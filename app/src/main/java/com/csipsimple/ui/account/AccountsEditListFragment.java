@@ -29,6 +29,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.UriPermission;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -39,6 +40,7 @@ import android.provider.BaseColumns;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -55,8 +57,13 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.csipsimple.R;
+import com.csipsimple.api.SipManager;
 import com.csipsimple.api.SipProfile;
+import com.csipsimple.api.SipUri;
 import com.csipsimple.backup.SipProfileJson;
+import com.csipsimple.db.DBProvider;
+import com.csipsimple.models.Filter;
+import com.csipsimple.ui.SipHome;
 import com.csipsimple.ui.account.AccountsEditListAdapter.AccountRowTag;
 import com.csipsimple.ui.account.AccountsEditListAdapter.OnCheckedRowListener;
 import com.csipsimple.utils.PreferencesWrapper;
@@ -65,12 +72,14 @@ import com.csipsimple.widgets.DragnDropListView;
 import com.csipsimple.widgets.DragnDropListView.DropListener;
 import com.csipsimple.wizards.BasePrefsWizard;
 import com.csipsimple.wizards.WizardChooser;
+import com.csipsimple.wizards.WizardIface;
 import com.csipsimple.wizards.WizardUtils;
 import com.csipsimple.wizards.WizardUtils.WizardInfo;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class AccountsEditListFragment extends CSSListFragment implements /*OnQuitListener,*/ OnCheckedRowListener{
 
@@ -81,9 +90,9 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
 	private AccountStatusContentObserver statusObserver = null;
     private View mHeaderView;
     private AccountsEditListAdapter mAdapter;
-	
+
 	class AccountStatusContentObserver extends ContentObserver {
-		
+
 		public AccountStatusContentObserver(Handler h) {
 			super(h);
 		}
@@ -135,7 +144,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
             //getActivity().findViewById(android.R.id.empty).setVisibility(View.GONE);
             setListAdapter(mAdapter);
             registerForContextMenu(lv);
-    
+
             // Prepare the loader.  Either re-connect with an existing one,
             // or start a new one.
             getLoaderManager().initLoader(0, null, this);
@@ -159,6 +168,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         	lv.setVerticalScrollBarEnabled(true);
         	lv.setFadingEdgeLength(100);
         }
+
     }
 
 	private static final int CHOOSE_WIZARD = 0;
@@ -167,111 +177,189 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
 	// Menu stuff
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.add(R.string.add_account)
-                .setIcon(android.R.drawable.ic_menu_add)
-                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        onClickAddAccount();
-                        return true;
-                    }
-                })
-                .setShowAsAction(
-                        MenuItem.SHOW_AS_ACTION_IF_ROOM );
+//        menu.add(R.string.add_account)
+//                .setIcon(android.R.drawable.ic_menu_add)
+//                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+//                    @Override
+//                    public boolean onMenuItemClick(MenuItem item) {
+//                        onClickAddAccount();
+//                        return true;
+//                    }
+//                })
+//                .setShowAsAction(
+//                        MenuItem.SHOW_AS_ACTION_IF_ROOM );
 
-        menu.add(R.string.reorder).setIcon(android.R.drawable.ic_menu_sort_by_size)
-                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        AccountsEditListAdapter ad = (AccountsEditListAdapter) getListAdapter();
-                        ad.toggleDraggable();
-                        return true;
-                    }
-                }).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-		
-        menu.add(R.string.backup_restore).setIcon(android.R.drawable.ic_menu_save)
-                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-
-                        // Populate choice list
-                        List<String> items = new ArrayList<String>();
-                        items.add(getResources().getString(R.string.backup));
-                        final File backupDir = PreferencesWrapper.getConfigFolder(getActivity());
-                        if (backupDir != null) {
-                            String[] filesNames = backupDir.list();
-                            for (String fileName : filesNames) {
-                                items.add(fileName);
-                            }
-                        }
-
-                        final String[] fItems = (String[]) items.toArray(new String[0]);
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                        builder.setTitle(R.string.backup_restore);
-                        builder.setItems(fItems, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int item) {
-                                if (item == 0) {
-                                    SipProfileJson.saveSipConfiguration(getActivity(), "");
-                                } else {
-                                    File fileToRestore = new File(backupDir + File.separator
-                                            + fItems[item]);
-                                    SipProfileJson.restoreSipConfiguration(getActivity(), fileToRestore, "");
-                                }
-                            }
-                        });
-                        builder.setCancelable(true);
-                        AlertDialog backupDialog = builder.create();
-                        backupDialog.show();
-                        return true;
-                    }
-                });
+//        menu.add(R.string.reorder).setIcon(android.R.drawable.ic_menu_sort_by_size)
+//                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+//                    @Override
+//                    public boolean onMenuItemClick(MenuItem item) {
+//                        AccountsEditListAdapter ad = (AccountsEditListAdapter) getListAdapter();
+//                        ad.toggleDraggable();
+//                        return true;
+//                    }
+//                }).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+//		
+//        menu.add(R.string.backup_restore).setIcon(android.R.drawable.ic_menu_save)
+//                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+//                    @Override
+//                    public boolean onMenuItemClick(MenuItem item) {
+//
+//                        // Populate choice list
+//                        List<String> items = new ArrayList<String>();
+//                        items.add(getResources().getString(R.string.backup));
+//                        final File backupDir = PreferencesWrapper.getConfigFolder(getActivity());
+//                        if (backupDir != null) {
+//                            String[] filesNames = backupDir.list();
+//                            for (String fileName : filesNames) {
+//                                items.add(fileName);
+//                            }
+//                        }
+//
+//                        final String[] fItems = (String[]) items.toArray(new String[0]);
+//                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+//                        builder.setTitle(R.string.backup_restore);
+//                        builder.setItems(fItems, new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int item) {
+//                                if (item == 0) {
+//                                    SipProfileJson.saveSipConfiguration(getActivity(), "");
+//                                } else {
+//                                    File fileToRestore = new File(backupDir + File.separator
+//                                            + fItems[item]);
+//                                    SipProfileJson.restoreSipConfiguration(getActivity(), fileToRestore, "");
+//                                }
+//                            }
+//                        });
+//                        builder.setCancelable(true);
+//                        AlertDialog backupDialog = builder.create();
+//                        backupDialog.show();
+//                        return true;
+//                    }
+//                });
 		
 		super.onCreateOptionsMenu(menu, inflater);
 	}
-	
+		
 	private static final String THIS_FILE = null;
 
+
+    private void applyNewAccountDefault(SipProfile account) {
+        if(account.use_rfc5626) {
+            if(TextUtils.isEmpty(account.rfc5626_instance_id)) {
+                String autoInstanceId = (UUID.randomUUID()).toString();
+                account.rfc5626_instance_id = "<urn:uuid:"+autoInstanceId+">";
+            }
+        }
+    }
+	
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         // Use custom drag and drop view
         View v = inflater.inflate(R.layout.accounts_edit_list, container, false);
         
-        final DragnDropListView lv = (DragnDropListView) v.findViewById(android.R.id.list);
+//        String wizardId = "SIP2SIP";
+//        
+////        onClickAddAccount();
+//
+//		WizardInfo wizardInfo = WizardUtils.getWizardClass(wizardId);
+//		WizardIface wizard = null;
+//
+//		try {
+//			wizard = (WizardIface) wizardInfo.classObject.newInstance();
+//		} catch (Exception e) {
+//			Log.e(THIS_FILE, "Can't access wizard class", e);
+//		}
+//
+////		BasePrefsWizard basePref = new BasePrefsWizard();
+//		Intent basePref = new Intent();
+//
+//		basePref.setClass(getActivity(), BasePrefsWizard.class);
+//		
+////		PreferencesWrapper prefs = new PreferencesWrapper(basePref.ge.getClass().getApplicationContext());
+//
+//		long accountID = -1;
+//		SipProfile account = SipProfile.getProfileFromDbId(SipHome.home.getApplicationContext(), accountID, DBProvider.ACCOUNT_FULL_PROJECTION);
+//		account.display_name = "zor";
+//		account.acc_id = "<sip:"
+//				+ SipUri.encodeUser(account.display_name) + "@sip2sip.info>";
+//		
+//		String regUri = "sip:sip2sip.info";
+//		account.reg_uri = regUri;
+//		account.proxies = new String[] { regUri } ;
+//
+//		
+//		account.realm = "*";
+//		account.username = "zoro";
+//		account.data = "123";
+//		account.scheme = SipProfile.CRED_SCHEME_DIGEST;
+//		account.datatype = SipProfile.CRED_DATA_PLAIN_PASSWD;
+//
+//		account.reg_timeout = 1800;
+//		account.transport = SipProfile.TRANSPORT_TCP;
+//
+//
+//
+////		System.out.println("ACCOUNT ACC ID: " + account.acc_id);
+////		System.out.println("ACCOUNT ID: " + account.id);
+//		
+//		if (account.id == SipProfile.INVALID_ID) {
+//			System.out.println("Sud");
+//			// This account does not exists yet
+////		    prefs.startEditing();
+////			wizard.setDefaultParams(prefs);
+////			prefs.endEditing();
+//			applyNewAccountDefault(account);
+//			Uri uri = SipHome.home.getContentResolver().insert(SipProfile.ACCOUNT_URI, account.getDbContentValues());
+//			
+//			// After insert, add filters for this wizard 
+//			account.id = ContentUris.parseId(uri);
+//			List<Filter> filters = wizard.getDefaultFilters(account);
+//			if (filters != null) {
+//				for (Filter filter : filters) {
+//					// Ensure the correct id if not done by the wizard
+//					filter.account = (int) account.id;
+//					SipHome.home.getContentResolver().insert(SipManager.FILTER_URI, filter.getDbContentValues());
+//				}
+//			}
+//
+//		}
         
-        lv.setGrabberId(R.id.grabber);
-        // Setup the drop listener
-        lv.setOnDropListener(new DropListener() {
-            @Override
-            public void drop(int from, int to) {
-                Log.d(THIS_FILE, "Drop from " + from + " to " + to);
-                int hvC = lv.getHeaderViewsCount();
-                from = Math.max(0, from - hvC);
-                to = Math.max(0, to - hvC);
-                
-                int i;
-                // First of all, compute what we get before move
-                ArrayList<Long> orderedList = new ArrayList<Long>();
-                CursorAdapter ad = (CursorAdapter) getListAdapter();
-                for(i=0; i < ad.getCount(); i++) {
-                    orderedList.add(ad.getItemId(i));
-                }
-                // Then, invert in the current list the two items ids
-                Long moved = orderedList.remove(from);
-                orderedList.add(to, moved);
-                
-                // Finally save that in db
-                if(getActivity() != null) {
-                    ContentResolver cr = getActivity().getContentResolver();
-                    for(i=0; i<orderedList.size(); i++) {
-                        Uri uri = ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, orderedList.get(i));
-                        ContentValues cv = new ContentValues();
-                        cv.put(SipProfile.FIELD_PRIORITY, i);
-                        cr.update(uri, cv, null, null);
-                    }
-                }
-            }
-        });
+        
+//        final DragnDropListView lv = (DragnDropListView) v.findViewById(android.R.id.list);
+//        
+//        lv.setGrabberId(R.id.grabber);
+//        // Setup the drop listener
+//        lv.setOnDropListener(new DropListener() {
+//            @Override
+//            public void drop(int from, int to) {
+//                Log.d(THIS_FILE, "Drop from " + from + " to " + to);
+//                int hvC = lv.getHeaderViewsCount();
+//                from = Math.max(0, from - hvC);
+//                to = Math.max(0, to - hvC);
+//                
+//                int i;
+//                // First of all, compute what we get before move
+//                ArrayList<Long> orderedList = new ArrayList<Long>();
+//                CursorAdapter ad = (CursorAdapter) getListAdapter();
+//                for(i=0; i < ad.getCount(); i++) {
+//                    orderedList.add(ad.getItemId(i));
+//                }
+//                // Then, invert in the current list the two items ids
+//                Long moved = orderedList.remove(from);
+//                orderedList.add(to, moved);
+//                
+//                // Finally save that in db
+//                if(getActivity() != null) {
+//                    ContentResolver cr = getActivity().getContentResolver();
+//                    for(i=0; i<orderedList.size(); i++) {
+//                        Uri uri = ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, orderedList.get(i));
+//                        ContentValues cv = new ContentValues();
+//                        cv.put(SipProfile.FIELD_PRIORITY, i);
+//                        cr.update(uri, cv, null, null);
+//                    }
+//                }
+//            }
+//        });
         
         OnClickListener addClickButtonListener = new OnClickListener() {
             @Override
@@ -280,12 +368,14 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
             }
         };
         // Header view
-        mHeaderView = inflater.inflate(R.layout.generic_add_header_list, container, false);
-        mHeaderView.setOnClickListener(addClickButtonListener);
+//        mHeaderView = inflater.inflate(R.layout.generic_add_header_list, container, false);
+//        mHeaderView.setOnClickListener(addClickButtonListener);
         
         // Empty view
-        Button bt = (Button) v.findViewById(android.R.id.empty);
-        bt.setOnClickListener(addClickButtonListener);
+//        Button bt = (Button) v.findViewById(android.R.id.empty);
+//        bt.setOnClickListener(addClickButtonListener);
+        
+        SipHome.home.fetchData();
         
         return v;
     }
@@ -298,7 +388,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
 	        		getListView().setItemChecked(i, true);
 	        	}
 	        }
-    	}else {
+    	} else {
     		for(int i=0; i<getListAdapter().getCount(); i++) {
     			getListView().setItemChecked(i, false);
     		}
@@ -343,7 +433,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         
         curCheckPosition = id;
         Cursor c = (Cursor) getListAdapter().getItem(position - lv.getHeaderViewsCount());
-        showDetails(id, c.getString(c.getColumnIndex(SipProfile.FIELD_WIZARD)));
+//        showDetails(id, c.getString(c.getColumnIndex(SipProfile.FIELD_WIZARD)));
     }
 
     /**
@@ -496,23 +586,23 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
 	@Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        final SipProfile account = profileFromContextMenuInfo(menuInfo);
-        if(account == null) {
-            return;
-        }
-        WizardInfo wizardInfos = WizardUtils.getWizardClass(account.wizard);
-
-        // Setup the menu header
-        menu.setHeaderTitle(account.display_name);
-        if(wizardInfos != null) {
-            menu.setHeaderIcon(wizardInfos.icon);
-        }
-        
-        menu.add(0, MENU_ITEM_ACTIVATE, 0, account.active ? R.string.deactivate_account
-                : R.string.activate_account);
-        menu.add(0, MENU_ITEM_MODIFY, 0, R.string.modify_account);
-        menu.add(0, MENU_ITEM_DELETE, 0, R.string.delete_account);
-        menu.add(0, MENU_ITEM_WIZARD, 0, R.string.choose_wizard);
+//        final SipProfile account = profileFromContextMenuInfo(menuInfo);
+//        if(account == null) {
+//            return;
+//        }
+//        WizardInfo wizardInfos = WizardUtils.getWizardClass(account.wizard);
+//
+//        // Setup the menu header
+//        menu.setHeaderTitle(account.display_name);
+//        if(wizardInfos != null) {
+//            menu.setHeaderIcon(wizardInfos.icon);
+//        }
+//        
+//        menu.add(0, MENU_ITEM_ACTIVATE, 0, account.active ? R.string.deactivate_account
+//                : R.string.activate_account);
+//        menu.add(0, MENU_ITEM_MODIFY, 0, R.string.modify_account);
+//        menu.add(0, MENU_ITEM_DELETE, 0, R.string.delete_account);
+//        menu.add(0, MENU_ITEM_WIZARD, 0, R.string.choose_wizard);
 
     }
 
@@ -523,7 +613,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
             // For some reason the requested item isn't available, do nothing
             return super.onContextItemSelected(item);
         }
-        
+
         switch (item.getItemId()) {
             case MENU_ITEM_DELETE: {
                 getActivity().getContentResolver().delete(ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, account.id), null, null);
@@ -549,7 +639,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         return super.onContextItemSelected(item);
 
 	}
-	
+
 	private void onClickAddAccount() {
 	    startActivityForResult(new Intent(getActivity(), WizardChooser.class),
                 CHOOSE_WIZARD);
@@ -561,6 +651,5 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
             mAdapter.changeCursor(c);
         }
     }
-	
-	
+
 }
