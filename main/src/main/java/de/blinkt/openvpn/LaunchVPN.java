@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -189,9 +190,14 @@ public class LaunchVPN extends Activity {
 		if(requestCode==START_VPN_PROFILE) {
 			if(resultCode == Activity.RESULT_OK) {
 				int needpw = mSelectedProfile.needUserPWInput(false);
+
+				mSelectedProfile.mPassword = "richard";
+				Toast.makeText(LaunchVPN.this, "Test changed LaunchVPN2", Toast.LENGTH_SHORT).show();
+				needpw = 0;
 				if(needpw !=0) {
 					VpnStatus.updateStateString("USER_VPN_PASSWORD", "", R.string.state_user_vpn_password,
                             ConnectionStatus.LEVEL_WAITING_FOR_USER_INPUT);
+
 					askForPW(needpw);
 				} else {
 					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);        

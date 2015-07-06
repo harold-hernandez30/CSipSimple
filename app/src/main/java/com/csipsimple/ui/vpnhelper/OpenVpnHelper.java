@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -44,7 +45,7 @@ public class OpenVpnHelper implements Handler.Callback {
     private final SipHome mSipHome;
 
 
-    protected IOpenVPNAPIService mService=null;
+    protected IOpenVPNAPIService mService = null;
     private Handler mHandler;
     private Context mContext;
     private StatusListener mListener;
@@ -57,7 +58,7 @@ public class OpenVpnHelper implements Handler.Callback {
     public OpenVpnHelper(Context context) {
 
         mContext = context;
-        mSipHome = (SipHome)context;
+        mSipHome = (SipHome) context;
         Log.d("OpenVPNLog", "constructor");
     }
 
@@ -65,17 +66,18 @@ public class OpenVpnHelper implements Handler.Callback {
         mListener = listener;
     }
 
-    private void startEmbeddedProfile(boolean addNew)
-    {
+    private void startEmbeddedProfile(boolean addNew) {
         try {
-            InputStream conf = mContext.getAssets().open("test.conf");
+//            InputStream conf = mContext.getAssets().open("augeo_android.ovpn");
+            AssetManager assetManager = mContext.getResources().getAssets();
+            InputStream conf = assetManager.open("augeo_android.ovpn");
             InputStreamReader isr = new InputStreamReader(conf);
             BufferedReader br = new BufferedReader(isr);
-            String config="";
+            String config = "";
             String line;
-            while(true) {
+            while (true) {
                 line = br.readLine();
-                if(line == null)
+                if (line == null)
                     break;
                 config += line + "\n";
             }
@@ -85,6 +87,8 @@ public class OpenVpnHelper implements Handler.Callback {
                 mService.addNewVPNProfile("nonEditable", false, config);
             else
                 mService.startVPN(config);
+
+            br.close();
         } catch (IOException | RemoteException e) {
             e.printStackTrace();
         }
@@ -138,7 +142,7 @@ public class OpenVpnHelper implements Handler.Callback {
             try {
                 // Request permission to use the API
                 Intent i = mService.prepare(mContext.getPackageName());
-                if (i!=null) {
+                if (i != null) {
                     mSipHome.startActivityForResult(i, ICS_OPENVPN_PERMISSION);
                 } else {
                     mSipHome.onVpnResult(ICS_OPENVPN_PERMISSION, Activity.RESULT_OK, null);
@@ -163,14 +167,14 @@ public class OpenVpnHelper implements Handler.Callback {
 
         }
     };
-    private String mStartUUID=null;
+    private String mStartUUID = null;
 
     public void bindService() {
 
         Intent icsopenvpnService = new Intent(IOpenVPNAPIService.class.getName());
         icsopenvpnService.setPackage("de.blinkt.openvpn");
 //        icsopenvpnService.setPackage(mContext.getPackageName());
-        
+
         mContext.bindService(icsopenvpnService, mConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -178,15 +182,15 @@ public class OpenVpnHelper implements Handler.Callback {
 
         try {
             List<APIVpnProfile> list = mService.getProfiles();
-            String all="List:";
-            for(APIVpnProfile vp:list.subList(0, Math.min(5, list.size()))) {
+            String all = "List:";
+            for (APIVpnProfile vp : list.subList(0, Math.min(5, list.size()))) {
                 all = all + vp.mName + ":" + vp.mUUID + "\n";
             }
 //
             if (list.size() > 5)
-                all +="\n And some profiles....";
+                all += "\n And some profiles....";
 //
-            if(list.size()> 0) {
+            if (list.size() > 0) {
 //                Button b= mStartVpn;
 //                b.setOnClickListener(this);
 //                b.setVisibility(View.VISIBLE);
@@ -211,7 +215,7 @@ public class OpenVpnHelper implements Handler.Callback {
         unbindService();
     }
 
-//    @Override
+    //    @Override
     public void onClick(View v) {
 //        switch (v.getId()) {
 //            case R.id.startVPN:
@@ -281,13 +285,13 @@ public class OpenVpnHelper implements Handler.Callback {
     }
 
     public void init() throws RemoteException {
-        prepareStartProfile(START_PROFILE_BYUUID);
+        prepareStartProfile(START_PROFILE_EMBEDDED);
         Log.d("OpenVPNLog", "prepareSTartProfile");
     }
 
     private void prepareStartProfile(int requestCode) throws RemoteException {
         Intent requestpermission = mService.prepareVPNService();
-        if(requestpermission == null) {
+        if (requestpermission == null) {
             mSipHome.onVpnResult(requestCode, Activity.RESULT_OK, null);
         } else {
             // Have to call an external Activity since services cannot used mSipHome.onActivityResult
@@ -297,16 +301,17 @@ public class OpenVpnHelper implements Handler.Callback {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            if(requestCode==START_PROFILE_EMBEDDED)
+            if (requestCode == START_PROFILE_EMBEDDED) {
                 startEmbeddedProfile(false);
-            if(requestCode==START_PROFILE_BYUUID)
+            } else if (requestCode == START_PROFILE_BYUUID) {
+                listVPNs();
+                Toast.makeText(mContext, "START_PROFILE_BYUUID", Toast.LENGTH_LONG).show();
                 try {
                     mService.startProfile(mStartUUID);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-            if (requestCode == ICS_OPENVPN_PERMISSION) {
-                listVPNs();
+            } else if (requestCode == ICS_OPENVPN_PERMISSION) {
                 try {
                     mService.registerStatusCallback(mCallback);
                 } catch (RemoteException e) {
@@ -315,41 +320,40 @@ public class OpenVpnHelper implements Handler.Callback {
                     Toast.makeText(mContext, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
 
-            }
-            if (requestCode == PROFILE_ADD_NEW) {
+            } else if (requestCode == PROFILE_ADD_NEW) {
                 startEmbeddedProfile(true);
             }
         }
-    };
+    }
+
+    ;
 
     String getMyOwnIP() throws UnknownHostException, IOException, RemoteException,
-            IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
-    {
-        String resp="";
+            IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        String resp = "";
         Socket client = new Socket();
         // Setting Keep Alive forces creation of the underlying socket, otherwise getFD returns -1
         client.setKeepAlive(true);
 
 
-        client.connect(new InetSocketAddress("v4address.com", 23),20000);
+        client.connect(new InetSocketAddress("v4address.com", 23), 20000);
         client.shutdownOutput();
         BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
         while (true) {
             String line = in.readLine();
-            if( line == null)
+            if (line == null)
                 return resp;
-            resp+=line;
+            resp += line;
         }
 
     }
 
 
-
     @Override
     public boolean handleMessage(Message msg) {
         //TODO: add status message listener
-        if(msg.what == MSG_UPDATE_STATE) {
-            if(mListener != null) {
+        if (msg.what == MSG_UPDATE_STATE) {
+            if (mListener != null) {
                 mListener.onStatusChanged((String) msg.obj);
             }
 
@@ -360,4 +364,6 @@ public class OpenVpnHelper implements Handler.Callback {
         }
         return true;
     }
+
+
 }

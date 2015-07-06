@@ -43,6 +43,7 @@ public class MainActivity extends Activity {
         mPager = (ViewPager) findViewById(R.id.pager);
         mPagerAdapter = new ScreenSlidePagerAdapter(getFragmentManager(), this);
 
+
         /* Toolbar and slider should have the same elevation */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             disableToolbarElevation();

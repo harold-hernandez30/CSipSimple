@@ -146,7 +146,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     @Override
     public void onStatusChanged(String message) {
-        Toast.makeText(this, "Status: " + message, Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "Status: " + message, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -170,6 +170,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         mOpenVpnHelper = new OpenVpnHelper(this);
         mOpenVpnHelper.registerStatusListener(this);
 
+//        Intent intent = new Intent(this, de.blinkt.openvpn.LaunchVPN.class);
 
         this.home = this;
         final ActionBar ab = getSupportActionBar();

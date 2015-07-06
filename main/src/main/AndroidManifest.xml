@@ -45,6 +45,10 @@
         <activity
             android:name=".activities.MainActivity"
             tools:ignore="ExportedActivity">
+
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <service
