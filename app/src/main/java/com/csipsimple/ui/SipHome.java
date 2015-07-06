@@ -106,7 +106,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import de.blinkt.openvpn.api.IOpenVPNAPIService;
+
 public class SipHome extends SherlockFragmentActivity implements OnWarningChanged {
+
+    protected IOpenVPNAPIService mService=null;
+
 	public static SipHome home;
     public static final int ACCOUNTS_MENU = Menu.FIRST + 1;
     public static final int PARAMS_MENU = Menu.FIRST + 2;
