@@ -73,6 +73,7 @@ import com.csipsimple.ui.dialpad.DialerFragment;
 import com.csipsimple.ui.favorites.FavListFragment;
 import com.csipsimple.ui.help.Help;
 import com.csipsimple.ui.messages.ConversationsListFragment;
+import com.csipsimple.ui.vpnhelper.OpenVpnHelper;
 import com.csipsimple.ui.warnings.WarningFragment;
 import com.csipsimple.ui.warnings.WarningUtils;
 import com.csipsimple.ui.warnings.WarningUtils.OnWarningChanged;
@@ -106,11 +107,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.blinkt.openvpn.api.IOpenVPNAPIService;
 
 public class SipHome extends SherlockFragmentActivity implements OnWarningChanged {
 
-    protected IOpenVPNAPIService mService=null;
+    private OpenVpnHelper mOpenVpnHelper;
 
 	public static SipHome home;
     public static final int ACCOUNTS_MENU = Menu.FIRST + 1;
@@ -161,6 +161,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.sip_home);
+        mOpenVpnHelper = new OpenVpnHelper(this);
 
         this.home = this;
         final ActionBar ab = getSupportActionBar();
@@ -231,7 +232,19 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         asyncSanityChecker.start();
 //        fetchData();
     }
-    
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mOpenVpnHelper.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mOpenVpnHelper.onStart();
+    }
+
     public void fetchData() {
 
 		new AsyncTask<Object, Object, Object>() {

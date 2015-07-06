@@ -211,57 +211,57 @@ public class MainFragment extends Fragment implements View.OnClickListener, Hand
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.startVPN:
-                try {
-                    prepareStartProfile(START_PROFILE_BYUUID);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case R.id.disconnect:
-                try {
-                    mService.disconnect();
-                } catch (RemoteException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                break;
-            case R.id.getMyIP:
-
-                // Socket handling is not allowed on main thread
-                new Thread() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            String myip = getMyOwnIP();
-                            Message msg = Message.obtain(mHandler,MSG_UPDATE_MYIP,myip);
-                            msg.sendToTarget();
-                        } catch (Exception e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-
-                    }
-                }.start();
-
-                break;
-            case R.id.startembedded:
-                try {
-                    prepareStartProfile(START_PROFILE_EMBEDDED);
-                } catch (RemoteException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                break;
-
-            case R.id.addNewProfile:
-                try {
-                    prepareStartProfile(PROFILE_ADD_NEW);
-                } catch (RemoteException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+//            case R.id.startVPN:
+//                try {
+//                    prepareStartProfile(START_PROFILE_BYUUID);
+//                } catch (RemoteException e) {
+//                    e.printStackTrace();
+//                }
+//                break;
+//            case R.id.disconnect:
+//                try {
+//                    mService.disconnect();
+//                } catch (RemoteException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//                break;
+//            case R.id.getMyIP:
+//
+//                // Socket handling is not allowed on main thread
+//                new Thread() {
+//
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            String myip = getMyOwnIP();
+//                            Message msg = Message.obtain(mHandler,MSG_UPDATE_MYIP,myip);
+//                            msg.sendToTarget();
+//                        } catch (Exception e) {
+//                            // TODO Auto-generated catch block
+//                            e.printStackTrace();
+//                        }
+//
+//                    }
+//                }.start();
+//
+//                break;
+//            case R.id.startembedded:
+//                try {
+//                    prepareStartProfile(START_PROFILE_EMBEDDED);
+//                } catch (RemoteException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//                break;
+//
+//            case R.id.addNewProfile:
+//                try {
+//                    prepareStartProfile(PROFILE_ADD_NEW);
+//                } catch (RemoteException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
             default:
                 break;
         }

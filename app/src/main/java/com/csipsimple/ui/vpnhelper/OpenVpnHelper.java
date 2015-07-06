@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,11 +25,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.List;
 
-import de.blinkt.openvpn.api.APIVpnProfile;
 import de.blinkt.openvpn.api.IOpenVPNAPIService;
 import de.blinkt.openvpn.api.IOpenVPNStatusCallback;
+
 
 /**
  * Created by harold on 7/6/2015.
@@ -123,7 +123,7 @@ public class OpenVpnHelper implements Handler.Callback {
                 // Request permission to use the API
                 Intent i = mService.prepare(mContext.getPackageName());
                 if (i!=null) {
-                    startActivityForResult(i, ICS_OPENVPN_PERMISSION);
+                    onActivityResult(ICS_OPENVPN_PERMISSION, Activity.RESULT_OK, null);
                 } else {
                     onActivityResult(ICS_OPENVPN_PERMISSION, Activity.RESULT_OK,null);
                 }
@@ -131,6 +131,12 @@ public class OpenVpnHelper implements Handler.Callback {
             } catch (RemoteException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
+            }
+            try {
+                init();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                Toast.makeText(mContext, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
 
@@ -153,32 +159,32 @@ public class OpenVpnHelper implements Handler.Callback {
 
     protected void listVPNs() {
 
-        try {
-            List<APIVpnProfile> list = mService.getProfiles();
-            String all="List:";
-            for(APIVpnProfile vp:list.subList(0, Math.min(5, list.size()))) {
-                all = all + vp.mName + ":" + vp.mUUID + "\n";
-            }
-
-            if (list.size() > 5)
-                all +="\n And some profiles....";
-
-            if(list.size()> 0) {
-                Button b= mStartVpn;
-                b.setOnClickListener(this);
-                b.setVisibility(View.VISIBLE);
-                b.setText(list.get(0).mName);
-                mStartUUID = list.get(0).mUUID;
-            }
-
-
-
-            mHelloWorld.setText(all);
-
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            mHelloWorld.setText(e.getMessage());
-        }
+//        try {
+//            List<APIVpnProfile> list = mService.getProfiles();
+//            String all="List:";
+//            for(APIVpnProfile vp:list.subList(0, Math.min(5, list.size()))) {
+//                all = all + vp.mName + ":" + vp.mUUID + "\n";
+//            }
+//
+//            if (list.size() > 5)
+//                all +="\n And some profiles....";
+//
+//            if(list.size()> 0) {
+//                Button b= mStartVpn;
+//                b.setOnClickListener(this);
+//                b.setVisibility(View.VISIBLE);
+//                b.setText(list.get(0).mName);
+//                mStartUUID = list.get(0).mUUID;
+//            }
+//
+//
+//
+//            mHelloWorld.setText(all);
+//
+//        } catch (RemoteException e) {
+//            // TODO Auto-generated catch block
+//            mHelloWorld.setText(e.getMessage());
+//        }
     }
 
     public void unbindService() {
@@ -189,64 +195,68 @@ public class OpenVpnHelper implements Handler.Callback {
         unbindService();
     }
 
-    @Override
+//    @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.startVPN:
-                try {
-                    prepareStartProfile(START_PROFILE_BYUUID);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case R.id.disconnect:
-                try {
-                    mService.disconnect();
-                } catch (RemoteException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                break;
-            case R.id.getMyIP:
+//        switch (v.getId()) {
+//            case R.id.startVPN:
+//                try {
+//                    prepareStartProfile(START_PROFILE_BYUUID);
+//                } catch (RemoteException e) {
+//                    e.printStackTrace();
+//                }
+//                break;
+//            case R.id.disconnect:
+//                try {
+//                    mService.disconnect();
+//                } catch (RemoteException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//                break;
+//            case R.id.getMyIP:
+//
+//                // Socket handling is not allowed on main thread
+//                new Thread() {
+//
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            String myip = getMyOwnIP();
+//                            Message msg = Message.obtain(mHandler,MSG_UPDATE_MYIP,myip);
+//                            msg.sendToTarget();
+//                        } catch (Exception e) {
+//                            // TODO Auto-generated catch block
+//                            e.printStackTrace();
+//                        }
+//
+//                    }
+//                }.start();
+//
+//                break;
+//            case R.id.startembedded:
+//                try {
+//                    prepareStartProfile(START_PROFILE_EMBEDDED);
+//                } catch (RemoteException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//                break;
+//
+//            case R.id.addNewProfile:
+//                try {
+//                    prepareStartProfile(PROFILE_ADD_NEW);
+//                } catch (RemoteException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//            default:
+//                break;
+//        }
 
-                // Socket handling is not allowed on main thread
-                new Thread() {
+    }
 
-                    @Override
-                    public void run() {
-                        try {
-                            String myip = getMyOwnIP();
-                            Message msg = Message.obtain(mHandler,MSG_UPDATE_MYIP,myip);
-                            msg.sendToTarget();
-                        } catch (Exception e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-
-                    }
-                }.start();
-
-                break;
-            case R.id.startembedded:
-                try {
-                    prepareStartProfile(START_PROFILE_EMBEDDED);
-                } catch (RemoteException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                break;
-
-            case R.id.addNewProfile:
-                try {
-                    prepareStartProfile(PROFILE_ADD_NEW);
-                } catch (RemoteException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            default:
-                break;
-        }
-
+    public void init() throws RemoteException {
+//        prepareStartProfile(START_PROFILE_BYUUID);
     }
 
     private void prepareStartProfile(int requestCode) throws RemoteException {
@@ -255,7 +265,7 @@ public class OpenVpnHelper implements Handler.Callback {
             onActivityResult(requestCode, Activity.RESULT_OK, null);
         } else {
             // Have to call an external Activity since services cannot used onActivityResult
-            startActivityForResult(requestpermission, requestCode);
+            onActivityResult(requestCode, Activity.RESULT_OK, null);
         }
     }
 
