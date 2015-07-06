@@ -108,7 +108,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class SipHome extends SherlockFragmentActivity implements OnWarningChanged {
+
+public class SipHome extends SherlockFragmentActivity implements OnWarningChanged, OpenVpnHelper.StatusListener {
 
     private OpenVpnHelper mOpenVpnHelper;
 
@@ -143,6 +144,11 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private Tab warningTab;
     private ObjectAnimator warningTabfadeAnim;
 
+    @Override
+    public void onStatusChanged(String message) {
+        Toast.makeText(this, "Status: " + message, Toast.LENGTH_LONG).show();
+    }
+
     /**
      * Listener interface for Fragments accommodated in {@link ViewPager}
      * enabling them to know when it becomes visible or invisible inside the
@@ -162,6 +168,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
         setContentView(R.layout.sip_home);
         mOpenVpnHelper = new OpenVpnHelper(this);
+        mOpenVpnHelper.registerStatusListener(this);
+
 
         this.home = this;
         final ActionBar ab = getSupportActionBar();
@@ -1076,6 +1084,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             sendBroadcast(new Intent(SipManager.ACTION_SIP_REQUEST_RESTART));
             BackupWrapper.getInstance(this).dataChanged();
         }
+
+        onVpnResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -1086,6 +1096,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         sendBroadcast(intent);
         if(quit) {
             finish();
+            mOpenVpnHelper.disconnect();
         }
     }
     
@@ -1151,8 +1162,13 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         }
     }
 
+    public void onVpnResult(int requestCode, int resultCode, Intent data) {
+        mOpenVpnHelper.onActivityResult(requestCode, resultCode, data);
+    }
+
     @Override
     public void onWarningRemoved(String warnKey) {
         applyWarning(warnKey, false);
     }
+
 }

@@ -5,17 +5,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.csipsimple.ui.SipHome;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,7 +23,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.List;
 
+import de.blinkt.openvpn.api.APIVpnProfile;
 import de.blinkt.openvpn.api.IOpenVPNAPIService;
 import de.blinkt.openvpn.api.IOpenVPNStatusCallback;
 
@@ -41,18 +41,29 @@ public class OpenVpnHelper implements Handler.Callback {
     private static final int START_PROFILE_BYUUID = 3;
     private static final int ICS_OPENVPN_PERMISSION = 7;
     private static final int PROFILE_ADD_NEW = 8;
+    private final SipHome mSipHome;
 
 
     protected IOpenVPNAPIService mService=null;
     private Handler mHandler;
     private Context mContext;
+    private StatusListener mListener;
+
+    public interface StatusListener {
+        void onStatusChanged(String message);
+    }
 
 
     public OpenVpnHelper(Context context) {
 
         mContext = context;
+        mSipHome = (SipHome)context;
+        Log.d("OpenVPNLog", "constructor");
     }
 
+    public void registerStatusListener(StatusListener listener) {
+        mListener = listener;
+    }
 
     private void startEmbeddedProfile(boolean addNew)
     {
@@ -82,6 +93,8 @@ public class OpenVpnHelper implements Handler.Callback {
     public void onStart() {
         mHandler = new Handler(this);
         bindService();
+        Log.d("OpenVPNLog", "onStart");
+
     }
 
 
@@ -100,6 +113,8 @@ public class OpenVpnHelper implements Handler.Callback {
             Message msg = Message.obtain(mHandler, MSG_UPDATE_STATE, state + "|" + message);
             msg.sendToTarget();
 
+            Log.d("OpenVPNLog", "newStatus");
+
         }
 
     };
@@ -117,15 +132,16 @@ public class OpenVpnHelper implements Handler.Callback {
             // service through an IDL interface, so get a client-side
             // representation of that from the raw service object.
 
+            Log.d("OpenVPNLog", "onServiceConnected");
             mService = IOpenVPNAPIService.Stub.asInterface(service);
 
             try {
                 // Request permission to use the API
                 Intent i = mService.prepare(mContext.getPackageName());
                 if (i!=null) {
-                    onActivityResult(ICS_OPENVPN_PERMISSION, Activity.RESULT_OK, null);
+                    mSipHome.startActivityForResult(i, ICS_OPENVPN_PERMISSION);
                 } else {
-                    onActivityResult(ICS_OPENVPN_PERMISSION, Activity.RESULT_OK,null);
+                    mSipHome.onVpnResult(ICS_OPENVPN_PERMISSION, Activity.RESULT_OK, null);
                 }
 
             } catch (RemoteException e) {
@@ -153,38 +169,38 @@ public class OpenVpnHelper implements Handler.Callback {
 
         Intent icsopenvpnService = new Intent(IOpenVPNAPIService.class.getName());
         icsopenvpnService.setPackage("de.blinkt.openvpn");
-
+//        icsopenvpnService.setPackage(mContext.getPackageName());
+        
         mContext.bindService(icsopenvpnService, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     protected void listVPNs() {
 
-//        try {
-//            List<APIVpnProfile> list = mService.getProfiles();
-//            String all="List:";
-//            for(APIVpnProfile vp:list.subList(0, Math.min(5, list.size()))) {
-//                all = all + vp.mName + ":" + vp.mUUID + "\n";
-//            }
+        try {
+            List<APIVpnProfile> list = mService.getProfiles();
+            String all="List:";
+            for(APIVpnProfile vp:list.subList(0, Math.min(5, list.size()))) {
+                all = all + vp.mName + ":" + vp.mUUID + "\n";
+            }
 //
-//            if (list.size() > 5)
-//                all +="\n And some profiles....";
+            if (list.size() > 5)
+                all +="\n And some profiles....";
 //
-//            if(list.size()> 0) {
+            if(list.size()> 0) {
 //                Button b= mStartVpn;
 //                b.setOnClickListener(this);
 //                b.setVisibility(View.VISIBLE);
 //                b.setText(list.get(0).mName);
-//                mStartUUID = list.get(0).mUUID;
-//            }
+                mStartUUID = list.get(0).mUUID;
+            }
 //
 //
 //
 //            mHelloWorld.setText(all);
 //
-//        } catch (RemoteException e) {
-//            // TODO Auto-generated catch block
-//            mHelloWorld.setText(e.getMessage());
-//        }
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+        }
     }
 
     public void unbindService() {
@@ -255,17 +271,27 @@ public class OpenVpnHelper implements Handler.Callback {
 
     }
 
+    public void disconnect() {
+        try {
+            mService.disconnect();
+            mListener = null;
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void init() throws RemoteException {
-//        prepareStartProfile(START_PROFILE_BYUUID);
+        prepareStartProfile(START_PROFILE_BYUUID);
+        Log.d("OpenVPNLog", "prepareSTartProfile");
     }
 
     private void prepareStartProfile(int requestCode) throws RemoteException {
         Intent requestpermission = mService.prepareVPNService();
         if(requestpermission == null) {
-            onActivityResult(requestCode, Activity.RESULT_OK, null);
+            mSipHome.onVpnResult(requestCode, Activity.RESULT_OK, null);
         } else {
-            // Have to call an external Activity since services cannot used onActivityResult
-            onActivityResult(requestCode, Activity.RESULT_OK, null);
+            // Have to call an external Activity since services cannot used mSipHome.onActivityResult
+            mSipHome.startActivityForResult(requestpermission, requestCode);
         }
     }
 
@@ -285,6 +311,8 @@ public class OpenVpnHelper implements Handler.Callback {
                     mService.registerStatusCallback(mCallback);
                 } catch (RemoteException e) {
                     e.printStackTrace();
+                } catch (SecurityException e) {
+                    Toast.makeText(mContext, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -321,6 +349,10 @@ public class OpenVpnHelper implements Handler.Callback {
     public boolean handleMessage(Message msg) {
         //TODO: add status message listener
         if(msg.what == MSG_UPDATE_STATE) {
+            if(mListener != null) {
+                mListener.onStatusChanged((String) msg.obj);
+            }
+
 //            mStatus.setText((CharSequence) msg.obj);
         } else if (msg.what == MSG_UPDATE_MYIP) {
 

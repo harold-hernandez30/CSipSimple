@@ -1,1 +1,1 @@
-include ':app', ':vpndialogxposed', ':remoteExample', ':main'
+include ':app', ':main', ':vpndialogxposed', ':remoteExample'
