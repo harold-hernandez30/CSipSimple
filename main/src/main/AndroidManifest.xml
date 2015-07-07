@@ -131,8 +131,7 @@
             android:name=".LaunchVPN"
             android:excludeFromRecents="true"
             android:label="@string/vpn_launch_title"
-            android:theme="@android:style/Theme.DeviceDefault.Light.Panel"
-            tools:ignore="ExportedActivity">
+            android:theme="@android:style/Theme.DeviceDefault.Light.Panel">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

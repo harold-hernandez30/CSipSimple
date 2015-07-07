@@ -107,6 +107,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import de.blinkt.openvpn.LaunchVPN;
 
 
 public class SipHome extends SherlockFragmentActivity implements OnWarningChanged, OpenVpnHelper.StatusListener {
@@ -170,7 +171,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         mOpenVpnHelper = new OpenVpnHelper(this);
         mOpenVpnHelper.registerStatusListener(this);
 
-//        Intent intent = new Intent(this, de.blinkt.openvpn.LaunchVPN.class);
 
         this.home = this;
         final ActionBar ab = getSupportActionBar();
@@ -181,6 +181,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
         // showAbTitle = Compatibility.hasPermanentMenuKey
 
+        Intent intent = new Intent(this, LaunchVPN.class);
+        startActivity(intent);
         
 
         Tab dialerTab = ab.newTab()

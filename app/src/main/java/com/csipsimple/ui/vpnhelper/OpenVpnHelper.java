@@ -152,6 +152,9 @@ public class OpenVpnHelper implements Handler.Callback {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+
+
+//            Intent intent = new Intent(mContext, LaunchVPN.class);
             try {
                 init();
             } catch (RemoteException e) {
