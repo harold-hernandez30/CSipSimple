@@ -218,12 +218,12 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mTabsAdapter = new TabsAdapter(this, getSupportActionBar(), mViewPager);
         mTabsAdapter.addTab(dialerTab, DialerFragment.class, TAB_ID_DIALER);
-        mTabsAdapter.addTab(callLogTab, CallLogListFragment.class, TAB_ID_CALL_LOG);
+//        mTabsAdapter.addTab(callLogTab, CallLogListFragment.class, TAB_ID_CALL_LOG);
         if(favoritesTab != null) {
-            mTabsAdapter.addTab(favoritesTab, FavListFragment.class, TAB_ID_FAVORITES);
+//            mTabsAdapter.addTab(favoritesTab, FavListFragment.class, TAB_ID_FAVORITES);
         }
         if (messagingTab != null) {
-            mTabsAdapter.addTab(messagingTab, ConversationsListFragment.class, TAB_ID_MESSAGES);
+//            mTabsAdapter.addTab(messagingTab, ConversationsListFragment.class, TAB_ID_MESSAGES);
         }
         
 
