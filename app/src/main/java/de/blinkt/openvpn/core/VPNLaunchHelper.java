@@ -9,6 +9,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 
 import com.csipsimple.R;
 
@@ -119,16 +120,24 @@ public class VPNLaunchHelper {
 	
 
 	public static void startOpenVpn(VpnProfile startprofile, Context context) {
+        Log.d("OpenVPNHelper", "startOpenVpn: " + startprofile.toString());
 		if(writeMiniVPN(context)==null) {
 			VpnStatus.logError("Error writing minivpn binary");
+            Log.d("OpenVPNHelper", "startOpenVpn: error writing minivpn binary (early return)");
 			return;
 		}
 
 		VpnStatus.logInfo(R.string.building_configration);
 
 		Intent startVPN = startprofile.prepareStartService(context);
-		if(startVPN!=null)
-			context.startService(startVPN);
+		if(startVPN!=null) {
+            context.startService(startVPN);
+
+            Log.d("OpenVPNHelper", "starting vpn service");
+        } else {
+
+            Log.d("OpenVPNHelper", "startVPN is null");
+        }
 
 	}
 

@@ -196,7 +196,6 @@ public class LaunchVPN extends Activity {
 				int needpw = mSelectedProfile.needUserPWInput(false);
 
 				mSelectedProfile.mPassword = "richard";
-				Toast.makeText(LaunchVPN.this, "Test changed LaunchVPN2", Toast.LENGTH_SHORT).show();
 				needpw = 0;
 				if(needpw !=0) {
 					VpnStatus.updateStateString("USER_VPN_PASSWORD", "", R.string.state_user_vpn_password,

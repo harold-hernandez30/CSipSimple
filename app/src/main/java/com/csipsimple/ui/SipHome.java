@@ -146,8 +146,14 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private ObjectAnimator warningTabfadeAnim;
 
     @Override
-    public void onStatusChanged(String message) {
-//        Toast.makeText(this, "Status: " + message, Toast.LENGTH_LONG).show();
+    public void onStatusChanged(final String message) {
+        Toast.makeText(this, "Status: " + message, Toast.LENGTH_LONG).show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                android.util.Log.d("OpenVPNMessage",  message + "stacktrace: " + android.util.Log.getStackTraceString(new Throwable()));
+            }
+        });
     }
 
     /**

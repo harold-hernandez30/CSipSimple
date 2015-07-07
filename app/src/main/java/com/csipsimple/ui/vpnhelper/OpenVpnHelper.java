@@ -118,6 +118,7 @@ public class OpenVpnHelper implements Handler.Callback {
             msg.sendToTarget();
 
             Log.d("OpenVPNLog", "newStatus");
+            mListener.onStatusChanged("state: " + state + ", message: " + message);
 
         }
 
