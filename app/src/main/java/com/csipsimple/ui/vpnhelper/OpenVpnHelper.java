@@ -119,6 +119,12 @@ public class OpenVpnHelper implements Handler.Callback {
 
             Log.d("OpenVPNLog", "newStatus");
             mListener.onStatusChanged("state: " + state + ", message: " + message);
+            try {
+                init();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                Toast.makeText(mContext, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
 
         }
 
@@ -155,12 +161,7 @@ public class OpenVpnHelper implements Handler.Callback {
             }
 
 
-            try {
-                init();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                Toast.makeText(mContext, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
+
         }
 
         public void onServiceDisconnected(ComponentName className) {

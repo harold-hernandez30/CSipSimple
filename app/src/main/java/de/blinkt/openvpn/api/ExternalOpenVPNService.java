@@ -358,7 +358,8 @@ public class ExternalOpenVPNService extends Service implements StateListener {
                     if (service == null || service.get() == null)
                         return;
 
-                    callbacks = service.get().mCallbacks;
+                    callbacks = service.get().
+                            mCallbacks;
 
 
                     // Broadcast to all clients the new value.
