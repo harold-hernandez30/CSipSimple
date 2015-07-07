@@ -154,7 +154,6 @@ public class OpenVpnHelper implements Handler.Callback {
             }
 
 
-//            Intent intent = new Intent(mContext, LaunchVPN.class);
             try {
                 init();
             } catch (RemoteException e) {
@@ -175,8 +174,8 @@ public class OpenVpnHelper implements Handler.Callback {
     public void bindService() {
 
         Intent icsopenvpnService = new Intent(IOpenVPNAPIService.class.getName());
-        icsopenvpnService.setPackage("de.blinkt.openvpn");
-//        icsopenvpnService.setPackage(mContext.getPackageName());
+//        icsopenvpnService.setPackage("de.blinkt.openvpn");
+        icsopenvpnService.setPackage(mContext.getPackageName());
 
         mContext.bindService(icsopenvpnService, mConnection, Context.BIND_AUTO_CREATE);
     }

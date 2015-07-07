@@ -181,9 +181,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
         // showAbTitle = Compatibility.hasPermanentMenuKey
 
-        Intent intent = new Intent(this, LaunchVPN.class);
-        startActivity(intent);
-        
 
         Tab dialerTab = ab.newTab()
                  .setContentDescription(R.string.dial_tab_name_text)
