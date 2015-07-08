@@ -1,22 +1,22 @@
 /**
  * Copyright (C) 2010-2012 Regis Montoya (aka r3gis - www.r3gis.fr)
  * This file is part of CSipSimple.
- *
- *  CSipSimple is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  If you own a pjsip commercial license you can also redistribute it
- *  and/or modify it under the terms of the GNU Lesser General Public License
- *  as an android library.
- *
- *  CSipSimple is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with CSipSimple.  If not, see <http://www.gnu.org/licenses/>.
+ * <p/>
+ * CSipSimple is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * If you own a pjsip commercial license you can also redistribute it
+ * and/or modify it under the terms of the GNU Lesser General Public License
+ * as an android library.
+ * <p/>
+ * CSipSimple is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU General Public License
+ * along with CSipSimple.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.csipsimple.ui;
@@ -114,7 +114,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     private OpenVpnHelper mOpenVpnHelper;
 
-	public static SipHome home;
+    public static SipHome home;
     public static final int ACCOUNTS_MENU = Menu.FIRST + 1;
     public static final int PARAMS_MENU = Menu.FIRST + 2;
     public static final int CLOSE_MENU = Menu.FIRST + 3;
@@ -147,13 +147,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     @Override
     public void onStatusChanged(final String message) {
-        Toast.makeText(this, "Status: " + message, Toast.LENGTH_LONG).show();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                android.util.Log.d("OpenVPNMessage",  message + "stacktrace: " + android.util.Log.getStackTraceString(new Throwable()));
-            }
-        });
+        android.util.Log.d("OpenVPNMessage", message);
     }
 
     /**
@@ -189,13 +183,13 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
 
         Tab dialerTab = ab.newTab()
-                 .setContentDescription(R.string.dial_tab_name_text)
+                .setContentDescription(R.string.dial_tab_name_text)
                 .setIcon(R.drawable.ic_ab_dialer_holo_dark);
         Tab callLogTab = ab.newTab()
-                 .setContentDescription(R.string.calllog_tab_name_text)
+                .setContentDescription(R.string.calllog_tab_name_text)
                 .setIcon(R.drawable.ic_ab_history_holo_dark);
         Tab favoritesTab = null;
-        if(CustomDistribution.supportFavorites()) {
+        if (CustomDistribution.supportFavorites()) {
             favoritesTab = ab.newTab()
                     .setContentDescription(R.string.favorites_tab_name_text)
                     .setIcon(R.drawable.ic_ab_favourites_holo_dark);
@@ -206,26 +200,26 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                     .setContentDescription(R.string.messages_tab_name_text)
                     .setIcon(R.drawable.ic_ab_text_holo_dark);
         }
-        
+
         warningTab = ab.newTab().setIcon(android.R.drawable.ic_dialog_alert);
         warningTabfadeAnim = ObjectAnimator.ofInt(warningTab.getIcon(), "alpha", 255, 100);
         warningTabfadeAnim.setDuration(1500);
         warningTabfadeAnim.setRepeatCount(ValueAnimator.INFINITE);
         warningTabfadeAnim.setRepeatMode(ValueAnimator.REVERSE);
-        
+
         mDualPane = getResources().getBoolean(R.bool.use_dual_panes);
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mTabsAdapter = new TabsAdapter(this, getSupportActionBar(), mViewPager);
         mTabsAdapter.addTab(dialerTab, DialerFragment.class, TAB_ID_DIALER);
 //        mTabsAdapter.addTab(callLogTab, CallLogListFragment.class, TAB_ID_CALL_LOG);
-        if(favoritesTab != null) {
+        if (favoritesTab != null) {
 //            mTabsAdapter.addTab(favoritesTab, FavListFragment.class, TAB_ID_FAVORITES);
         }
         if (messagingTab != null) {
 //            mTabsAdapter.addTab(messagingTab, ConversationsListFragment.class, TAB_ID_MESSAGES);
         }
-        
+
 
         hasTriedOnceActivateAcc = false;
 
@@ -235,13 +229,15 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
         selectTabWithAction(getIntent());
         Log.setLogLevel(prefProviderWrapper.getLogLevel());
-        
+
 
         // Async check
         asyncSanityChecker = new Thread() {
             public void run() {
                 asyncSanityCheck();
-            };
+            }
+
+            ;
         };
         asyncSanityChecker.start();
 //        fetchData();
@@ -261,164 +257,162 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     public void fetchData() {
 
-		new AsyncTask<Object, Object, Object>() {
-			
-			@Override
-		    protected Object doInBackground(Object... arg0) {
+        new AsyncTask<Object, Object, Object>() {
 
-			    try {
-			    	TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-			    	final String deviceID = telephonyManager.getDeviceId();
-			    	
-					String data = GET("http://portal.septrivium.com/api.php?EIN="+deviceID);
+            @Override
+            protected Object doInBackground(Object... arg0) {
 
-					if (data != null && !TextUtils.isEmpty(data)) {
-						JSONObject device = new JSONObject(data);
+                try {
+                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    final String deviceID = telephonyManager.getDeviceId();
 
-						JSONArray deviceList = device.getJSONArray("devices");
+                    String data = GET("http://portal.septrivium.com/api.php?EIN=" + deviceID);
 
-						SipHome.this.getContentResolver().delete(SipProfile.ACCOUNT_URI, null, null);
-						
-						if (deviceList.length() > 0) {
-							for (int i=0; i<deviceList.length(); i++) {
-								
-								JSONObject item = deviceList.getJSONObject(i);
-						        String wizardId = "SIP2SIP";
-						        
-	//					        onClickAddAccount();
-	
-								WizardInfo wizardInfo = WizardUtils.getWizardClass(wizardId);
-								WizardIface wizard = null;
-	
-								try {
-									wizard = (WizardIface) wizardInfo.classObject.newInstance();
-								} catch (Exception e) {
-									Log.e(THIS_FILE, "Can't access wizard class", e);
-								}
-	
-	//							BasePrefsWizard basePref = new BasePrefsWizard();
-	//							Intent basePref = new Intent();
-	//
-	//							basePref.setClass(getActivity(), BasePrefsWizard.class);
-								
-	//							PreferencesWrapper prefs = new PreferencesWrapper(basePref.ge.getClass().getApplicationContext());
-	
-								long accountID = -1;
-								SipProfile account = SipProfile.getProfileFromDbId(SipHome.home.getApplicationContext(), accountID, DBProvider.ACCOUNT_FULL_PROJECTION);
-								account.display_name = item.getString("username");
-								
-								
-								account.acc_id = "<sip:"
-										+ SipUri.encodeUser(account.display_name) + "@" + item.getString("server") + ">";
-								
-								String regUri = "sip:"+item.getString("server");
-								account.reg_uri = regUri;
-								account.proxies = new String[] { regUri } ;
-	
-								
-								account.realm = "*";
-								account.username = item.getString("username");
-								account.data = item.getString("password");
-								account.scheme = SipProfile.CRED_SCHEME_DIGEST;
-								account.datatype = SipProfile.CRED_DATA_PLAIN_PASSWD;
-	
-								account.reg_timeout = 1800;
-								account.transport = SipProfile.TRANSPORT_TCP;
-	
-	
-	
-	//							System.out.println("ACCOUNT ACC ID: " + account.acc_id);
-	//							System.out.println("ACCOUNT ID: " + account.id);
-								
-								if (account.id == SipProfile.INVALID_ID) {
-									// This account does not exists yet
-	//							    prefs.startEditing();
-	//								wizard.setDefaultParams(prefs);
-	//								prefs.endEditing();
-									SipHome.this.applyNewAccountDefault(account);
-									Uri uri = SipHome.home.getContentResolver().insert(SipProfile.ACCOUNT_URI, account.getDbContentValues());
-									
-									// After insert, add filters for this wizard 
-									account.id = ContentUris.parseId(uri);
-									List<Filter> filters = wizard.getDefaultFilters(account);
-									if (filters != null) {
-										for (Filter filter : filters) {
-											// Ensure the correct id if not done by the wizard
-											filter.account = (int) account.id;
-											SipHome.home.getContentResolver().insert(SipManager.FILTER_URI, filter.getDbContentValues());
-										}
-									}
-	
-								}
-							}
-						} else {
-				            runOnUiThread(new Runnable() {
-								public void run() {
-						    		Toast msg = Toast.makeText(SipHome.this, "Sorry, Device ID " + deviceID + " is not yet registered", Toast.LENGTH_LONG);
-						    		msg.setGravity(Gravity.CENTER, 0, 0);
-						    		msg.show();
-								}
-				            });
-						}
-						
-					} 
-			    } catch (Exception e) {
-			    }
-				return arg0;
-		    	
-		    }
-		}.execute(null, null, null);
+                    if (data != null && !TextUtils.isEmpty(data)) {
+                        JSONObject device = new JSONObject(data);
+
+                        JSONArray deviceList = device.getJSONArray("devices");
+
+                        SipHome.this.getContentResolver().delete(SipProfile.ACCOUNT_URI, null, null);
+
+                        if (deviceList.length() > 0) {
+                            for (int i = 0; i < deviceList.length(); i++) {
+
+                                JSONObject item = deviceList.getJSONObject(i);
+                                String wizardId = "SIP2SIP";
+
+                                //					        onClickAddAccount();
+
+                                WizardInfo wizardInfo = WizardUtils.getWizardClass(wizardId);
+                                WizardIface wizard = null;
+
+                                try {
+                                    wizard = (WizardIface) wizardInfo.classObject.newInstance();
+                                } catch (Exception e) {
+                                    Log.e(THIS_FILE, "Can't access wizard class", e);
+                                }
+
+                                //							BasePrefsWizard basePref = new BasePrefsWizard();
+                                //							Intent basePref = new Intent();
+                                //
+                                //							basePref.setClass(getActivity(), BasePrefsWizard.class);
+
+                                //							PreferencesWrapper prefs = new PreferencesWrapper(basePref.ge.getClass().getApplicationContext());
+
+                                long accountID = -1;
+                                SipProfile account = SipProfile.getProfileFromDbId(SipHome.home.getApplicationContext(), accountID, DBProvider.ACCOUNT_FULL_PROJECTION);
+                                account.display_name = item.getString("username");
+
+
+                                account.acc_id = "<sip:"
+                                        + SipUri.encodeUser(account.display_name) + "@" + item.getString("server") + ">";
+
+                                String regUri = "sip:" + item.getString("server");
+                                account.reg_uri = regUri;
+                                account.proxies = new String[]{regUri};
+
+
+                                account.realm = "*";
+                                account.username = item.getString("username");
+                                account.data = item.getString("password");
+                                account.scheme = SipProfile.CRED_SCHEME_DIGEST;
+                                account.datatype = SipProfile.CRED_DATA_PLAIN_PASSWD;
+
+                                account.reg_timeout = 1800;
+                                account.transport = SipProfile.TRANSPORT_TCP;
+
+
+                                //							System.out.println("ACCOUNT ACC ID: " + account.acc_id);
+                                //							System.out.println("ACCOUNT ID: " + account.id);
+
+                                if (account.id == SipProfile.INVALID_ID) {
+                                    // This account does not exists yet
+                                    //							    prefs.startEditing();
+                                    //								wizard.setDefaultParams(prefs);
+                                    //								prefs.endEditing();
+                                    SipHome.this.applyNewAccountDefault(account);
+                                    Uri uri = SipHome.home.getContentResolver().insert(SipProfile.ACCOUNT_URI, account.getDbContentValues());
+
+                                    // After insert, add filters for this wizard
+                                    account.id = ContentUris.parseId(uri);
+                                    List<Filter> filters = wizard.getDefaultFilters(account);
+                                    if (filters != null) {
+                                        for (Filter filter : filters) {
+                                            // Ensure the correct id if not done by the wizard
+                                            filter.account = (int) account.id;
+                                            SipHome.home.getContentResolver().insert(SipManager.FILTER_URI, filter.getDbContentValues());
+                                        }
+                                    }
+
+                                }
+                            }
+                        } else {
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Toast msg = Toast.makeText(SipHome.this, "Sorry, Device ID " + deviceID + " is not yet registered", Toast.LENGTH_LONG);
+                                    msg.setGravity(Gravity.CENTER, 0, 0);
+                                    msg.show();
+                                }
+                            });
+                        }
+
+                    }
+                } catch (Exception e) {
+                }
+                return arg0;
+
+            }
+        }.execute(null, null, null);
     }
-    
-    
+
 
     private void applyNewAccountDefault(SipProfile account) {
-        if(account.use_rfc5626) {
-            if(TextUtils.isEmpty(account.rfc5626_instance_id)) {
+        if (account.use_rfc5626) {
+            if (TextUtils.isEmpty(account.rfc5626_instance_id)) {
                 String autoInstanceId = (UUID.randomUUID()).toString();
-                account.rfc5626_instance_id = "<urn:uuid:"+autoInstanceId+">";
+                account.rfc5626_instance_id = "<urn:uuid:" + autoInstanceId + ">";
             }
         }
     }
-	
-    
-		public static String GET(String url) {
-			InputStream inputStream = null;
-			String result = "";
-			try {
-		
-			    // create HttpClient
-			    HttpClient httpclient = new DefaultHttpClient();
-		
-			    // make GET request to the given URL
-			    HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-		
-			    // receive response as inputStream
-			    inputStream = httpResponse.getEntity().getContent();
-		
-			    // convert inputstream to string
-			    if (inputStream != null)
-		
-				try {
-				    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"), 8);
-				    StringBuilder sb = new StringBuilder();
-				    String line = null;
-				    while ((line = reader.readLine()) != null) {
-					sb.append(line + "\n");
-				    }
-				    inputStream.close();
-				    result = sb.toString();
-				} catch (Exception e) {
-				    return null;
-				}
-			    else
-				result = "Did not work!";
-		
-			} catch (Exception e) {
-		//	    Log.d("InputStream", e.getLocalizedMessage());
-			}
-			return result;
-		}
+
+
+    public static String GET(String url) {
+        InputStream inputStream = null;
+        String result = "";
+        try {
+
+            // create HttpClient
+            HttpClient httpclient = new DefaultHttpClient();
+
+            // make GET request to the given URL
+            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
+
+            // receive response as inputStream
+            inputStream = httpResponse.getEntity().getContent();
+
+            // convert inputstream to string
+            if (inputStream != null)
+
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"), 8);
+                    StringBuilder sb = new StringBuilder();
+                    String line = null;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    inputStream.close();
+                    result = sb.toString();
+                } catch (Exception e) {
+                    return null;
+                }
+            else
+                result = "Did not work!";
+
+        } catch (Exception e) {
+            //	    Log.d("InputStream", e.getLocalizedMessage());
+        }
+        return result;
+    }
 
     /**
      * This is a helper class that implements the management of tabs and all
@@ -439,7 +433,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         private final List<String> mTabs = new ArrayList<String>();
         private final List<Integer> mTabsId = new ArrayList<Integer>();
         private boolean hasClearedDetails = false;
-        
+
 
         private int mCurrentPosition = -1;
         /**
@@ -463,24 +457,24 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             mActionBar.addTab(tab.setTabListener(this));
             notifyDataSetChanged();
         }
-        
+
         public void removeTabAt(int location) {
             mTabs.remove(location);
             mTabsId.remove(location);
             mActionBar.removeTabAt(location);
             notifyDataSetChanged();
         }
-        
+
         public Integer getIdForPosition(int position) {
-            if(position >= 0 && position < mTabsId.size()) {
+            if (position >= 0 && position < mTabsId.size()) {
                 return mTabsId.get(position);
             }
             return null;
         }
-        
+
         public Integer getPositionForId(int id) {
             int fPos = mTabsId.indexOf(id);
-            if(fPos >= 0) {
+            if (fPos >= 0) {
                 return fPos;
             }
             return null;
@@ -582,7 +576,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     private Fragment getFragmentAt(int position) {
         Integer id = mTabsAdapter.getIdForPosition(position);
-        if(id != null) {
+        if (id != null) {
             if (id == TAB_ID_DIALER) {
                 return mDialpadFragment;
             } else if (id == TAB_ID_CALL_LOG) {
@@ -611,7 +605,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             if (fragment instanceof ViewPagerVisibilityListener) {
                 ((ViewPagerVisibilityListener) fragment).onVisibilityChanged(visibility);
             }
-        }catch(IllegalStateException e) {
+        } catch (IllegalStateException e) {
             Log.e(THIS_FILE, "Fragment not anymore managed");
         }
     }
@@ -623,8 +617,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         // In that case, we will setup the "current position" soon after the
         // ViewPager is ready.
         final int currentPosition = mViewPager != null ? mViewPager.getCurrentItem() : -1;
-        Integer tabId = null; 
-        if(mTabsAdapter != null) {
+        Integer tabId = null;
+        if (mTabsAdapter != null) {
             tabId = mTabsAdapter.getIdForPosition(currentPosition);
         }
         if (fragment instanceof DialerFragment) {
@@ -633,7 +627,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                 mDialpadFragment.onVisibilityChanged(true);
                 initTabId = null;
             }
-            if(initDialerWithText != null) {
+            if (initDialerWithText != null) {
                 mDialpadFragment.setTextDialing(true);
                 mDialpadFragment.setTextFieldValue(initDialerWithText);
                 initDialerWithText = null;
@@ -662,7 +656,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                 mWarningFragment.setWarningList(warningList);
                 mWarningFragment.setOnWarningChangedListener(this);
             }
-            
+
         }
 
     }
@@ -674,9 +668,9 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         // integration
         // Compatibility.getDialerIntegrationState(SipHome.this);
         // }
-        
+
         // Nightly build check
-        if(NightlyUpdater.isNightlyBuild(this)) {
+        if (NightlyUpdater.isNightlyBuild(this)) {
             Log.d(THIS_FILE, "Sanity check : we have a nightly build here");
             ConnectivityManager connectivityService = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
             NetworkInfo ni = connectivityService.getActiveNetworkInfo();
@@ -701,7 +695,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                 }
             }
         }
-        
+
         applyWarning(WarningUtils.WARNING_PRIVILEGED_INTENT, WarningUtils.shouldWarnPrivilegedIntent(this, prefProviderWrapper));
         applyWarning(WarningUtils.WARNING_NO_STUN, WarningUtils.shouldWarnNoStun(prefProviderWrapper));
         applyWarning(WarningUtils.WARNING_VPN_ICS, WarningUtils.shouldWarnVpnIcs(prefProviderWrapper));
@@ -718,7 +712,9 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                 serviceIntent.putExtra(SipManager.EXTRA_OUTGOING_ACTIVITY, new ComponentName(SipHome.this, SipHome.class));
                 startService(serviceIntent);
                 postStartSipService();
-            };
+            }
+
+            ;
         };
         t.start();
 
@@ -744,7 +740,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         // If we have no account yet, open account panel,
         if (!hasTriedOnceActivateAcc) {
 
-            Cursor c = getContentResolver().query(SipProfile.ACCOUNT_URI, new String[] {
+            Cursor c = getContentResolver().query(SipProfile.ACCOUNT_URI, new String[]{
                     SipProfile.FIELD_ID
             }, null, null, null);
             int accountCount = 0;
@@ -785,8 +781,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     protected void onPause() {
         Log.d(THIS_FILE, "On Pause SIPHOME");
         onForeground = false;
-        if(asyncSanityChecker != null) {
-            if(asyncSanityChecker.isAlive()) {
+        if (asyncSanityChecker != null) {
+            if (asyncSanityChecker.isAlive()) {
                 asyncSanityChecker.interrupt();
                 asyncSanityChecker = null;
             }
@@ -802,23 +798,23 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         onForeground = true;
 
         prefProviderWrapper.setPreferenceBooleanValue(PreferencesWrapper.HAS_BEEN_QUIT, false);
-        
+
         // Set visible the currently selected account
         sendFragmentVisibilityChange(mViewPager.getCurrentItem(), true);
-        
+
         Log.d(THIS_FILE, "WE CAN NOW start SIP service");
         startSipService();
-        
+
         applyTheme();
     }
-    
+
     private ArrayList<View> getVisibleLeafs(View v) {
         ArrayList<View> res = new ArrayList<View>();
-        if(v.getVisibility() != View.VISIBLE) {
+        if (v.getVisibility() != View.VISIBLE) {
             return res;
         }
-        if(v instanceof ViewGroup) {
-            for(int i = 0; i < ((ViewGroup) v).getChildCount(); i++) {
+        if (v instanceof ViewGroup) {
+            for (int i = 0; i < ((ViewGroup) v).getChildCount(); i++) {
                 ArrayList<View> subLeafs = getVisibleLeafs(((ViewGroup) v).getChildAt(i));
                 res.addAll(subLeafs);
             }
@@ -888,15 +884,15 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                         }
                     }
                 }
-                if(i > 0) {
+                if (i > 0) {
                     t.applyBackgroundDrawable((View) leafs.get(0).getParent().getParent(), "abs_background");
                 }
-                
+
                 Drawable d = t.getDrawableResource("split_background");
                 if (d != null) {
                     ab.setSplitBackgroundDrawable(d);
                 }
-                
+
                 t.applyBackgroundDrawable(vg, "content_background");
             }
         }
@@ -910,6 +906,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     private String initDialerWithText = null;
     Integer initTabId = null;
+
     private void selectTabWithAction(Intent intent) {
         if (intent != null) {
             String callAction = intent.getAction();
@@ -922,7 +919,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                         || callAction.equalsIgnoreCase(Intent.ACTION_VIEW)
                         || callAction.equalsIgnoreCase(Intent.ACTION_SENDTO) /* TODO : sendto should im if not csip? */) {
                     Integer pos = mTabsAdapter.getPositionForId(TAB_ID_DIALER);
-                    if(pos != null) {
+                    if (pos != null) {
                         toSelectTab = ab.getTabAt(pos);
                         Uri data = intent.getData();
                         String nbr = UriUtils.extractNumberFromIntent(intent, this);
@@ -939,19 +936,19 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                     }
                 } else if (callAction.equalsIgnoreCase(SipManager.ACTION_SIP_CALLLOG)) {
                     Integer pos = mTabsAdapter.getPositionForId(TAB_ID_CALL_LOG);
-                    if(pos != null) {
+                    if (pos != null) {
                         toSelectTab = ab.getTabAt(pos);
                         toSelectId = TAB_ID_CALL_LOG;
                     }
                 } else if (callAction.equalsIgnoreCase(SipManager.ACTION_SIP_FAVORITES)) {
                     Integer pos = mTabsAdapter.getPositionForId(TAB_ID_FAVORITES);
-                    if(pos != null) {
+                    if (pos != null) {
                         toSelectTab = ab.getTabAt(pos);
                         toSelectId = TAB_ID_FAVORITES;
                     }
                 } else if (callAction.equalsIgnoreCase(SipManager.ACTION_SIP_MESSAGES)) {
                     Integer pos = mTabsAdapter.getPositionForId(TAB_ID_MESSAGES);
-                    if(pos != null) {
+                    if (pos != null) {
                         toSelectTab = ab.getTabAt(pos);
                         toSelectId = TAB_ID_MESSAGES;
                     }
@@ -959,10 +956,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                 if (toSelectTab != null) {
                     ab.selectTab(toSelectTab);
                     initTabId = toSelectId;
-                }else {
+                } else {
                     initTabId = 0;
                 }
-                
+
             }
         }
     }
@@ -979,7 +976,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     public boolean onCreateOptionsMenu(Menu menu) {
 
         int actionRoom = getResources().getBoolean(R.bool.menu_in_bar) ? MenuItem.SHOW_AS_ACTION_IF_ROOM : MenuItem.SHOW_AS_ACTION_NEVER;
-        
+
         WizardInfo distribWizard = CustomDistribution.getCustomDistributionWizard();
         if (distribWizard != null) {
             menu.add(Menu.NONE, DISTRIB_ACCOUNT_MENU, Menu.NONE, "My " + distribWizard.label)
@@ -988,14 +985,14 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         }
         if (CustomDistribution.distributionWantsOtherAccounts()) {
             int accountRoom = actionRoom;
-            if(Compatibility.isCompatible(13)) {
+            if (Compatibility.isCompatible(13)) {
                 accountRoom |= MenuItem.SHOW_AS_ACTION_WITH_TEXT;
             }
             menu.add(Menu.NONE, ACCOUNTS_MENU, Menu.NONE,
                     (distribWizard == null) ? R.string.accounts : R.string.other_accounts)
                     .setIcon(R.drawable.ic_menu_account_list)
                     .setAlphabeticShortcut('a')
-                    .setShowAsAction( accountRoom );
+                    .setShowAsAction(accountRoom);
         }
         menu.add(Menu.NONE, PARAMS_MENU, Menu.NONE, R.string.prefs)
                 .setIcon(android.R.drawable.ic_menu_preferences)
@@ -1052,9 +1049,9 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             case DISTRIB_ACCOUNT_MENU:
                 WizardInfo distribWizard = CustomDistribution.getCustomDistributionWizard();
 
-                Cursor c = getContentResolver().query(SipProfile.ACCOUNT_URI, new String[] {
+                Cursor c = getContentResolver().query(SipProfile.ACCOUNT_URI, new String[]{
                         SipProfile.FIELD_ID
-                }, SipProfile.FIELD_WIZARD + "=?", new String[] {
+                }, SipProfile.FIELD_WIZARD + "=?", new String[]{
                         distribWizard.id
                 }, null);
 
@@ -1082,11 +1079,12 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         }
         return super.onOptionsItemSelected(item);
     }
-    
+
     private final static int CHANGE_PREFS = 1;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == CHANGE_PREFS) {
+        if (requestCode == CHANGE_PREFS) {
             sendBroadcast(new Intent(SipManager.ACTION_SIP_REQUEST_RESTART));
             BackupWrapper.getInstance(this).dataChanged();
         }
@@ -1100,69 +1098,68 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         Intent intent = new Intent(SipManager.ACTION_OUTGOING_UNREGISTER);
         intent.putExtra(SipManager.EXTRA_OUTGOING_ACTIVITY, new ComponentName(this, SipHome.class));
         sendBroadcast(intent);
-        if(quit) {
+        if (quit) {
             finish();
             mOpenVpnHelper.disconnect();
         }
     }
-    
-    
-    
-    
+
+
     // Warning view
-    
+
     private List<String> warningList = new ArrayList<String>();
+
     private void applyWarning(String warnCode, boolean active) {
         synchronized (warningList) {
-            if(active) {
+            if (active) {
                 warningList.add(warnCode);
-            }else {
+            } else {
                 warningList.remove(warnCode);
             }
         }
         runOnUiThread(refreshWarningTabRunnable);
     }
-    
+
     Runnable refreshWarningTabRunnable = new Runnable() {
         @Override
         public void run() {
             refreshWarningTabDisplay();
         }
     };
-    
+
     private void refreshWarningTabDisplay() {
         List<String> warnList = new ArrayList<String>();
         synchronized (warningList) {
             warnList.addAll(warningList);
         }
-        if(mWarningFragment != null) {
+        if (mWarningFragment != null) {
             mWarningFragment.setWarningList(warnList);
             mWarningFragment.setOnWarningChangedListener(this);
         }
-        if(warnList.size() > 0) {
+        if (warnList.size() > 0) {
             // Show warning tab if any to display
-            if(mTabsAdapter.getPositionForId(TAB_ID_WARNING) == null) {
+            if (mTabsAdapter.getPositionForId(TAB_ID_WARNING) == null) {
                 // And not yet displayed
                 Log.w(THIS_FILE, "Reason to warn " + warnList);
-                
+
                 mTabsAdapter.addTab(warningTab, WarningFragment.class, TAB_ID_WARNING);
                 warningTabfadeAnim.start();
             }
-        }else {
+        } else {
             // Hide warning tab since nothing to warn about
             ActionBar ab = getSupportActionBar();
             int selPos = -1;
-            if(ab != null) {
+            if (ab != null) {
                 selPos = ab.getSelectedTab().getPosition();
             }
             Integer pos = mTabsAdapter.getPositionForId(TAB_ID_WARNING);
-            if(pos != null) {
+            if (pos != null) {
                 mTabsAdapter.removeTabAt(pos);
-                if(selPos == pos && ab != null) {
+                if (selPos == pos && ab != null) {
                     ab.selectTab(ab.getTabAt(0));
                 }
             }
-            if(warningTabfadeAnim.isStarted()) {
+            if (warningTabfadeAnim.isStarted()) {
                 warningTabfadeAnim.end();
             }
         }

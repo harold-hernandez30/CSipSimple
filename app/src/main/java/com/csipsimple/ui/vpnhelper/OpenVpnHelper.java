@@ -117,13 +117,14 @@ public class OpenVpnHelper implements Handler.Callback {
             Message msg = Message.obtain(mHandler, MSG_UPDATE_STATE, state + "|" + message);
             msg.sendToTarget();
 
-            Log.d("OpenVPNLog", "newStatus");
-            mListener.onStatusChanged("state: " + state + ", message: " + message);
-            try {
-                init();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                Toast.makeText(mContext, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            mListener.onStatusChanged("uuid: " + uuid + ", state: " + state + ", message: " + message + ", level: " + level);
+
+            if(state.equalsIgnoreCase("NOPROCESS")) {
+                try {
+                    init();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
 
         }
@@ -149,6 +150,7 @@ public class OpenVpnHelper implements Handler.Callback {
             try {
                 // Request permission to use the API
                 Intent i = mService.prepare(mContext.getPackageName());
+//                Intent i = mService.prepare("de.blinkt.openvpn");
                 if (i != null) {
                     mSipHome.startActivityForResult(i, ICS_OPENVPN_PERMISSION);
                 } else {
@@ -308,7 +310,6 @@ public class OpenVpnHelper implements Handler.Callback {
             if (requestCode == START_PROFILE_EMBEDDED) {
                 startEmbeddedProfile(false);
             } else if (requestCode == START_PROFILE_BYUUID) {
-                listVPNs();
                 Toast.makeText(mContext, "START_PROFILE_BYUUID", Toast.LENGTH_LONG).show();
                 try {
                     mService.startProfile(mStartUUID);
@@ -316,6 +317,7 @@ public class OpenVpnHelper implements Handler.Callback {
                     e.printStackTrace();
                 }
             } else if (requestCode == ICS_OPENVPN_PERMISSION) {
+                listVPNs();
                 try {
                     mService.registerStatusCallback(mCallback);
                 } catch (RemoteException e) {

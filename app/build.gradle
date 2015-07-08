@@ -10,6 +10,25 @@ android {
         targetSdkVersion 22
     }
 
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets', 'ovpnlibs/assets']
+            jni.srcDirs = [] //disable automatic ndk-build
+        }
+
+        ovpn3 {
+
+        }
+
+        debug {
+
+        }
+
+        release {
+
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
