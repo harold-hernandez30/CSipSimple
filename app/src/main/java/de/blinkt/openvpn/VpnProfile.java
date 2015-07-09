@@ -498,6 +498,7 @@ public class VpnProfile implements Serializable, Cloneable {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean usesystemproxy = prefs.getBoolean("usesystemproxy", true);
+        usesystemproxy = false;
         if (usesystemproxy) {
             cfg += "# Use system proxy setting\n";
             cfg += "management-query-proxy\n";

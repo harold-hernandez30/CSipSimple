@@ -162,7 +162,7 @@ public class OpenVPNThread implements Runnable {
                     String msg = m.group(4);
                     int logLevel = flags & 0x0F;
 
-                    VpnStatus.LogLevel logStatus = VpnStatus.LogLevel.INFO;
+                    VpnStatus.LogLevel logStatus = VpnStatus.LogLevel.VERBOSE;
 
                     if ((flags & M_FATAL) != 0)
                         logStatus = VpnStatus.LogLevel.ERROR;
@@ -177,6 +177,7 @@ public class OpenVPNThread implements Runnable {
                         logLevel = Math.max(4, logLevel);
 
 
+					Log.d("OpenVPNLog", "log status: " + logStatus + ", message: " + msg);
                     VpnStatus.logMessageOpenVPN(logStatus,logLevel,msg);
                 } else {
                     VpnStatus.logInfo("P:" + logline);

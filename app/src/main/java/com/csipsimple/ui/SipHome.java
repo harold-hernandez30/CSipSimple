@@ -40,16 +40,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v4.view.ViewPager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -73,6 +70,7 @@ import com.csipsimple.ui.dialpad.DialerFragment;
 import com.csipsimple.ui.favorites.FavListFragment;
 import com.csipsimple.ui.help.Help;
 import com.csipsimple.ui.messages.ConversationsListFragment;
+import com.csipsimple.ui.vpnhelper.ConfigConverter;
 import com.csipsimple.ui.vpnhelper.OpenVpnHelper;
 import com.csipsimple.ui.warnings.WarningFragment;
 import com.csipsimple.ui.warnings.WarningUtils;
@@ -93,6 +91,7 @@ import com.csipsimple.wizards.WizardUtils;
 import com.csipsimple.wizards.WizardUtils.WizardInfo;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -104,10 +103,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.blinkt.openvpn.LaunchVPN;
+import de.blinkt.openvpn.VpnProfile;
+import de.blinkt.openvpn.core.ConfigParser;
+import de.blinkt.openvpn.core.ProfileManager;
 
 
 public class SipHome extends SherlockFragmentActivity implements OnWarningChanged, OpenVpnHelper.StatusListener {
@@ -168,8 +169,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.sip_home);
-        mOpenVpnHelper = new OpenVpnHelper(this);
-        mOpenVpnHelper.registerStatusListener(this);
+//        mOpenVpnHelper = new OpenVpnHelper(this);
+//        mOpenVpnHelper.registerStatusListener(this);
+
+        new ConfigProfileTask().execute();
 
 
         this.home = this;
@@ -246,13 +249,13 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     protected void onStop() {
         super.onStop();
-        mOpenVpnHelper.onStop();
+//        mOpenVpnHelper.onStop();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mOpenVpnHelper.onStart();
+//        mOpenVpnHelper.onStart();
     }
 
     public void fetchData() {
@@ -1100,7 +1103,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         sendBroadcast(intent);
         if (quit) {
             finish();
-            mOpenVpnHelper.disconnect();
+//            mOpenVpnHelper.disconnect();
         }
     }
 
@@ -1166,12 +1169,50 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     }
 
     public void onVpnResult(int requestCode, int resultCode, Intent data) {
-        mOpenVpnHelper.onActivityResult(requestCode, resultCode, data);
+//        mOpenVpnHelper.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
     public void onWarningRemoved(String warnKey) {
         applyWarning(warnKey, false);
+    }
+
+    private class ConfigProfileTask extends AsyncTask<Void, Void, VpnProfile> {
+
+        @Override
+        protected VpnProfile doInBackground(Void... voids) {
+            ConfigConverter configConverter = new ConfigConverter(SipHome.this);
+            try {
+                return configConverter.doImportFromAsset("augeo_android.ovpn");
+            } catch (IOException e) {
+                e.printStackTrace();
+                android.util.Log.d("OpenVPNMessage", e.getMessage());
+                return null;
+            } catch (ConfigParser.ConfigParseError configParseError) {
+                configParseError.printStackTrace();
+                android.util.Log.d("OpenVPNMessage", configParseError.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(VpnProfile vpnProfile) {
+            super.onPostExecute(vpnProfile);
+
+//            vpnProfile.mUsername = "richard";
+//            vpnProfile.mPassword = "richard";
+            startVPN(vpnProfile);
+        }
+    }
+
+    private void startVPN(VpnProfile profile) {
+
+        ProfileManager.getInstance(this).saveProfile(this, profile);
+
+        Intent intent = new Intent(this, LaunchVPN.class);
+        intent.putExtra(LaunchVPN.EXTRA_KEY, profile.getUUID().toString());
+        intent.setAction(Intent.ACTION_MAIN);
+        startActivity(intent);
     }
 
 }

@@ -195,10 +195,8 @@ public class LaunchVPN extends Activity {
 			if(resultCode == Activity.RESULT_OK) {
 				int needpw = mSelectedProfile.needUserPWInput(false);
 
-				mSelectedProfile.mPassword = "richard";
-//				mSelectedProfile.mAlias = "richard";
 				mSelectedProfile.mUsername = "richard";
-//				mSelectedProfile.copy("richard");
+				mSelectedProfile.mPassword = "richard";
 				needpw = 0;
 				if(needpw !=0) {
 					VpnStatus.updateStateString("USER_VPN_PASSWORD", "", R.string.state_user_vpn_password,
@@ -207,10 +205,10 @@ public class LaunchVPN extends Activity {
 					askForPW(needpw);
 				} else {
 					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);        
-					boolean showLogWindow = prefs.getBoolean("showlogwindow", true);
-
-					if(!mhideLog && showLogWindow)
-						showLogWindow();
+//					boolean showLogWindow = prefs.getBoolean("showlogwindow", true);
+//
+//					if(!mhideLog && showLogWindow)
+//						showLogWindow();
 					new startOpenVpnThread().start();
 				}
 			} else if (resultCode == Activity.RESULT_CANCELED) {
