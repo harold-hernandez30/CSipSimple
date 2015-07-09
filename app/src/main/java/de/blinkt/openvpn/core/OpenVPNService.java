@@ -29,6 +29,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.csipsimple.R;
+import com.csipsimple.ui.SipHome;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -243,7 +244,7 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
 
     PendingIntent getLogPendingIntent() {
         // Let the configure Button show the Log
-        Intent intent = new Intent(getBaseContext(), LogWindow.class);
+        Intent intent = new Intent(getBaseContext(), SipHome.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         PendingIntent startLW = PendingIntent.getActivity(this, 0, intent, 0);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);

@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.csipsimple.R;
+import com.csipsimple.ui.SipHome;
 
 import java.io.IOException;
 
@@ -222,7 +223,7 @@ public class LaunchVPN extends Activity {
 	}
 	void showLogWindow() {
 
-		Intent startLW = new Intent(getBaseContext(),LogWindow.class);
+		Intent startLW = new Intent(getBaseContext(),SipHome.class);
 		startLW.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		startActivity(startLW);
 
