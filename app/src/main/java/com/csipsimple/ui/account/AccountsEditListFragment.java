@@ -77,7 +77,8 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     private BroadcastReceiver mVpnConnectedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onResume();
+//            onResume();
+            ((BaseAdapter) getListAdapter()).notifyDataSetChanged();
         }
     };
 

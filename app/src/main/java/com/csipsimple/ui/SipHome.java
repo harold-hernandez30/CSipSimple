@@ -109,12 +109,14 @@ import org.json.JSONObject;
 
 import de.blinkt.openvpn.LaunchVPN;
 import de.blinkt.openvpn.VpnProfile;
+import de.blinkt.openvpn.api.ConfirmDialog;
 import de.blinkt.openvpn.core.ConfigParser;
 import de.blinkt.openvpn.core.ProfileManager;
 
 
 public class SipHome extends SherlockFragmentActivity implements OnWarningChanged, OpenVpnHelper.StatusListener {
 
+    private static final int CONFIRM_DIALOG = 100;
     public static SipHome home;
     public static final int ACCOUNTS_MENU = Menu.FIRST + 1;
     public static final int PARAMS_MENU = Menu.FIRST + 2;
@@ -145,6 +147,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private Thread asyncSanityChecker;
     private Tab warningTab;
     private ObjectAnimator warningTabfadeAnim;
+    private VpnProfile mVpnProfile;
 
     @Override
     public void onStatusChanged(final String message) {
@@ -778,6 +781,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                 if (distribWizard != null) {
                     accountIntent = new Intent(this, BasePrefsWizard.class);
                     accountIntent.putExtra(SipProfile.FIELD_WIZARD, distribWizard.id);
+
+
                 } else {
                     accountIntent = new Intent(this, AccountsEditList.class);
                 }
@@ -815,9 +820,19 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         super.onResume();
         onForeground = true;
 
-        if(!OpenVpnHelper.getInstance().isBound()) {
-            new ConfigProfileTask().execute();
+        if(hasTriedOnceActivateAcc) {
+            if (OpenVpnHelper.getInstance().hasPermission(this) && !OpenVpnHelper.getInstance().isBound()) {
+                new ConfigProfileTask(true).execute();
+            } else {
+                if (!OpenVpnHelper.getInstance().hasPermission(this)) {
+                    Intent intent = new Intent(this, ConfirmDialog.class);
+                    android.util.Log.d("CONFIRM_DIALOG", "AccountsEditList Activity call");
+                    startActivityForResult(intent, CONFIRM_DIALOG);
+                }
+
+            }
         }
+
 
         prefProviderWrapper.setPreferenceBooleanValue(PreferencesWrapper.HAS_BEEN_QUIT, false);
 
@@ -1111,6 +1126,20 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             BackupWrapper.getInstance(this).dataChanged();
         }
 
+        if(resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case CONFIRM_DIALOG:
+                    if (mVpnProfile != null) {
+                        startVPN(mVpnProfile);
+                    } else {
+                        new ConfigProfileTask(true).execute();
+                    }
+                    break;
+            }
+
+        } else if (resultCode == RESULT_CANCELED) {
+
+        }
         if (requestCode == OpenVpnHelper.ICS_OPENVPN_PERMISSION) {
             OpenVpnHelper.getInstance().registerToServiceCallback();
         }
@@ -1202,6 +1231,13 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     private class ConfigProfileTask extends AsyncTask<Void, Void, VpnProfile> {
 
+        private boolean shouldLaunchVpn;
+
+        public ConfigProfileTask(boolean shouldLaunchVpn) {
+
+            this.shouldLaunchVpn = shouldLaunchVpn;
+        }
+
         @Override
         protected VpnProfile doInBackground(Void... voids) {
             ConfigConverter configConverter = new ConfigConverter(SipHome.this);
@@ -1225,17 +1261,13 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             OpenVpnHelper.getInstance().registerStatusListener(SipHome.this);
             try {
                 OpenVpnHelper.getInstance().init(SipHome.this, SipHome.this);
-//
-//                if (OpenVpnHelper.getInstance().hasPermission(SipHome.this)) {
-//                    startVPN(vpnProfile);
-//                }
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-//            ProfileManager.getInstance(SipHome.this).saveProfile(SipHome.this, vpnProfile);
+            ProfileManager.getInstance(SipHome.this).saveProfile(SipHome.this, vpnProfile);
+            mVpnProfile = vpnProfile;
 
-
-            if (OpenVpnHelper.getInstance().hasPermission(SipHome.this)) {
+            if (shouldLaunchVpn) {
                 startVPN(vpnProfile);
             }
 
