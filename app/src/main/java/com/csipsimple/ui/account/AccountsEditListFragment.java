@@ -23,9 +23,12 @@ package com.csipsimple.ui.account;
 
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -53,6 +56,7 @@ import com.csipsimple.api.SipProfile;
 import com.csipsimple.ui.SipHome;
 import com.csipsimple.ui.account.AccountsEditListAdapter.AccountRowTag;
 import com.csipsimple.ui.account.AccountsEditListAdapter.OnCheckedRowListener;
+import com.csipsimple.ui.vpnhelper.OpenVpnHelper;
 import com.csipsimple.widgets.CSSListFragment;
 import com.csipsimple.wizards.BasePrefsWizard;
 import com.csipsimple.wizards.WizardChooser;
@@ -69,6 +73,13 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
 	private AccountStatusContentObserver statusObserver = null;
     private View mHeaderView;
     private AccountsEditListAdapter mAdapter;
+
+    private BroadcastReceiver mVpnConnectedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onResume();
+        }
+    };
 
 	class AccountStatusContentObserver extends ContentObserver {
 
@@ -91,6 +102,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
+
 	}
 	
 	@Override 
@@ -387,7 +399,10 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     	super.onResume();
     	if(statusObserver == null) {
         	statusObserver = new AccountStatusContentObserver(mHandler);
-        	getActivity().getContentResolver().registerContentObserver(SipProfile.ACCOUNT_STATUS_URI, true, statusObserver);
+            if(isAdded()) {
+                getActivity().registerReceiver(mVpnConnectedReceiver, new IntentFilter(OpenVpnHelper.ACTION_BROADCAST_VPN_CONNECTED));
+                getActivity().getContentResolver().registerContentObserver(SipProfile.ACCOUNT_STATUS_URI, true, statusObserver);
+            }
     	}
     	mAdapter.notifyDataSetChanged();
     }
@@ -395,8 +410,9 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     @Override
     public void onPause() {
     	super.onPause();
-    	if(statusObserver != null) {
+    	if(statusObserver != null && isAdded()) {
     		getActivity().getContentResolver().unregisterContentObserver(statusObserver);
+            getActivity().unregisterReceiver(mVpnConnectedReceiver);
     		statusObserver = null;
     	}
     }

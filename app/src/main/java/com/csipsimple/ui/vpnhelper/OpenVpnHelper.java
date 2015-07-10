@@ -33,6 +33,9 @@ public class OpenVpnHelper implements Handler.Callback {
     public static final int ANDROID_REQUEST_PERMISSION = 9;
     public static final int HACK_ANDROID_REQUEST_REINSTALL_FIX = 10;
 
+    public static final String ACTION_BROADCAST_VPN_CONNECTED = "action.vpnstatus.connected";
+    public static final String ACTION_BROADCAST_VPN_PERMISSION_OK = "action.vpnpermission.ok";
+
     protected IOpenVPNAPIService mService = null;
     private Handler mHandler;
     private StatusListener mListener;

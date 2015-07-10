@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnShowListener;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -31,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.csipsimple.R;
+import com.csipsimple.ui.vpnhelper.OpenVpnHelper;
 
 
 public class ConfirmDialog extends Activity implements
