@@ -23,23 +23,17 @@ package com.csipsimple.ui.account;
 
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.UriPermission;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.BaseColumns;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -50,35 +44,20 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.csipsimple.R;
-import com.csipsimple.api.SipManager;
 import com.csipsimple.api.SipProfile;
-import com.csipsimple.api.SipUri;
-import com.csipsimple.backup.SipProfileJson;
-import com.csipsimple.db.DBProvider;
-import com.csipsimple.models.Filter;
 import com.csipsimple.ui.SipHome;
 import com.csipsimple.ui.account.AccountsEditListAdapter.AccountRowTag;
 import com.csipsimple.ui.account.AccountsEditListAdapter.OnCheckedRowListener;
-import com.csipsimple.utils.PreferencesWrapper;
 import com.csipsimple.widgets.CSSListFragment;
-import com.csipsimple.widgets.DragnDropListView;
-import com.csipsimple.widgets.DragnDropListView.DropListener;
 import com.csipsimple.wizards.BasePrefsWizard;
 import com.csipsimple.wizards.WizardChooser;
-import com.csipsimple.wizards.WizardIface;
 import com.csipsimple.wizards.WizardUtils;
-import com.csipsimple.wizards.WizardUtils.WizardInfo;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class AccountsEditListFragment extends CSSListFragment implements /*OnQuitListener,*/ OnCheckedRowListener{

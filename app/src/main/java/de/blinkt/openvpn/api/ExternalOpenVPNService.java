@@ -23,6 +23,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.csipsimple.R;
 
@@ -239,6 +240,7 @@ public class ExternalOpenVPNService extends Service implements StateListener {
 
             Intent intent = new Intent();
             intent.setClass(ExternalOpenVPNService.this, ConfirmDialog.class);
+            Log.d("CONFIRM_DIALOG", "ExternalOpenVPNService + stacktrac: " + Log.getStackTraceString(new Throwable()));
             return intent;
         }
 

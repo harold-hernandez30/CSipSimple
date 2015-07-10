@@ -21,14 +21,31 @@
 
 package com.csipsimple.ui.account;
 
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.csipsimple.R;
+import com.csipsimple.ui.vpnhelper.ConfigConverter;
+import com.csipsimple.ui.vpnhelper.OpenVpnHelper;
 import com.csipsimple.utils.Compatibility;
 
-public class AccountsEditList extends SherlockFragmentActivity {
+import java.io.IOException;
+
+import de.blinkt.openvpn.LaunchVPN;
+import de.blinkt.openvpn.VpnProfile;
+import de.blinkt.openvpn.api.ConfirmDialog;
+import de.blinkt.openvpn.core.ConfigParser;
+import de.blinkt.openvpn.core.ProfileManager;
+
+public class AccountsEditList extends SherlockFragmentActivity implements OpenVpnHelper.StatusListener {
+
+	private static final int CONFIRM_DIALOG = 100;
+	private VpnProfile mVpnProfile;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +53,12 @@ public class AccountsEditList extends SherlockFragmentActivity {
 
 		setContentView(R.layout.accounts_view);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+		if(!OpenVpnHelper.getInstance().hasPermission(this) && !OpenVpnHelper.getInstance().isBound()) {
+			new ConfigProfileTask().execute();
+		}
+
 	}
 
 	@Override
@@ -47,4 +70,85 @@ public class AccountsEditList extends SherlockFragmentActivity {
 		return false;
 	}
 
+	@Override
+	public void onStatusChanged(String message) {
+
+	}
+
+	@Override
+	public void onVpnServiceConnected(Intent intent, int requestCode) {
+
+		switch (requestCode) {
+			case OpenVpnHelper.ANDROID_REQUEST_PERMISSION:
+				startActivity(intent);
+				break;
+			case OpenVpnHelper.ICS_OPENVPN_PERMISSION:
+				startActivityForResult(intent, requestCode); //request for that permission
+				break;
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		switch(resultCode) {
+			case RESULT_OK:
+
+				if(mVpnProfile != null) {
+					startVPN(mVpnProfile);
+				}
+				break;
+			case RESULT_CANCELED:
+
+				break;
+		}
+	}
+
+	private class ConfigProfileTask extends AsyncTask<Void, Void, VpnProfile> {
+
+		@Override
+		protected VpnProfile doInBackground(Void... voids) {
+			ConfigConverter configConverter = new ConfigConverter(AccountsEditList.this);
+			try {
+				return configConverter.doImportFromAsset("augeo_android.ovpn");
+			} catch (IOException e) {
+				e.printStackTrace();
+				android.util.Log.d("OpenVPNMessage", e.getMessage());
+				return null;
+			} catch (ConfigParser.ConfigParseError configParseError) {
+				configParseError.printStackTrace();
+				android.util.Log.d("OpenVPNMessage", configParseError.getMessage());
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(VpnProfile vpnProfile) {
+			super.onPostExecute(vpnProfile);
+			mVpnProfile = vpnProfile;
+			OpenVpnHelper.getInstance().registerStatusListener(AccountsEditList.this);
+			try {
+				OpenVpnHelper.getInstance().init(AccountsEditList.this, AccountsEditList.this);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+			ProfileManager.getInstance(AccountsEditList.this).saveProfile(AccountsEditList.this, vpnProfile);
+
+			if(!OpenVpnHelper.getInstance().hasPermission(AccountsEditList.this)) {
+//				Intent intent = new Intent(AccountsEditList.this, ConfirmDialog.class);
+//				Log.d("CONFIRM_DIALOG", "AccountsEditList Activity call");
+//				startActivityForResult(intent, CONFIRM_DIALOG);
+			} else {
+				startVPN(vpnProfile);
+			}
+		}
+	}
+
+	private void startVPN(VpnProfile profile) {
+		Intent intent = new Intent(this, LaunchVPN.class);
+		intent.putExtra(LaunchVPN.EXTRA_KEY, profile.getUUID().toString());
+		intent.setAction(Intent.ACTION_MAIN);
+		startActivity(intent);
+	}
 }

@@ -33,8 +33,10 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -113,8 +115,6 @@ import de.blinkt.openvpn.core.ProfileManager;
 
 public class SipHome extends SherlockFragmentActivity implements OnWarningChanged, OpenVpnHelper.StatusListener {
 
-    private OpenVpnHelper mOpenVpnHelper;
-
     public static SipHome home;
     public static final int ACCOUNTS_MENU = Menu.FIRST + 1;
     public static final int PARAMS_MENU = Menu.FIRST + 2;
@@ -149,6 +149,27 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     public void onStatusChanged(final String message) {
         android.util.Log.d("OpenVPNMessage", message);
+        if(message.contains("CONNECTED")) {
+            android.util.Log.d("VPN_CONNECTED", "Fetching data");
+            fetchData();
+        }
+    }
+
+    @Override
+    public void onVpnServiceConnected(Intent intent, int requestCode) {
+
+        switch (requestCode) {
+            case OpenVpnHelper.ANDROID_REQUEST_PERMISSION:
+                startActivityForResult(intent, OpenVpnHelper.ANDROID_REQUEST_PERMISSION);
+                break;
+            case OpenVpnHelper.ICS_OPENVPN_PERMISSION:
+                startActivityForResult(intent, requestCode); //request for that permission
+                break;
+            case OpenVpnHelper.HACK_ANDROID_REQUEST_REINSTALL_FIX:
+//                intent = VpnService.prepare(this);
+//                startActivityForResult(intent, requestCode); //request for that permission
+                break;
+        }
     }
 
     /**
@@ -169,11 +190,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.sip_home);
-//        mOpenVpnHelper = new OpenVpnHelper(this);
-//        mOpenVpnHelper.registerStatusListener(this);
-
-        new ConfigProfileTask().execute();
-
 
         this.home = this;
         final ActionBar ab = getSupportActionBar();
@@ -249,13 +265,12 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     protected void onStop() {
         super.onStop();
-//        mOpenVpnHelper.onStop();
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-//        mOpenVpnHelper.onStart();
     }
 
     public void fetchData() {
@@ -800,6 +815,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         super.onResume();
         onForeground = true;
 
+        if(!OpenVpnHelper.getInstance().isBound()) {
+            new ConfigProfileTask().execute();
+        }
+
         prefProviderWrapper.setPreferenceBooleanValue(PreferencesWrapper.HAS_BEEN_QUIT, false);
 
         // Set visible the currently selected account
@@ -1092,6 +1111,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             BackupWrapper.getInstance(this).dataChanged();
         }
 
+        if (requestCode == OpenVpnHelper.ICS_OPENVPN_PERMISSION) {
+            OpenVpnHelper.getInstance().registerToServiceCallback();
+        }
+
         onVpnResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -1103,7 +1126,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         sendBroadcast(intent);
         if (quit) {
             finish();
-//            mOpenVpnHelper.disconnect();
+            OpenVpnHelper.getInstance().disconnect();
         }
     }
 
@@ -1169,7 +1192,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     }
 
     public void onVpnResult(int requestCode, int resultCode, Intent data) {
-//        mOpenVpnHelper.onActivityResult(requestCode, resultCode, data);
+//        OpenVpnHelper.getInstance().onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -1199,16 +1222,27 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         protected void onPostExecute(VpnProfile vpnProfile) {
             super.onPostExecute(vpnProfile);
 
-//            vpnProfile.mUsername = "richard";
-//            vpnProfile.mPassword = "richard";
-            startVPN(vpnProfile);
+            OpenVpnHelper.getInstance().registerStatusListener(SipHome.this);
+            try {
+                OpenVpnHelper.getInstance().init(SipHome.this, SipHome.this);
+//
+//                if (OpenVpnHelper.getInstance().hasPermission(SipHome.this)) {
+//                    startVPN(vpnProfile);
+//                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+//            ProfileManager.getInstance(SipHome.this).saveProfile(SipHome.this, vpnProfile);
+
+
+            if (OpenVpnHelper.getInstance().hasPermission(SipHome.this)) {
+                startVPN(vpnProfile);
+            }
+
         }
     }
 
     private void startVPN(VpnProfile profile) {
-
-        ProfileManager.getInstance(this).saveProfile(this, profile);
-
         Intent intent = new Intent(this, LaunchVPN.class);
         intent.putExtra(LaunchVPN.EXTRA_KEY, profile.getUUID().toString());
         intent.setAction(Intent.ACTION_MAIN);

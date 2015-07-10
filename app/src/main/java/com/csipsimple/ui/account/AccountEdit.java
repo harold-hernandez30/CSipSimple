@@ -51,8 +51,8 @@ public class AccountEdit extends BasePrefsWizard /*implements OnQuitListener */ 
 	}
 	
 	@Override
-	protected void onStart() {
-		super.onStart();
+	protected void init() {
+		super.init();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 	
