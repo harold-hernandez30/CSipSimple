@@ -50,7 +50,7 @@ import com.actionbarsherlock.view.MenuItem.OnMenuItemClickListener;
 import com.csipsimple.R;
 import com.csipsimple.api.SipMessage;
 import com.csipsimple.service.SipNotifications;
-import com.csipsimple.ui.SipHome.ViewPagerVisibilityListener;
+import com.augeo.ui.SipHome.ViewPagerVisibilityListener;
 import com.csipsimple.ui.messages.ConversationsAdapter.ConversationListItemViews;
 import com.csipsimple.widgets.CSSListFragment;
 

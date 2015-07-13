@@ -29,7 +29,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.csipsimple.R;
-import com.csipsimple.ui.SipHome;
+import com.augeo.ui.SipHome;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,7 +44,6 @@ import java.util.Vector;
 import de.blinkt.openvpn.BuildConfig;
 import de.blinkt.openvpn.VpnProfile;
 import de.blinkt.openvpn.activities.DisconnectVPN;
-import de.blinkt.openvpn.activities.LogWindow;
 import de.blinkt.openvpn.core.VpnStatus.ByteCountListener;
 import de.blinkt.openvpn.core.VpnStatus.ConnectionStatus;
 import de.blinkt.openvpn.core.VpnStatus.StateListener;

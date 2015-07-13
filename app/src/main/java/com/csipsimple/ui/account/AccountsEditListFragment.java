@@ -53,7 +53,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.csipsimple.R;
 import com.csipsimple.api.SipProfile;
-import com.csipsimple.ui.SipHome;
+import com.augeo.ui.SipHome;
 import com.csipsimple.ui.account.AccountsEditListAdapter.AccountRowTag;
 import com.csipsimple.ui.account.AccountsEditListAdapter.OnCheckedRowListener;
 import com.csipsimple.ui.vpnhelper.OpenVpnHelper;

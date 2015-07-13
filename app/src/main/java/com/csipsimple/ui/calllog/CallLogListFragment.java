@@ -50,7 +50,7 @@ import com.csipsimple.R;
 import com.csipsimple.api.SipManager;
 import com.csipsimple.api.SipProfile;
 import com.csipsimple.api.SipUri;
-import com.csipsimple.ui.SipHome.ViewPagerVisibilityListener;
+import com.augeo.ui.SipHome.ViewPagerVisibilityListener;
 import com.csipsimple.ui.calllog.CallLogAdapter.OnCallLogAction;
 import com.csipsimple.utils.Log;
 import com.csipsimple.widgets.CSSListFragment;

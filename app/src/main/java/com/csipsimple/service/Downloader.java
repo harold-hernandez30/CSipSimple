@@ -49,7 +49,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.csipsimple.R;
-import com.csipsimple.ui.SipHome;
+import com.augeo.ui.SipHome;
 import com.csipsimple.utils.Log;
 import com.csipsimple.utils.MD5;
 

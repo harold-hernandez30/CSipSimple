@@ -19,7 +19,7 @@
  * along with CSipSimple.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.csipsimple.ui;
+package com.augeo.ui;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -33,7 +33,6 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;

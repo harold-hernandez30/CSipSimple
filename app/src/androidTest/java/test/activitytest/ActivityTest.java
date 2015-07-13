@@ -1,12 +1,9 @@
 package test.activitytest;
 
-import android.app.Activity;
 import android.content.Context;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.csipsimple.ui.SipHome;
+import com.augeo.ui.SipHome;
 import com.csipsimple.ui.dialpad.DialerFragment;
 
 /**

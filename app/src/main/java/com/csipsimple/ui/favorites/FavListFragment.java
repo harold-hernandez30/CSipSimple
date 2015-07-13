@@ -28,7 +28,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.csipsimple.R;
-import com.csipsimple.ui.SipHome.ViewPagerVisibilityListener;
+import com.augeo.ui.SipHome.ViewPagerVisibilityListener;
 import com.csipsimple.widgets.CSSListFragment;
 
 public class FavListFragment extends CSSListFragment implements ViewPagerVisibilityListener {

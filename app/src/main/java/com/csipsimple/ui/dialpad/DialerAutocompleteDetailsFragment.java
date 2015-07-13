@@ -28,7 +28,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
-import com.csipsimple.ui.SipHome;
+import com.augeo.ui.SipHome;
 import com.csipsimple.utils.contacts.ContactsSearchAdapter;
 
 public class DialerAutocompleteDetailsFragment extends SherlockListFragment {
