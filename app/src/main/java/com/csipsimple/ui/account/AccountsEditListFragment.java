@@ -56,7 +56,7 @@ import com.csipsimple.api.SipProfile;
 import com.augeo.ui.SipHome;
 import com.csipsimple.ui.account.AccountsEditListAdapter.AccountRowTag;
 import com.csipsimple.ui.account.AccountsEditListAdapter.OnCheckedRowListener;
-import com.csipsimple.ui.vpnhelper.OpenVpnHelper;
+import com.augeo.vpnhelper.OpenVpnHelper;
 import com.csipsimple.widgets.CSSListFragment;
 import com.csipsimple.wizards.BasePrefsWizard;
 import com.csipsimple.wizards.WizardChooser;

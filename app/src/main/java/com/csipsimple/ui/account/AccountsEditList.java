@@ -33,8 +33,8 @@ import android.util.Log;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.csipsimple.R;
-import com.csipsimple.ui.vpnhelper.ConfigConverter;
-import com.csipsimple.ui.vpnhelper.OpenVpnHelper;
+import com.augeo.vpnhelper.ConfigConverter;
+import com.augeo.vpnhelper.OpenVpnHelper;
 import com.csipsimple.utils.Compatibility;
 
 import java.io.IOException;

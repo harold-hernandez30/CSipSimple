@@ -1,12 +1,8 @@
-package com.csipsimple.ui.vpnhelper;
+package com.augeo.vpnhelper;
 
 import android.content.Context;
 import android.os.Environment;
-import android.text.TextUtils;
 import android.util.Base64;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.csipsimple.R;
 
