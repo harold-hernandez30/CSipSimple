@@ -21,8 +21,10 @@
 
 package com.csipsimple.ui.account;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.VpnService;
@@ -30,14 +32,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.augeo.ui.SipHome;
 import com.csipsimple.R;
 import com.augeo.vpnhelper.ConfigConverter;
 import com.augeo.vpnhelper.OpenVpnHelper;
 import com.csipsimple.service.SipService;
 import com.csipsimple.utils.Compatibility;
+import com.csipsimple.utils.PreferencesWrapper;
 
 import java.io.IOException;
 
@@ -69,10 +74,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = VpnService.prepare(this);
-        if(intent != null) {
-            startActivityForResult(intent, ANDROID_CONFIRM_DIALOG);
-        }
+        launchVpnPermissionDialog();
         setContentView(R.layout.accounts_view);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -90,6 +92,13 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
 
         }
 
+    }
+
+    private void launchVpnPermissionDialog() {
+        Intent intent = VpnService.prepare(this);
+        if(intent != null) {
+            startActivityForResult(intent, ANDROID_CONFIRM_DIALOG);
+        }
     }
 
     @Override
@@ -156,7 +165,26 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
                     break;
             }
         } else if (resultCode == RESULT_CANCELED) {
+            switch (requestCode) {
+                case ANDROID_CONFIRM_DIALOG:
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.warning)
+                            .setMessage(getString(R.string.app_name) + " requires VPN. Please ")
+                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    launchVpnPermissionDialog();
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    SipHome.home.fetchData();
+                                }
+                            })
+                            .show();
+                    break;
 
+            }
         }
     }
 
