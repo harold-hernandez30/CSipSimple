@@ -79,7 +79,8 @@ public class PrefsLogic {
     public final static int TYPE_NETWORK_SIP_PROTOCOL = 23;
     public final static int TYPE_CALLS = 40;
     public final static int TYPE_UI = 60;
-    
+    public static final int TYPE_VPN = 100;
+
     /**
      * Get the xml res for preference screen building.
      * @param t The preference screen type
@@ -105,6 +106,8 @@ public class PrefsLogic {
                 return R.xml.prefs_calls;
             case TYPE_UI:
                 return R.xml.prefs_ui;
+            case TYPE_VPN:
+                return R.xml.prefs_vpn;
         }
         return 0;
     }

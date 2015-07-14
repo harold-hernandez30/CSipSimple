@@ -59,6 +59,7 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.ValueAnimator;
 //import com.actionbarsherlock.internal.utils.UtilityWrapper;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.augeo.vpnhelper.OpenVpnConfigManager;
 import com.csipsimple.R;
 import com.csipsimple.api.SipConfigManager;
 import com.csipsimple.api.SipManager;
@@ -209,6 +210,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
         super.onCreate(savedInstanceState);
 
+        OpenVpnConfigManager.init(this);
         setContentView(R.layout.sip_home);
         OpenVpnHelper.getInstance().registerStatusListener(SipHome.this);
 
@@ -828,6 +830,9 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                 asyncSanityChecker = null;
             }
         }
+
+        android.util.Log.d("BATTERY_SAVING_MODE", "is in battery saving mode? " + OpenVpnConfigManager.getInstance().isInBatterySavingMode());
+
         super.onPause();
 
     }

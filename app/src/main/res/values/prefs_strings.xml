@@ -338,6 +338,9 @@
     <!-- Calls settings -->
     <string name="auto_record_calls">Auto record calls</string>
     <string name="auto_record_calls_desc">Record calls as soon as connected</string>
+
+    <string name="vpn_prefs_battery_saving_mode_title">Battery Saving Mode</string>
+    <string name="vpn_prefs_battery_saving_mode_desc">Disconnect from VPN when you\'re not using the app. Enabling this would not allow incoming calls while app is in the background.</string>
     <string name="support_multiple_calls">Support multiple calls</string>
     <string name="support_multiple_calls_desc">Allow conference and multiple concurrent calls</string>
     <string name="vid_in_auto_show">Auto show video</string>

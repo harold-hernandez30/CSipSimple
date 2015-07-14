@@ -78,6 +78,8 @@ public class MainPrefs extends SherlockListActivity {
 				R.drawable.ic_prefs_calls, getIntentForType(PrefsLogic.TYPE_CALLS)));
 		prefs_list.add(new PrefGroup(R.string.filters, R.string.filters_desc, 
 				R.drawable.ic_prefs_filter, new Intent(this, PrefsFilters.class)));
+		prefs_list.add(new PrefGroup(R.string.vpn, R.string.vpn_desc,
+				R.drawable.icon, getIntentForType(PrefsLogic.TYPE_VPN)));
 		
 		adapter = new PrefGroupAdapter(this, prefs_list);
 		setListAdapter(adapter);

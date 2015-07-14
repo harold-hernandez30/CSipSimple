@@ -63,5 +63,16 @@
         android:summary="@string/filters_desc"
         android:title="@string/filters" >
     </header>
+    <header
+        android:fragment="com.csipsimple.ui.prefs.hc.PrefsLoaderFragment"
+        android:icon="@drawable/icon"
+        android:summary="@string/vpn_desc"
+        android:title="@string/vpn" >
+
+        <extra
+            android:name="preference_type"
+            android:value="100" />
+    </header>
+
 
 </preference-headers>
