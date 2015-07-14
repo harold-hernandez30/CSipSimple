@@ -254,10 +254,10 @@ public class OpenVpnHelper implements Handler.Callback {
         if (msg.what == MSG_UPDATE_STATE) {
             if (mListener != null) {
                 String message = (String) msg.obj;
-                mListener.onStatusChanged(message);
                 if(message.toLowerCase().contains("CONNECTED")) {
                     isVpnConnected = true;
                 }
+                mListener.onStatusChanged(message);
             }
         }
         return true;

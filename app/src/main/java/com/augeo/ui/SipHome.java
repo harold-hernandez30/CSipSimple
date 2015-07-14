@@ -192,8 +192,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-//        ExternalAppDatabase extapps = new ExternalAppDatabase(this);
-//        extapps.addApp(getPackageName());
+        ExternalAppDatabase extapps = new ExternalAppDatabase(this);
+        extapps.addApp(getPackageName());
         //prefWrapper = new PreferencesWrapper(this);
         Intent intent = VpnService.prepare(this);
         if(intent != null && hasTriedOnceActivateAcc) {
