@@ -154,12 +154,16 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     private boolean mConfirmedDialog = false;
 
+
     @Override
     public void onStatusChanged(final String message) {
         android.util.Log.d("OpenVPNMessage", message);
-        if(message.contains("CONNECTED")) {
+        if(message.contains("SUCCESS")) {
             android.util.Log.d("VPN_CONNECTED", "Fetching data");
 //            fetchData();
+            if(OpenVpnHelper.getInstance().isVpnConnected()) {
+                fetchData();
+            }
         }
     }
 
@@ -833,7 +837,17 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         super.onResume();
         onForeground = true;
 
-        if(hasTriedOnceActivateAcc) {
+
+
+
+        prefProviderWrapper.setPreferenceBooleanValue(PreferencesWrapper.HAS_BEEN_QUIT, false);
+
+        // Set visible the currently selected account
+        sendFragmentVisibilityChange(mViewPager.getCurrentItem(), true);
+
+        Log.d(THIS_FILE, "WE CAN NOW start SIP service");
+        startSipService();
+        if(hasUserTriedActivatingSync()) {
             if (OpenVpnHelper.getInstance().hasPermission(this) && !OpenVpnHelper.getInstance().isBound()) {
                 new ConfigProfileTask(true).execute();
             } else if (!OpenVpnHelper.getInstance().hasPermission(this)) {
@@ -849,16 +863,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
             }
         }
-
-
-        prefProviderWrapper.setPreferenceBooleanValue(PreferencesWrapper.HAS_BEEN_QUIT, false);
-
-        // Set visible the currently selected account
-        sendFragmentVisibilityChange(mViewPager.getCurrentItem(), true);
-
-        Log.d(THIS_FILE, "WE CAN NOW start SIP service");
-        startSipService();
-
         applyTheme();
     }
 
@@ -1302,4 +1306,22 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         startActivity(intent);
     }
 
+
+    private boolean hasUserTriedActivatingSync() {
+        Cursor c = getContentResolver().query(SipProfile.ACCOUNT_URI, new String[]{
+                SipProfile.FIELD_ID
+        }, null, null, null);
+        int accountCount = 0;
+        if (c != null) {
+            try {
+                accountCount = c.getCount();
+            } catch (Exception e) {
+                Log.e(THIS_FILE, "Something went wrong while retrieving the account", e);
+            } finally {
+                c.close();
+            }
+        }
+
+        return (accountCount > 0);
+    }
 }
