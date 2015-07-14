@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.text.TextUtils;
 
+import com.augeo.vpnhelper.OpenVpnHelper;
 import com.csipsimple.R;
 import com.csipsimple.api.SipCallSession;
 import com.csipsimple.api.SipManager;
@@ -48,6 +49,7 @@ public class AccountListUtils {
 	
 	
 	public static AccountStatusDisplay getAccountDisplay(Context context, long accountId) {
+//		android.util.Log.d("ACCOUNT_STATUS_DISPLAY", "checking from: " + android.util.Log.getStackTraceString(new Throwable()));
 		AccountStatusDisplay accountDisplay = new AccountStatusDisplay();
 		accountDisplay.statusLabel = context.getString(R.string.acct_inactive);
 		final Resources resources = context.getResources();
@@ -78,7 +80,7 @@ public class AccountListUtils {
 				accountDisplay.statusLabel = context.getString(R.string.acct_unregistered);
 				accountDisplay.statusColor = resources.getColor(R.color.account_unregistered);
 				accountDisplay.checkBoxIndicator = R.drawable.ic_indicator_yellow;
-				if( TextUtils.isEmpty( accountInfo.getRegUri()) ) {
+				if( TextUtils.isEmpty(accountInfo.getRegUri()) ) {
 					// Green
 					accountDisplay.statusColor = resources.getColor(R.color.account_valid);
 					accountDisplay.checkBoxIndicator = R.drawable.ic_indicator_on;
@@ -107,7 +109,11 @@ public class AccountListUtils {
 							// Yellow progressing ...
 							accountDisplay.statusColor = resources.getColor(R.color.account_unregistered);
 							accountDisplay.checkBoxIndicator = R.drawable.ic_indicator_yellow;
-							accountDisplay.statusLabel = context.getString(R.string.acct_registering);
+							if(OpenVpnHelper.getInstance().isVpnConnected()) {
+								accountDisplay.statusLabel = context.getString(R.string.acct_registering);
+							} else {
+								accountDisplay.statusLabel = context.getString(R.string.acct_vpn_wait);
+							}
 						} else {
 							//TODO : treat 403 with special message
 							// Red : error
@@ -119,7 +125,13 @@ public class AccountListUtils {
 						// Account is currently registering (added to pjsua but not replies yet from pjsua registration)
 						accountDisplay.statusColor = resources.getColor(R.color.account_inactive);
 						accountDisplay.checkBoxIndicator = R.drawable.ic_indicator_yellow;
-						accountDisplay.statusLabel = context.getString(R.string.acct_registering);
+
+
+						if(OpenVpnHelper.getInstance().isVpnConnected()) {
+							accountDisplay.statusLabel = context.getString(R.string.acct_registering);
+						} else {
+							accountDisplay.statusLabel = context.getString(R.string.acct_vpn_wait);
+						}
 					}
 				}
 			} else {
@@ -129,7 +141,13 @@ public class AccountListUtils {
 				}else {
 					accountDisplay.statusColor = resources.getColor(R.color.account_inactive);
 					accountDisplay.checkBoxIndicator = R.drawable.ic_indicator_yellow;
-					accountDisplay.statusLabel = context.getString(R.string.acct_registering);
+					if(OpenVpnHelper.getInstance().isVpnConnected()) {
+						accountDisplay.statusLabel = context.getString(R.string.acct_registering);
+						android.util.Log.d("ACCOUNT_STATUS", "registering: " + accountDisplay.statusLabel);
+					} else {
+						accountDisplay.statusLabel = context.getString(R.string.acct_vpn_wait);
+						android.util.Log.d("ACCOUNT_STATUS", "waiting for vpn: " + accountDisplay.statusLabel);
+					}
 					
 				}
 			}

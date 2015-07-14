@@ -107,15 +107,18 @@ public class OpenVpnHelper implements Handler.Callback {
                 Message msg = Message.obtain(mHandler, MSG_UPDATE_STATE, state + "|" + message);
                 msg.sendToTarget();
 
+                if(message.contains("SUCCESS")) {
+                    isVpnConnected = true;
+                    android.util.Log.d("VPN_SUCCESS", "message contains success");
+                } else {
+
+                    android.util.Log.d("VPN_SUCCESS", "other messages: " + message);
+                }
+
                 if(mListener != null) {
                     mListener.onStatusChanged("uuid: " + uuid + ", state: " + state + ", message: " + message + ", level: " + level);
 
                 }
-
-                if(message.toLowerCase().contains("connected")) {
-                    isVpnConnected = true;
-                }
-
 
             }
 
@@ -250,7 +253,11 @@ public class OpenVpnHelper implements Handler.Callback {
         //TODO: add status message listener
         if (msg.what == MSG_UPDATE_STATE) {
             if (mListener != null) {
-                mListener.onStatusChanged((String) msg.obj);
+                String message = (String) msg.obj;
+                mListener.onStatusChanged(message);
+                if(message.toLowerCase().contains("CONNECTED")) {
+                    isVpnConnected = true;
+                }
             }
         }
         return true;

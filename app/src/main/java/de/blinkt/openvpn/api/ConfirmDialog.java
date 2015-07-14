@@ -52,6 +52,7 @@ CompoundButton.OnCheckedChangeListener, DialogInterface.OnClickListener {
 				finish();
 				return;
 			}
+			android.util.Log.d("ConfirmDialog", "onResume " + getIntent());
 				
 
 			PackageManager pm = getPackageManager();

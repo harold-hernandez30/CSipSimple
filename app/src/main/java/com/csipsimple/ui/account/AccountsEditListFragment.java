@@ -24,16 +24,19 @@ package com.csipsimple.ui.account;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.BaseColumns;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -52,8 +55,10 @@ import android.widget.ListView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.csipsimple.R;
+import com.csipsimple.api.ISipService;
 import com.csipsimple.api.SipProfile;
 import com.augeo.ui.SipHome;
+import com.csipsimple.service.SipService;
 import com.csipsimple.ui.account.AccountsEditListAdapter.AccountRowTag;
 import com.csipsimple.ui.account.AccountsEditListAdapter.OnCheckedRowListener;
 import com.augeo.vpnhelper.OpenVpnHelper;
@@ -78,11 +83,32 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         @Override
         public void onReceive(Context context, Intent intent) {
 //            onResume();
+            android.util.Log.d("VPN_CONNECTED_RECEIVER", "Vpn connected!");
+            updateAllRegistered();
+//            updateCheckedItem();
+
+            SipHome.home.fetchData();
             ((BaseAdapter) getListAdapter()).notifyDataSetChanged();
         }
     };
+    private ISipService service;
+    private ServiceConnection connection  = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
+            service = ISipService.Stub.asInterface(arg1);
+            if(service != null) {
 
-	class AccountStatusContentObserver extends ContentObserver {
+                android.util.Log.d("AccountsEditList", "onServiceConnected");
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            service = null;
+        }
+    };
+
+    class AccountStatusContentObserver extends ContentObserver {
 
 		public AccountStatusContentObserver(Handler h) {
 			super(h);
@@ -118,7 +144,8 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         // View management
         View detailsFrame = getActivity().findViewById(R.id.details);
         dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
-        
+
+        getActivity().bindService(new Intent(getActivity(), SipService.class), connection, Context.BIND_AUTO_CREATE);
 
         if (savedInstanceState != null) {
             // Restore last state for checked position.
@@ -169,65 +196,6 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
 	// Menu stuff
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//        menu.add(R.string.add_account)
-//                .setIcon(android.R.drawable.ic_menu_add)
-//                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-//                    @Override
-//                    public boolean onMenuItemClick(MenuItem item) {
-//                        onClickAddAccount();
-//                        return true;
-//                    }
-//                })
-//                .setShowAsAction(
-//                        MenuItem.SHOW_AS_ACTION_IF_ROOM );
-
-//        menu.add(R.string.reorder).setIcon(android.R.drawable.ic_menu_sort_by_size)
-//                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-//                    @Override
-//                    public boolean onMenuItemClick(MenuItem item) {
-//                        AccountsEditListAdapter ad = (AccountsEditListAdapter) getListAdapter();
-//                        ad.toggleDraggable();
-//                        return true;
-//                    }
-//                }).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-//		
-//        menu.add(R.string.backup_restore).setIcon(android.R.drawable.ic_menu_save)
-//                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-//                    @Override
-//                    public boolean onMenuItemClick(MenuItem item) {
-//
-//                        // Populate choice list
-//                        List<String> items = new ArrayList<String>();
-//                        items.add(getResources().getString(R.string.backup));
-//                        final File backupDir = PreferencesWrapper.getConfigFolder(getActivity());
-//                        if (backupDir != null) {
-//                            String[] filesNames = backupDir.list();
-//                            for (String fileName : filesNames) {
-//                                items.add(fileName);
-//                            }
-//                        }
-//
-//                        final String[] fItems = (String[]) items.toArray(new String[0]);
-//                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//                        builder.setTitle(R.string.backup_restore);
-//                        builder.setItems(fItems, new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog, int item) {
-//                                if (item == 0) {
-//                                    SipProfileJson.saveSipConfiguration(getActivity(), "");
-//                                } else {
-//                                    File fileToRestore = new File(backupDir + File.separator
-//                                            + fItems[item]);
-//                                    SipProfileJson.restoreSipConfiguration(getActivity(), fileToRestore, "");
-//                                }
-//                            }
-//                        });
-//                        builder.setCancelable(true);
-//                        AlertDialog backupDialog = builder.create();
-//                        backupDialog.show();
-//                        return true;
-//                    }
-//                });
-		
 		super.onCreateOptionsMenu(menu, inflater);
 	}
 		
@@ -248,126 +216,9 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
             Bundle savedInstanceState) {
         // Use custom drag and drop view
         View v = inflater.inflate(R.layout.accounts_edit_list, container, false);
+
         
-//        String wizardId = "SIP2SIP";
-//        
-////        onClickAddAccount();
-//
-//		WizardInfo wizardInfo = WizardUtils.getWizardClass(wizardId);
-//		WizardIface wizard = null;
-//
-//		try {
-//			wizard = (WizardIface) wizardInfo.classObject.newInstance();
-//		} catch (Exception e) {
-//			Log.e(THIS_FILE, "Can't access wizard class", e);
-//		}
-//
-////		BasePrefsWizard basePref = new BasePrefsWizard();
-//		Intent basePref = new Intent();
-//
-//		basePref.setClass(getActivity(), BasePrefsWizard.class);
-//		
-////		PreferencesWrapper prefs = new PreferencesWrapper(basePref.ge.getClass().getApplicationContext());
-//
-//		long accountID = -1;
-//		SipProfile account = SipProfile.getProfileFromDbId(SipHome.home.getApplicationContext(), accountID, DBProvider.ACCOUNT_FULL_PROJECTION);
-//		account.display_name = "zor";
-//		account.acc_id = "<sip:"
-//				+ SipUri.encodeUser(account.display_name) + "@sip2sip.info>";
-//		
-//		String regUri = "sip:sip2sip.info";
-//		account.reg_uri = regUri;
-//		account.proxies = new String[] { regUri } ;
-//
-//		
-//		account.realm = "*";
-//		account.username = "zoro";
-//		account.data = "123";
-//		account.scheme = SipProfile.CRED_SCHEME_DIGEST;
-//		account.datatype = SipProfile.CRED_DATA_PLAIN_PASSWD;
-//
-//		account.reg_timeout = 1800;
-//		account.transport = SipProfile.TRANSPORT_TCP;
-//
-//
-//
-////		System.out.println("ACCOUNT ACC ID: " + account.acc_id);
-////		System.out.println("ACCOUNT ID: " + account.id);
-//		
-//		if (account.id == SipProfile.INVALID_ID) {
-//			System.out.println("Sud");
-//			// This account does not exists yet
-////		    prefs.startEditing();
-////			wizard.setDefaultParams(prefs);
-////			prefs.endEditing();
-//			applyNewAccountDefault(account);
-//			Uri uri = SipHome.home.getContentResolver().insert(SipProfile.ACCOUNT_URI, account.getDbContentValues());
-//			
-//			// After insert, add filters for this wizard 
-//			account.id = ContentUris.parseId(uri);
-//			List<Filter> filters = wizard.getDefaultFilters(account);
-//			if (filters != null) {
-//				for (Filter filter : filters) {
-//					// Ensure the correct id if not done by the wizard
-//					filter.account = (int) account.id;
-//					SipHome.home.getContentResolver().insert(SipManager.FILTER_URI, filter.getDbContentValues());
-//				}
-//			}
-//
-//		}
-        
-        
-//        final DragnDropListView lv = (DragnDropListView) v.findViewById(android.R.id.list);
-//        
-//        lv.setGrabberId(R.id.grabber);
-//        // Setup the drop listener
-//        lv.setOnDropListener(new DropListener() {
-//            @Override
-//            public void drop(int from, int to) {
-//                Log.d(THIS_FILE, "Drop from " + from + " to " + to);
-//                int hvC = lv.getHeaderViewsCount();
-//                from = Math.max(0, from - hvC);
-//                to = Math.max(0, to - hvC);
-//                
-//                int i;
-//                // First of all, compute what we get before move
-//                ArrayList<Long> orderedList = new ArrayList<Long>();
-//                CursorAdapter ad = (CursorAdapter) getListAdapter();
-//                for(i=0; i < ad.getCount(); i++) {
-//                    orderedList.add(ad.getItemId(i));
-//                }
-//                // Then, invert in the current list the two items ids
-//                Long moved = orderedList.remove(from);
-//                orderedList.add(to, moved);
-//                
-//                // Finally save that in db
-//                if(getActivity() != null) {
-//                    ContentResolver cr = getActivity().getContentResolver();
-//                    for(i=0; i<orderedList.size(); i++) {
-//                        Uri uri = ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, orderedList.get(i));
-//                        ContentValues cv = new ContentValues();
-//                        cv.put(SipProfile.FIELD_PRIORITY, i);
-//                        cr.update(uri, cv, null, null);
-//                    }
-//                }
-//            }
-//        });
-        
-        OnClickListener addClickButtonListener = new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickAddAccount();
-            }
-        };
-        // Header view
-//        mHeaderView = inflater.inflate(R.layout.generic_add_header_list, container, false);
-//        mHeaderView.setOnClickListener(addClickButtonListener);
-        
-        // Empty view
-//        Button bt = (Button) v.findViewById(android.R.id.empty);
-//        bt.setOnClickListener(addClickButtonListener);
-        
-        SipHome.home.fetchData();
+//        SipHome.home.fetchData();
         
         return v;
     }
@@ -423,6 +274,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     public void onListItemClick(ListView l, View v, int position, long id) {
     	
         Log.d(THIS_FILE, "Checked " + position + " et " + id);
+        android.util.Log.d("LIST_ITEM_CHECKED", "list item checked");
         
         ListView lv = getListView();
         lv.setItemChecked(position, true);
@@ -578,7 +430,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         }
         return new SipProfile(c);
     }
-    
+
 	@Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
@@ -646,6 +498,22 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         if(mAdapter != null) {
             mAdapter.changeCursor(c);
         }
+    }
+
+    public void updateAllRegistered() {
+
+        for(int i=0; i<getListAdapter().getCount(); i++) {
+
+            ContentValues cv = new ContentValues();
+            Cursor c = (Cursor) getListAdapter().getItem(i - getListView().getHeaderViewsCount());
+            SipProfile sipProfile = new SipProfile(c);
+            if(sipProfile.active) {
+                cv.put(SipProfile.FIELD_ACTIVE, sipProfile.active);
+                getActivity().getContentResolver().update(ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, sipProfile.id), cv, null, null);
+            }
+
+        }
+
     }
 
 }

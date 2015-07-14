@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -35,6 +36,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.csipsimple.R;
 import com.augeo.vpnhelper.ConfigConverter;
 import com.augeo.vpnhelper.OpenVpnHelper;
+import com.csipsimple.service.SipService;
 import com.csipsimple.utils.Compatibility;
 
 import java.io.IOException;
@@ -48,6 +50,7 @@ import de.blinkt.openvpn.core.ProfileManager;
 public class AccountsEditList extends SherlockFragmentActivity implements OpenVpnHelper.StatusListener {
 
     private static final int CONFIRM_DIALOG = 100;
+    private static final int ANDROID_CONFIRM_DIALOG = 101;
     private VpnProfile mVpnProfile;
     private BroadcastReceiver mConfirmDialogReceiver = new BroadcastReceiver() {
         @Override
@@ -66,17 +69,23 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Intent intent = VpnService.prepare(this);
+        if(intent != null) {
+            startActivityForResult(intent, ANDROID_CONFIRM_DIALOG);
+        }
         setContentView(R.layout.accounts_view);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        OpenVpnHelper.getInstance().registerStatusListener(AccountsEditList.this);
 
 
         if (OpenVpnHelper.getInstance().hasPermission(this) && !OpenVpnHelper.getInstance().isBound()) {
             new ConfigProfileTask(true).execute();
         } else {
             if (!OpenVpnHelper.getInstance().hasPermission(this)) {
-                Intent intent = new Intent(AccountsEditList.this, ConfirmDialog.class);
+                Intent i = new Intent(AccountsEditList.this, ConfirmDialog.class);
                 Log.d("CONFIRM_DIALOG", "AccountsEditList Activity call");
-                startActivityForResult(intent, CONFIRM_DIALOG);
+                startActivityForResult(i, CONFIRM_DIALOG);
             }
 
         }
@@ -108,7 +117,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
     @Override
     public void onStatusChanged(String message) {
 
-        if (message.contains("CONNECTED")) {
+        if (message.contains("SUCCESS")) {
             Intent intent = new Intent();
             intent.setAction(OpenVpnHelper.ACTION_BROADCAST_VPN_CONNECTED);
             sendBroadcast(intent);
@@ -134,6 +143,10 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
 
         if(resultCode == RESULT_OK) {
             switch (requestCode) {
+                case ANDROID_CONFIRM_DIALOG:
+                    new ConfigProfileTask(true).execute();
+                    break;
+
                 case CONFIRM_DIALOG:
                     if (mVpnProfile != null) {
                         startVPN(mVpnProfile);
@@ -176,7 +189,6 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
         protected void onPostExecute(VpnProfile vpnProfile) {
             super.onPostExecute(vpnProfile);
             mVpnProfile = vpnProfile;
-            OpenVpnHelper.getInstance().registerStatusListener(AccountsEditList.this);
             try {
                 OpenVpnHelper.getInstance().init(AccountsEditList.this, AccountsEditList.this);
             } catch (RemoteException e) {
