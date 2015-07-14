@@ -126,7 +126,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
     @Override
     public void onStatusChanged(String message) {
 
-        if (message.contains("SUCCESS")) {
+        if (message.contains(OpenVpnHelper.CONNECTED_SUCESS_STATUS)) {
             Intent intent = new Intent();
             intent.setAction(OpenVpnHelper.ACTION_BROADCAST_VPN_CONNECTED);
             sendBroadcast(intent);

@@ -47,5 +47,9 @@
     <dimen name="message_item_text_padding_left_right">8dip</dimen>
     <dimen name="message_item_text_padding_top">5dip</dimen>
     <dimen name="message_contact_photo_size">54dip</dimen>
+    <dimen name="stdpadding">8dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
 
 </resources>

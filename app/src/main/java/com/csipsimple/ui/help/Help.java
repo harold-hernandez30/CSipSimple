@@ -40,6 +40,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockDialogFragment;
+import com.augeo.ui.AboutActivity;
 import com.csipsimple.R;
 import com.csipsimple.api.SipConfigManager;
 import com.csipsimple.api.SipManager;
@@ -70,7 +71,7 @@ public class Help extends SherlockDialogFragment implements OnItemClickListener 
 	private static final int REQUEST_SEND_LOGS = 0;
 	
 	// Help choices
-	private final static int FAQ = 0, OPEN_ISSUES = 1, SEND_LOGS = 2, START_LOGS = 3, LEGALS = 4, NIGHTLY = 5;
+	private final static int FAQ = 0, OPEN_ISSUES = 1, SEND_LOGS = 2, START_LOGS = 3, LEGALS = 4, NIGHTLY = 5, VPN = 6;
 	
 	private class HelpEntry {
 		public int iconRes;
@@ -143,6 +144,10 @@ public class Help extends SherlockDialogFragment implements OnItemClickListener 
         
         if(NightlyUpdater.isNightlyBuild(getActivity())){
 			items.add(new HelpEntry(R.drawable.ic_launcher_nightly, R.string.update_nightly_build, NIGHTLY));
+		}
+
+		if(NightlyUpdater.isNightlyBuild(getActivity())){
+			items.add(new HelpEntry(R.drawable.icon, R.string.help_menu_openvpn, VPN));
 		}
 		
         lv.setAdapter(new HelpArrayAdapter(getActivity(), items));
@@ -234,6 +239,8 @@ public class Help extends SherlockDialogFragment implements OnItemClickListener 
 			getActivity().sendBroadcast(intent);
 			dismiss();
 			break;
+		case VPN :
+			startActivity(new Intent(getActivity(), AboutActivity.class));
 		default:
 			break;
 		}

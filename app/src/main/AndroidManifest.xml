@@ -4,7 +4,11 @@
     package="com.csipsimple"
     android:installLocation="auto"
     android:versionCode="2417"
-    android:versionName="1.02.03">
+    android:versionName="1.02.03" >
+
+    <uses-sdk
+        android:minSdkVersion="15"
+        android:targetSdkVersion="21" />
 
     <supports-screens
         android:anyDensity="true"
@@ -12,10 +16,6 @@
         android:normalScreens="true"
         android:smallScreens="true"
         android:xlargeScreens="true" />
-
-    <uses-sdk
-        android:minSdkVersion="15"
-        android:targetSdkVersion="21" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -39,7 +39,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.READ_LOGS" />
-    <!--<uses-permission android:name="android.permission.WRITE_CALL_LOG" />-->
+    <!-- <uses-permission android:name="android.permission.WRITE_CALL_LOG" /> -->
     <uses-permission android:name="android.permission.USE_SIP" />
     <uses-permission android:name="android.permission.CONFIGURE_SIP" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -101,11 +101,14 @@
     <uses-feature
         android:name="android.hardware.camera.front"
         android:required="false" />
+
+    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
-        android:icon="@drawable/ic_launcher"
         android:allowBackup="true"
-        android:backupAgent="com.csipsimple.backup.SipBackupAgent"
+        android:backupAgent=".backup.SipBackupAgent"
         android:hardwareAccelerated="true"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <meta-data
             android:name="app_type"
@@ -170,7 +173,7 @@
         </activity>
 
         <activity-alias
-            android:name="com.csipsimple.ui.SipDialer"
+            android:name=".ui.SipDialer"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:targetActivity="com.augeo.ui.SipHome"
@@ -211,7 +214,7 @@
         <!-- Main service -->
         <!-- Require at least the configure permission to use -->
         <service
-            android:name="com.csipsimple.service.SipService"
+            android:name=".service.SipService"
             android:exported="true"
             android:permission="android.permission.CONFIGURE_SIP"
             android:process=":sipStack" >
@@ -220,10 +223,10 @@
                 <action android:name="com.csipsimple.service.SipConfiguration" />
             </intent-filter>
         </service>
-        <service android:name="com.csipsimple.service.Downloader" />
+        <service android:name=".service.Downloader" />
 
         <receiver
-            android:name="com.csipsimple.service.DeviceStateReceiver"
+            android:name=".service.DeviceStateReceiver"
             android:process=":sipStack" >
 
             <!-- Here filter for protected-broadcasts -->
@@ -238,40 +241,43 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
-        <!--<receiver
+        <!--
+        <receiver
             android:name="com.csipsimple.service.DeviceStateReceiver"
             android:permission="android.permission.CONFIGURE_SIP"
             android:process=":sipStack" >
             <intent-filter>
                 <action android:name="com.csipsimple.accounts.activate" />
             </intent-filter>
-        </receiver>-->
+        </receiver>
+        -->
+
 
         <!-- Main ui -->
         <activity
-            android:name="com.csipsimple.ui.calllog.CallLogDetailsActivity"
+            android:name=".ui.calllog.CallLogDetailsActivity"
             android:theme="@style/DarkTheme" />
 
         <!-- Accounts -->
         <activity
-            android:name="com.csipsimple.ui.filters.AccountFilters"
+            android:name=".ui.filters.AccountFilters"
             android:configChanges="orientation"
             android:label="@string/filters"
             android:theme="@style/DarkTheme" />
         <activity
-            android:name="com.csipsimple.ui.filters.EditFilter"
+            android:name=".ui.filters.EditFilter"
             android:configChanges="orientation"
             android:label="@string/filters"
             android:theme="@style/DarkTheme" />
         <activity
-            android:name="com.csipsimple.wizards.WizardChooser"
+            android:name=".wizards.WizardChooser"
             android:configChanges="orientation"
             android:label="@string/choose_wizard"
             android:theme="@style/DarkTheme.Dialog" />
 
         <!-- Preferences -->
         <activity
-            android:name="com.csipsimple.ui.prefs.hc.MainPrefs"
+            android:name=".ui.prefs.hc.MainPrefs"
             android:configChanges="orientation"
             android:enabled="@bool/use_hc_prefs"
             android:label="@string/prefs"
@@ -284,7 +290,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.csipsimple.ui.prefs.cupcake.MainPrefs"
+            android:name=".ui.prefs.cupcake.MainPrefs"
             android:configChanges="orientation"
             android:enabled="@bool/use_cupcake_prefs"
             android:label="@string/prefs"
@@ -297,16 +303,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.csipsimple.ui.prefs.cupcake.PrefsLoaderActivity"
+            android:name=".ui.prefs.cupcake.PrefsLoaderActivity"
             android:label=""
             android:theme="@style/DarkTheme" />
         <activity
-            android:name="com.csipsimple.ui.prefs.PrefsFilters"
+            android:name=".ui.prefs.PrefsFilters"
             android:configChanges="orientation"
             android:label="@string/filters"
             android:theme="@style/DarkTheme" />
         <activity
-            android:name="com.csipsimple.ui.prefs.PrefsFast"
+            android:name=".ui.prefs.PrefsFast"
             android:configChanges="orientation"
             android:label="@string/prefs_fast"
             android:permission="android.permission.CONFIGURE_SIP"
@@ -318,26 +324,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.csipsimple.ui.prefs.Codecs"
+            android:name=".ui.prefs.Codecs"
             android:configChanges="orientation"
             android:label="@string/codecs"
             android:theme="@style/DarkTheme" />
         <activity
-            android:name="com.csipsimple.ui.prefs.AudioTester"
+            android:name=".ui.prefs.AudioTester"
             android:label="@string/test_audio"
             android:screenOrientation="portrait"
             android:theme="@style/DarkTheme.Dialog" />
 
         <!-- Wizards -->
         <activity
-            android:name="com.csipsimple.wizards.BasePrefsWizard"
+            android:name=".wizards.BasePrefsWizard"
             android:configChanges="orientation"
             android:label="@string/edit"
             android:theme="@style/DarkTheme" />
 
         <!-- Call management -->
         <receiver
-            android:name="com.csipsimple.service.OutgoingCall"
+            android:name=".service.OutgoingCall"
             android:permission="android.permission.CALL_PHONE"
             android:process=":sipStack" >
 
@@ -348,7 +354,7 @@
         </receiver>
 
         <activity
-            android:name="com.csipsimple.ui.outgoingcall.OutgoingCallChooser"
+            android:name=".ui.outgoingcall.OutgoingCallChooser"
             android:allowTaskReparenting="false"
             android:configChanges="orientation"
             android:excludeFromRecents="true"
@@ -379,12 +385,12 @@
         </activity>
 
         <activity-alias
-            android:name="com.csipsimple.ui.PrivilegedOutgoingSipCallBroadcaster"
+            android:name=".ui.PrivilegedOutgoingSipCallBroadcaster"
             android:configChanges="orientation"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:permission="android.permission.CALL_PRIVILEGED"
-            android:targetActivity="com.csipsimple.ui.outgoingcall.OutgoingCallChooser"
+            android:targetActivity=".ui.outgoingcall.OutgoingCallChooser"
             android:theme="@style/DarkTheme.Dialog" >
             <intent-filter>
                 <action android:name="android.intent.action.CALL_PRIVILEGED" />
@@ -395,14 +401,14 @@
             </intent-filter>
         </activity-alias>
         <activity-alias
-            android:name="com.csipsimple.ui.PrivilegedOutgoingCallBroadcaster"
+            android:name=".ui.PrivilegedOutgoingCallBroadcaster"
             android:configChanges="orientation"
             android:enabled="false"
             android:excludeFromRecents="true"
             android:label="@string/sip_call"
             android:launchMode="singleTask"
             android:permission="android.permission.CALL_PRIVILEGED"
-            android:targetActivity="com.csipsimple.ui.outgoingcall.OutgoingCallChooser"
+            android:targetActivity=".ui.outgoingcall.OutgoingCallChooser"
             android:theme="@style/DarkTheme.Dialog" >
             <intent-filter>
                 <action android:name="android.intent.action.CALL_PRIVILEGED" />
@@ -433,7 +439,7 @@
 
         <!-- To be able to do video, this has to be launched in sipStack process -->
         <activity
-            android:name="com.csipsimple.ui.incall.InCallActivity"
+            android:name=".ui.incall.InCallActivity"
             android:allowTaskReparenting="true"
             android:configChanges="orientation"
             android:excludeFromRecents="true"
@@ -449,22 +455,22 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.csipsimple.ui.PickupSipUri"
+            android:name=".ui.PickupSipUri"
             android:configChanges="orientation"
             android:label="@string/pickup_sip_uri"
             android:theme="@style/DarkTheme" />
         <activity
-            android:name="com.csipsimple.ui.incall.InCallMediaControl"
+            android:name=".ui.incall.InCallMediaControl"
             android:configChanges="orientation"
             android:label="@string/prefs_media"
             android:taskAffinity="com.csipsimple.ui.incall.InCallActivity"
             android:theme="@style/DarkTheme.Dialog" />
 
-        <receiver android:name="com.csipsimple.service.HeadsetButtonReceiver" />
+        <receiver android:name=".service.HeadsetButtonReceiver" />
 
         <!-- Widget -->
         <receiver
-            android:name="com.csipsimple.widgets.AccountWidgetProvider"
+            android:name=".widgets.AccountWidgetProvider"
             android:icon="@drawable/appwidget_preview"
             android:label="@string/gadget_title" >
             <intent-filter>
@@ -479,7 +485,7 @@
         </receiver>
 
         <activity
-            android:name="com.csipsimple.widgets.AccountWidgetConfigure"
+            android:name=".widgets.AccountWidgetConfigure"
             android:theme="@style/DarkTheme" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
@@ -487,7 +493,7 @@
         </activity>
 
         <receiver
-            android:name="com.csipsimple.widgets.ShortcutWidgetProvider"
+            android:name=".widgets.ShortcutWidgetProvider"
             android:icon="@drawable/ic_ab_favourites_holo_dark"
             android:label="@string/csipsimple_shortcut" >
             <intent-filter>
@@ -500,7 +506,7 @@
         </receiver>
 
         <activity
-            android:name="com.csipsimple.widgets.ShortcutWidgetConfigure"
+            android:name=".widgets.ShortcutWidgetConfigure"
             android:theme="@style/DarkTheme" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
@@ -509,7 +515,7 @@
 
         <!-- Messages -->
         <activity
-            android:name="com.csipsimple.ui.messages.MessageActivity"
+            android:name=".ui.messages.MessageActivity"
             android:configChanges="orientation"
             android:launchMode="singleTop"
             android:theme="@style/DarkTheme"
@@ -518,7 +524,7 @@
         <!-- Embedded plugins -->
         <!-- Call handlers android:process=":telCallHandler" -->
         <receiver
-            android:name="com.csipsimple.plugins.telephony.CallHandler"
+            android:name=".plugins.telephony.CallHandler"
             android:permission="android.permission.PROCESS_OUTGOING_CALLS"
             android:process=":sipStack" >
             <intent-filter>
@@ -528,28 +534,28 @@
 
         <!-- Databases providers -->
         <provider
-            android:name="com.csipsimple.service.PreferenceProvider"
+            android:name=".service.PreferenceProvider"
             android:authorities="com.csipsimple.prefs"
             android:permission="android.permission.CONFIGURE_SIP" />
         <provider
-            android:name="com.csipsimple.db.DBProvider"
+            android:name=".db.DBProvider"
             android:authorities="com.csipsimple.db"
             android:permission="android.permission.CONFIGURE_SIP"
             android:process=":sipStack" />
 
         <!-- New UI -->
         <activity
-            android:name="com.csipsimple.ui.account.AccountsEditList"
+            android:name=".ui.account.AccountsEditList"
             android:label="@string/accounts"
             android:theme="@style/DarkTheme" />
         <activity
-            android:name="com.csipsimple.ui.account.AccountEdit"
+            android:name=".ui.account.AccountEdit"
             android:theme="@style/DarkTheme" />
 
         <!-- Extra codecs -->
 
         <receiver
-            android:name="com.csipsimple.plugins.codecs.ReceiverSILK"
+            android:name=".plugins.codecs.ReceiverSILK"
             android:exported="false" >
             <meta-data
                 android:name="lib_name"
@@ -567,66 +573,62 @@
 
         <!-- Extra wizard creation account activities -->
         <activity
-            android:name="com.csipsimple.wizards.impl.MondotalkCreate"
+            android:name=".wizards.impl.MondotalkCreate"
             android:theme="@style/DarkTheme" />
 
-
-        <!--OpenVPN-->
+        <!-- OpenVPN -->
 
         <activity
+            android:name="de.blinkt.openvpn.activities.DisconnectVPN"
             android:autoRemoveFromRecents="true"
             android:excludeFromRecents="true"
-            android:name="de.blinkt.openvpn.activities.DisconnectVPN"
             android:theme="@android:style/Theme.DeviceDefault.Light.Dialog" />
         <activity
             android:name="de.blinkt.openvpn.activities.LogWindow"
             android:allowTaskReparenting="true"
             android:label="@string/openvpn_log"
             android:launchMode="singleTask" />
+
         <service
             android:name="de.blinkt.openvpn.core.OpenVPNService"
-            android:permission="android.permission.BIND_VPN_SERVICE">
+            android:permission="android.permission.BIND_VPN_SERVICE" >
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
         </service>
-
         <service
-            tools:ignore="ExportedService"
-            android:name="de.blinkt.openvpn.api.ExternalOpenVPNService">
-
+            android:name="de.blinkt.openvpn.api.ExternalOpenVPNService"
+            tools:ignore="ExportedService" >
             <intent-filter>
                 <action android:name="de.blinkt.openvpn.api.IOpenVPNAPIService" />
             </intent-filter>
         </service>
 
-
-        <activity android:name="de.blinkt.openvpn.api.GrantPermissionsActivity">
+        <activity android:name="de.blinkt.openvpn.api.GrantPermissionsActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name="de.blinkt.openvpn.api.ConfirmDialog">
+        <activity android:name="de.blinkt.openvpn.api.ConfirmDialog" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
-        <receiver android:name="de.blinkt.openvpn.OnBootReceiver">
-            <intent-filter android:priority="999">
+        <receiver android:name="de.blinkt.openvpn.OnBootReceiver" >
+            <intent-filter android:priority="999" >
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-
             </intent-filter>
         </receiver>
+
         <activity
             android:name="de.blinkt.openvpn.LaunchVPN"
             android:excludeFromRecents="true"
             android:label="@string/vpn_launch_title"
             android:theme="@android:style/Theme.DeviceDefault.Light.Panel"
-            tools:ignore="ExportedActivity">
-
-        <intent-filter>
+            tools:ignore="ExportedActivity" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -639,10 +641,17 @@
             android:exported="true"
             android:grantUriPermissions="true"
             tools:ignore="ExportedContentProvider" />
-        <!--Test -->
-        <instrumentation android:targetPackage="com.csipsimple"
-                         android:name="android.test.InstrumentationTestRunner" />
+        <!-- Test -->
+        <instrumentation
+            android:name="android.test.InstrumentationTestRunner"
+            android:targetPackage="com.csipsimple" />
+
         <uses-library android:name="android.test.runner" />
+
+        <activity
+            android:name="com.augeo.ui.AboutActivity"
+            android:label="@string/title_activity_about" >
+        </activity>
     </application>
 
 </manifest>

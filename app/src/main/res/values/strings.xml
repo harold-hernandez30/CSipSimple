@@ -495,5 +495,9 @@
     <string name="Search">Search</string>
     <string name="lastdumpdate">(Last dump is %1$d:%2$dh old (%3$s))</string>
     <string name="acct_vpn_wait">Waiting for VPN</string>
+    <string name="title_activity_about">About OpenVPN for Android</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="help_menu_openvpn">Vpn Client</string>
 
 </resources>

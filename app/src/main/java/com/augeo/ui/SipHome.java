@@ -158,11 +158,12 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     public void onStatusChanged(final String message) {
         android.util.Log.d("OpenVPNMessage", message);
-        if(message.contains("SUCCESS")) {
+        if(message.contains(OpenVpnHelper.CONNECTED_SUCESS_STATUS)) {
             android.util.Log.d("VPN_CONNECTED", "Fetching data");
 //            fetchData();
             if(OpenVpnHelper.getInstance().isVpnConnected()) {
                 fetchData();
+                Toast.makeText(this, "Registering...", Toast.LENGTH_LONG).show();
             }
         }
     }

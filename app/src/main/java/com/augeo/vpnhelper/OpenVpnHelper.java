@@ -34,6 +34,7 @@ public class OpenVpnHelper implements Handler.Callback {
 
     public static final String ACTION_BROADCAST_VPN_CONNECTED = "action.vpnstatus.connected";
     public static final String ACTION_BROADCAST_VPN_PERMISSION_OK = "action.vpnpermission.ok";
+    public static final CharSequence CONNECTED_SUCESS_STATUS = "CONNECTED|SUCCESS";
 
     protected IOpenVPNAPIService mService = null;
     private Handler mHandler;
@@ -107,7 +108,7 @@ public class OpenVpnHelper implements Handler.Callback {
                 Message msg = Message.obtain(mHandler, MSG_UPDATE_STATE, state + "|" + message);
                 msg.sendToTarget();
 
-                if(message.contains("SUCCESS")) {
+                if(message.contains(CONNECTED_SUCESS_STATUS)) {
                     isVpnConnected = true;
                     android.util.Log.d("VPN_SUCCESS", "message contains success");
                 } else {
