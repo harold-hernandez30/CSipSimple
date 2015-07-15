@@ -10,6 +10,8 @@ import android.preference.PreferenceManager;
 public class OpenVpnConfigManager {
 
     private static final String KEY_BATTERY_MODE = "vpn_prefs_lifecycle";
+    private static final String KEY_VPN_USERNAME = "vpn_username";
+    private static final String KEY_VPN_PASSWORD = "vpn_password";
     private final SharedPreferences mPrefs;
     private static OpenVpnConfigManager sInstance;
 
@@ -33,5 +35,27 @@ public class OpenVpnConfigManager {
     public boolean isInBatterySavingMode() {
         return mPrefs.getBoolean(KEY_BATTERY_MODE, false);
     }
+
+    public void saveVpnPassword(String password) {
+        mPrefs.edit().putString(KEY_VPN_PASSWORD, password).apply();
+    }
+
+    public String getVpnPassword() {
+        return mPrefs.getString(KEY_VPN_PASSWORD, "");
+    }
+
+    public void saveVpnUsername(String username) {
+        mPrefs.edit().putString(KEY_VPN_USERNAME, username).apply();
+    }
+
+    public String getVpnUsername() {
+        return mPrefs.getString(KEY_VPN_USERNAME, "");
+    }
+
+    public boolean hasVpnAuthCredentials() {
+        return (!getVpnPassword().isEmpty() && !getVpnUsername().isEmpty());
+
+    }
+
 
 }

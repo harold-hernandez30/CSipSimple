@@ -31,15 +31,23 @@ import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.augeo.siphelper.sipprofilehelper.SipProfileBuilder;
+import com.augeo.siphelper.sipprofilehelper.SipProfileDatabaseHelper;
 import com.augeo.ui.SipHome;
+import com.augeo.vpnhelper.OpenVpnConfigManager;
+import com.augeo.webapihelper.AuGeoWebAPIManager;
+import com.augeo.webresponse.AuGeoDeviceResponse;
+import com.augeo.webresponse.DeviceProfile;
 import com.csipsimple.R;
 import com.augeo.vpnhelper.ConfigConverter;
 import com.augeo.vpnhelper.OpenVpnHelper;
+import com.csipsimple.api.SipProfile;
 import com.csipsimple.service.SipService;
 import com.csipsimple.utils.Compatibility;
 import com.csipsimple.utils.PreferencesWrapper;
@@ -51,6 +59,9 @@ import de.blinkt.openvpn.VpnProfile;
 import de.blinkt.openvpn.api.ConfirmDialog;
 import de.blinkt.openvpn.core.ConfigParser;
 import de.blinkt.openvpn.core.ProfileManager;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class AccountsEditList extends SherlockFragmentActivity implements OpenVpnHelper.StatusListener {
 
@@ -69,6 +80,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
             }
         }
     };
+    private SipProfile account;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,16 +93,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
         OpenVpnHelper.getInstance().registerStatusListener(AccountsEditList.this);
 
 
-        if (OpenVpnHelper.getInstance().hasPermission(this) && !OpenVpnHelper.getInstance().isBound()) {
-            new ConfigProfileTask(true).execute();
-        } else {
-            if (!OpenVpnHelper.getInstance().hasPermission(this)) {
-                Intent i = new Intent(AccountsEditList.this, ConfirmDialog.class);
-                Log.d("CONFIRM_DIALOG", "AccountsEditList Activity call");
-                startActivityForResult(i, CONFIRM_DIALOG);
-            }
-
-        }
+        startVpnSipRegisterProcess();
 
     }
 
@@ -153,7 +156,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
         if(resultCode == RESULT_OK) {
             switch (requestCode) {
                 case ANDROID_CONFIRM_DIALOG:
-                    new ConfigProfileTask(true).execute();
+                    startVpnSipRegisterProcess();
                     break;
 
                 case CONFIRM_DIALOG:
@@ -178,13 +181,43 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
                             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    SipHome.home.fetchData();
+//                                    SipHome.home.fetchData();
                                 }
                             })
                             .show();
                     break;
 
             }
+        }
+    }
+
+    private void startVpnSipRegisterProcess() {
+        if (OpenVpnConfigManager.getInstance().hasVpnAuthCredentials() && !OpenVpnHelper.getInstance().isBound()) {
+            new ConfigProfileTask(true).execute();
+        }  else {
+            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String deviceID = telephonyManager.getDeviceId();
+            AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfile(deviceID, new Callback<AuGeoDeviceResponse>() {
+                @Override
+                public void success(AuGeoDeviceResponse auGeoDeviceResponse, Response response) {
+                    Log.d("AuGeoWebAPIManager", "Account Edit LIst auGeoDeviceResponse: " + auGeoDeviceResponse);
+                    DeviceProfile deviceProfile = auGeoDeviceResponse.getResponse().get(0);
+
+                    OpenVpnConfigManager.getInstance().saveVpnUsername(deviceProfile.getVpnUsername());
+                    OpenVpnConfigManager.getInstance().saveVpnPassword(deviceProfile.getVpnPassword());
+
+                    account = SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
+                    new ConfigProfileTask(true).execute();
+
+
+
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    Log.d("AuGeoWebAPIManager", "error: " + error.getMessage());
+                }
+            });
         }
     }
 

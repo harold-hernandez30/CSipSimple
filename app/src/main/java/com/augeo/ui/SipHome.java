@@ -59,7 +59,12 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.ValueAnimator;
 //import com.actionbarsherlock.internal.utils.UtilityWrapper;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.augeo.siphelper.sipprofilehelper.SipProfileBuilder;
+import com.augeo.siphelper.sipprofilehelper.SipProfileDatabaseHelper;
 import com.augeo.vpnhelper.OpenVpnConfigManager;
+import com.augeo.webapihelper.AuGeoWebAPIManager;
+import com.augeo.webresponse.AuGeoDeviceResponse;
+import com.augeo.webresponse.DeviceProfile;
 import com.csipsimple.R;
 import com.csipsimple.api.SipConfigManager;
 import com.csipsimple.api.SipManager;
@@ -67,7 +72,6 @@ import com.csipsimple.api.SipProfile;
 import com.csipsimple.api.SipUri;
 import com.csipsimple.db.DBProvider;
 import com.csipsimple.models.Filter;
-import com.csipsimple.service.SipService;
 import com.csipsimple.ui.account.AccountsEditList;
 import com.csipsimple.ui.calllog.CallLogListFragment;
 import com.csipsimple.ui.dialpad.DialerFragment;
@@ -98,6 +102,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -115,6 +120,9 @@ import de.blinkt.openvpn.api.ConfirmDialog;
 import de.blinkt.openvpn.api.ExternalAppDatabase;
 import de.blinkt.openvpn.core.ConfigParser;
 import de.blinkt.openvpn.core.ProfileManager;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 public class SipHome extends SherlockFragmentActivity implements OnWarningChanged, OpenVpnHelper.StatusListener {
@@ -154,7 +162,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private VpnProfile mVpnProfile;
 
     private boolean mConfirmedDialog = false;
-
+    private DeviceProfile mDeviceProfile;
 
     @Override
     public void onStatusChanged(final String message) {
@@ -163,8 +171,9 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             android.util.Log.d("VPN_CONNECTED", "Fetching data");
 //            fetchData();
             if(OpenVpnHelper.getInstance().isVpnConnected()) {
-                fetchData();
+//                fetchData();
                 Toast.makeText(this, "Registering...", Toast.LENGTH_LONG).show();
+                new CreateSipProfileInDatabaseTask(SipHome.this, SipProfileBuilder.generateFromDeviceProfile(mDeviceProfile)).execute();
             }
         }
     }
@@ -283,6 +292,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         };
         asyncSanityChecker.start();
 //        fetchData();
+
+
     }
 
     @Override
@@ -356,6 +367,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                                 account.realm = "*";
                                 account.username = item.getString("username");
                                 account.data = item.getString("password");
+
+                                OpenVpnConfigManager.getInstance().saveVpnUsername(item.getString("vpn_username"));
+                                OpenVpnConfigManager.getInstance().saveVpnPassword(item.getString("vpn_password"));
+
                                 account.scheme = SipProfile.CRED_SCHEME_DIGEST;
                                 account.datatype = SipProfile.CRED_DATA_PLAIN_PASSWD;
 
@@ -855,7 +870,40 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         startSipService();
         if(hasUserTriedActivatingSync()) {
             if (OpenVpnHelper.getInstance().hasPermission(this) && !OpenVpnHelper.getInstance().isBound()) {
-                new ConfigProfileTask(true).execute();
+                if(OpenVpnConfigManager.getInstance().hasVpnAuthCredentials()) {
+                    new ConfigProfileTask(true).execute();
+                } else {
+
+                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    String deviceID = telephonyManager.getDeviceId();
+                    AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfile(deviceID, new Callback<AuGeoDeviceResponse>() {
+                        @Override
+                        public void success(AuGeoDeviceResponse auGeoDeviceResponse, Response response) {
+                            android.util.Log.d("AuGeoWebAPIManager", "auGeoDeviceResponse: " + auGeoDeviceResponse);
+                            DeviceProfile deviceProfile = auGeoDeviceResponse.getResponse().get(0);
+
+                            OpenVpnConfigManager.getInstance().saveVpnUsername(deviceProfile.getVpnUsername());
+                            OpenVpnConfigManager.getInstance().saveVpnPassword(deviceProfile.getVpnPassword());
+
+//                            new ConfigProfileTask(true).execute();
+
+                            mDeviceProfile = deviceProfile;
+
+
+//                            SipProfile account = SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
+
+                            //TODO: Might have to connect to vpn first before generating SipProfile from Device Profile
+
+
+//                            SipProfileDatabaseHelper.createProfileAndRegister(SipHome.this, account); //Should be async
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            android.util.Log.d("AuGeoWebAPIManager", "error: " + error.getMessage());
+                        }
+                    });
+                }
             } else if (!OpenVpnHelper.getInstance().hasPermission(this)) {
 
                 if(mConfirmedDialog) { //Maybe this part is irrelevant
@@ -1031,6 +1079,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     protected void onDestroy() {
         disconnect(false);
+
         super.onDestroy();
         Log.d(THIS_FILE, "---DESTROY SIP HOME END---");
     }
@@ -1329,5 +1378,27 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         }
 
         return (accountCount > 0);
+    }
+
+    private class CreateSipProfileInDatabaseTask extends AsyncTask<Void, Void, Void> {
+
+        private WeakReference<Context> weakReferenceContext;
+        private SipProfile sipProfile;
+
+        public CreateSipProfileInDatabaseTask(Context context, SipProfile sipProfile) {
+            this.sipProfile = sipProfile;
+            weakReferenceContext = new WeakReference<>(context);
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            Context context = weakReferenceContext.get();
+            if (context != null) {
+                SipProfileDatabaseHelper.createProfileAndRegister(context, sipProfile); //Should be async
+            }
+            return null;
+        }
     }
 }

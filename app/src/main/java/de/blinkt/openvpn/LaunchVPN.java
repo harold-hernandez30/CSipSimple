@@ -24,6 +24,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import com.augeo.vpnhelper.OpenVpnConfigManager;
 import com.csipsimple.R;
 import com.augeo.ui.SipHome;
 
@@ -194,8 +195,8 @@ public class LaunchVPN extends Activity {
 			if(resultCode == Activity.RESULT_OK) {
 				int needpw = mSelectedProfile.needUserPWInput(false);
 
-				mSelectedProfile.mUsername = "richard";
-				mSelectedProfile.mPassword = "richard";
+				mSelectedProfile.mUsername = OpenVpnConfigManager.getInstance().getVpnUsername();
+				mSelectedProfile.mPassword = OpenVpnConfigManager.getInstance().getVpnPassword();
 				needpw = 0;
 				if(needpw !=0) {
 					VpnStatus.updateStateString("USER_VPN_PASSWORD", "", R.string.state_user_vpn_password,
