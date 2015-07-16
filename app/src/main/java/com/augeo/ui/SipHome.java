@@ -56,14 +56,12 @@ import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ValueAnimator;
-//import com.actionbarsherlock.internal.utils.UtilityWrapper;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.augeo.siphelper.sipprofilehelper.SipProfileBuilder;
-import com.augeo.siphelper.sipprofilehelper.SipProfileDatabaseHelper;
+import com.augeo.helper.AppFlowCallback;
+import com.augeo.helper.AuGeoAppFlowManager;
 import com.augeo.vpnhelper.OpenVpnConfigManager;
-import com.augeo.webapihelper.AuGeoWebAPIManager;
-import com.augeo.webresponse.AuGeoDeviceResponse;
+import com.augeo.vpnhelper.OpenVpnHelper;
 import com.augeo.webresponse.DeviceProfile;
 import com.csipsimple.R;
 import com.csipsimple.api.SipConfigManager;
@@ -78,8 +76,6 @@ import com.csipsimple.ui.dialpad.DialerFragment;
 import com.csipsimple.ui.favorites.FavListFragment;
 import com.csipsimple.ui.help.Help;
 import com.csipsimple.ui.messages.ConversationsListFragment;
-import com.augeo.vpnhelper.ConfigConverter;
-import com.augeo.vpnhelper.OpenVpnHelper;
 import com.csipsimple.ui.warnings.WarningFragment;
 import com.csipsimple.ui.warnings.WarningUtils;
 import com.csipsimple.ui.warnings.WarningUtils.OnWarningChanged;
@@ -98,15 +94,6 @@ import com.csipsimple.wizards.WizardIface;
 import com.csipsimple.wizards.WizardUtils;
 import com.csipsimple.wizards.WizardUtils.WizardInfo;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -114,18 +101,22 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Handler;
+
 import de.blinkt.openvpn.LaunchVPN;
 import de.blinkt.openvpn.VpnProfile;
-import de.blinkt.openvpn.api.ConfirmDialog;
 import de.blinkt.openvpn.api.ExternalAppDatabase;
-import de.blinkt.openvpn.core.ConfigParser;
-import de.blinkt.openvpn.core.ProfileManager;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+
+//import com.actionbarsherlock.internal.utils.UtilityWrapper;
 
 
-public class SipHome extends SherlockFragmentActivity implements OnWarningChanged, OpenVpnHelper.StatusListener {
+public class SipHome extends SherlockFragmentActivity implements OnWarningChanged, AppFlowCallback {
 
     private static final int CONFIRM_DIALOG = 100;
     public static SipHome home;
@@ -146,7 +137,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     // protected static final int PICKUP_PHONE = 0;
     private static final int REQUEST_EDIT_DISTRIBUTION_ACCOUNT = 0;
-    private static final int REQUEST_VPN_SERVICE_PERMISSION = 101;
+    private static final int ANDROID_VPN_SERVICE_PERMISSION = 101;
 
     //private PreferencesWrapper prefWrapper;
     private PreferencesProviderWrapper prefProviderWrapper;
@@ -159,41 +150,31 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private Thread asyncSanityChecker;
     private Tab warningTab;
     private ObjectAnimator warningTabfadeAnim;
-    private VpnProfile mVpnProfile;
+    private AuGeoAppFlowManager mAugeoAppFlowManager;
 
-    private boolean mConfirmedDialog = false;
-    private DeviceProfile mDeviceProfile;
+    private android.os.Handler mHandler = new android.os.Handler();
 
     @Override
-    public void onStatusChanged(final String message) {
-        android.util.Log.d("OpenVPNMessage", message);
-        if(message.contains(OpenVpnHelper.CONNECTED_SUCESS_STATUS)) {
-            android.util.Log.d("VPN_CONNECTED", "Fetching data");
-//            fetchData();
-            if(OpenVpnHelper.getInstance().isVpnConnected()) {
-//                fetchData();
-                Toast.makeText(this, "Registering...", Toast.LENGTH_LONG).show();
-                new CreateSipProfileInDatabaseTask(SipHome.this, SipProfileBuilder.generateFromDeviceProfile(mDeviceProfile)).execute();
-            }
-        }
+    public void onVpnAuthCredentialsRecieved(VpnProfile sipProfile) {
+        android.util.Log.d("APP_FLOW", "onVpnAuthCredentialsRecieved");
     }
 
     @Override
-    public void onVpnServiceConnected(Intent intent, int requestCode) {
-
-        switch (requestCode) {
-            case OpenVpnHelper.ANDROID_REQUEST_PERMISSION:
-                startActivityForResult(intent, OpenVpnHelper.ANDROID_REQUEST_PERMISSION);
-                break;
-            case OpenVpnHelper.ICS_OPENVPN_PERMISSION:
-                startActivityForResult(intent, requestCode); //request for that permission
-                break;
-            case OpenVpnHelper.HACK_ANDROID_REQUEST_REINSTALL_FIX:
-//                intent = VpnService.prepare(this);
-//                startActivityForResult(intent, requestCode); //request for that permission
-                break;
-        }
+    public void onDeviceProfileReceived(DeviceProfile deviceProfile) {
+        android.util.Log.d("APP_FLOW", "onDeviceProfileReceived");
     }
+
+    @Override
+    public void onDeviceProfileRetreiveFailed() {
+        android.util.Log.d("APP_FLOW", "onDeviceProfileRetreiveFailed");
+    }
+
+    @Override
+    public void onVpnConnected() {
+        android.util.Log.d("APP_FLOW", "onVPNConnected");
+
+    }
+
 
     /**
      * Listener interface for Fragments accommodated in {@link ViewPager}
@@ -207,21 +188,26 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        OpenVpnConfigManager.init(this);
         ExternalAppDatabase extapps = new ExternalAppDatabase(this);
         extapps.addApp(getPackageName());
+        mAugeoAppFlowManager = new AuGeoAppFlowManager(this, mHandler);
         //prefWrapper = new PreferencesWrapper(this);
         Intent intent = VpnService.prepare(this);
-        if(intent != null && hasTriedOnceActivateAcc) {
-            startActivityForResult(intent, REQUEST_VPN_SERVICE_PERMISSION);
+        if (intent != null && hasTriedOnceActivateAcc) {
+            startActivityForResult(intent, ANDROID_VPN_SERVICE_PERMISSION);
+        }
+
+
+        if (intent == null) {
+            startAppFlow();
         }
 
         prefProviderWrapper = new PreferencesProviderWrapper(this);
 
         super.onCreate(savedInstanceState);
 
-        OpenVpnConfigManager.init(this);
         setContentView(R.layout.sip_home);
-        OpenVpnHelper.getInstance().registerStatusListener(SipHome.this);
 
         this.home = this;
         final ActionBar ab = getSupportActionBar();
@@ -294,6 +280,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 //        fetchData();
 
 
+    }
+
+    private void startAppFlow() {
+        mAugeoAppFlowManager.start();
     }
 
     @Override
@@ -858,9 +848,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         super.onResume();
         onForeground = true;
 
-
-
-
         prefProviderWrapper.setPreferenceBooleanValue(PreferencesWrapper.HAS_BEEN_QUIT, false);
 
         // Set visible the currently selected account
@@ -868,55 +855,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
         Log.d(THIS_FILE, "WE CAN NOW start SIP service");
         startSipService();
-        if(hasUserTriedActivatingSync()) {
-            if (OpenVpnHelper.getInstance().hasPermission(this) && !OpenVpnHelper.getInstance().isBound()) {
-                if(OpenVpnConfigManager.getInstance().hasVpnAuthCredentials()) {
-                    new ConfigProfileTask(true).execute();
-                } else {
-
-                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                    String deviceID = telephonyManager.getDeviceId();
-                    AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfile(deviceID, new Callback<AuGeoDeviceResponse>() {
-                        @Override
-                        public void success(AuGeoDeviceResponse auGeoDeviceResponse, Response response) {
-                            android.util.Log.d("AuGeoWebAPIManager", "auGeoDeviceResponse: " + auGeoDeviceResponse);
-                            DeviceProfile deviceProfile = auGeoDeviceResponse.getResponse().get(0);
-
-                            OpenVpnConfigManager.getInstance().saveVpnUsername(deviceProfile.getVpnUsername());
-                            OpenVpnConfigManager.getInstance().saveVpnPassword(deviceProfile.getVpnPassword());
-
-//                            new ConfigProfileTask(true).execute();
-
-                            mDeviceProfile = deviceProfile;
-
-
-//                            SipProfile account = SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
-
-                            //TODO: Might have to connect to vpn first before generating SipProfile from Device Profile
-
-
-//                            SipProfileDatabaseHelper.createProfileAndRegister(SipHome.this, account); //Should be async
-                        }
-
-                        @Override
-                        public void failure(RetrofitError error) {
-                            android.util.Log.d("AuGeoWebAPIManager", "error: " + error.getMessage());
-                        }
-                    });
-                }
-            } else if (!OpenVpnHelper.getInstance().hasPermission(this)) {
-
-                if(mConfirmedDialog) { //Maybe this part is irrelevant
-                    Intent intent = new Intent(this, ConfirmDialog.class);
-                    android.util.Log.d("CONFIRM_DIALOG", "AccountsEditList Activity call");
-                    startActivityForResult(intent, CONFIRM_DIALOG);
-                } else {
-
-                }
-
-
-            }
-        }
         applyTheme();
     }
 
@@ -1202,24 +1140,15 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             BackupWrapper.getInstance(this).dataChanged();
         }
 
-        if(resultCode == RESULT_OK) {
-            mConfirmedDialog = true;
+        if (resultCode == RESULT_OK) {
             switch (requestCode) {
-                case CONFIRM_DIALOG:
-                    if (mVpnProfile != null) {
-                        startVPN(mVpnProfile);
-                    } else {
-                        new ConfigProfileTask(true).execute();
-                    }
-                    break;
-                case REQUEST_VPN_SERVICE_PERMISSION:
-
-                    new ConfigProfileTask(true).execute();
+                case ANDROID_VPN_SERVICE_PERMISSION:
+                    startAppFlow();
                     break;
             }
 
         } else if (resultCode == RESULT_CANCELED) {
-            mConfirmedDialog = false;
+//            mConfirmedDialog = false;
         }
         if (requestCode == OpenVpnHelper.ICS_OPENVPN_PERMISSION) {
             OpenVpnHelper.getInstance().registerToServiceCallback();
@@ -1310,50 +1239,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         applyWarning(warnKey, false);
     }
 
-    private class ConfigProfileTask extends AsyncTask<Void, Void, VpnProfile> {
-
-        private boolean shouldLaunchVpn;
-
-        public ConfigProfileTask(boolean shouldLaunchVpn) {
-
-            this.shouldLaunchVpn = shouldLaunchVpn;
-        }
-
-        @Override
-        protected VpnProfile doInBackground(Void... voids) {
-            ConfigConverter configConverter = new ConfigConverter(SipHome.this);
-            try {
-                return configConverter.doImportFromAsset("augeo_android.ovpn");
-            } catch (IOException e) {
-                e.printStackTrace();
-                android.util.Log.d("OpenVPNMessage", e.getMessage());
-                return null;
-            } catch (ConfigParser.ConfigParseError configParseError) {
-                configParseError.printStackTrace();
-                android.util.Log.d("OpenVPNMessage", configParseError.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(VpnProfile vpnProfile) {
-            super.onPostExecute(vpnProfile);
-
-            try {
-                OpenVpnHelper.getInstance().init(SipHome.this, SipHome.this);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-            ProfileManager.getInstance(SipHome.this).saveProfile(SipHome.this, vpnProfile);
-            mVpnProfile = vpnProfile;
-
-            if (shouldLaunchVpn) {
-                startVPN(vpnProfile);
-            }
-
-        }
-    }
-
     private void startVPN(VpnProfile profile) {
         Intent intent = new Intent(this, LaunchVPN.class);
         intent.putExtra(LaunchVPN.EXTRA_KEY, profile.getUUID().toString());
@@ -1380,25 +1265,4 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         return (accountCount > 0);
     }
 
-    private class CreateSipProfileInDatabaseTask extends AsyncTask<Void, Void, Void> {
-
-        private WeakReference<Context> weakReferenceContext;
-        private SipProfile sipProfile;
-
-        public CreateSipProfileInDatabaseTask(Context context, SipProfile sipProfile) {
-            this.sipProfile = sipProfile;
-            weakReferenceContext = new WeakReference<>(context);
-
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            Context context = weakReferenceContext.get();
-            if (context != null) {
-                SipProfileDatabaseHelper.createProfileAndRegister(context, sipProfile); //Should be async
-            }
-            return null;
-        }
-    }
 }

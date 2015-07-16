@@ -34,7 +34,7 @@ public class OpenVpnHelper implements Handler.Callback {
 
     public static final String ACTION_BROADCAST_VPN_CONNECTED = "action.vpnstatus.connected";
     public static final String ACTION_BROADCAST_VPN_PERMISSION_OK = "action.vpnpermission.ok";
-    public static final CharSequence CONNECTED_SUCESS_STATUS = "CONNECTED|SUCCESS";
+    public static final CharSequence CONNECTED_SUCESS_STATUS = "SUCCESS";
 
     protected IOpenVPNAPIService mService = null;
     private Handler mHandler;
@@ -58,8 +58,10 @@ public class OpenVpnHelper implements Handler.Callback {
     private boolean isVpnConnected = false;
 
     public interface StatusListener {
-        void onStatusChanged(String message);
-        void onVpnServiceConnected(Intent intent, int requestCode);
+        void onVpnConnected();
+
+        void onVpnServiceConnected(Intent i, int status);
+        void onVpnFailed();
     }
     private OpenVpnHelper() {}
 
@@ -111,15 +113,12 @@ public class OpenVpnHelper implements Handler.Callback {
                 if(message.contains(CONNECTED_SUCESS_STATUS)) {
                     isVpnConnected = true;
                     android.util.Log.d("VPN_SUCCESS", "message contains success");
+                    mListener.onVpnConnected();
                 } else {
 
                     android.util.Log.d("VPN_SUCCESS", "other messages: " + message);
                 }
 
-                if(mListener != null) {
-                    mListener.onStatusChanged("uuid: " + uuid + ", state: " + state + ", message: " + message + ", level: " + level);
-
-                }
 
             }
 
@@ -258,7 +257,6 @@ public class OpenVpnHelper implements Handler.Callback {
                 if(message.toLowerCase().contains("CONNECTED")) {
                     isVpnConnected = true;
                 }
-                mListener.onStatusChanged(message);
             }
         }
         return true;

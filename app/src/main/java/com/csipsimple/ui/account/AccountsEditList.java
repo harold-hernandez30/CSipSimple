@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -37,6 +38,8 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.augeo.helper.AppFlowCallback;
+import com.augeo.helper.AuGeoAppFlowManager;
 import com.augeo.siphelper.sipprofilehelper.SipProfileBuilder;
 import com.augeo.siphelper.sipprofilehelper.SipProfileDatabaseHelper;
 import com.augeo.ui.SipHome;
@@ -63,58 +66,45 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class AccountsEditList extends SherlockFragmentActivity implements OpenVpnHelper.StatusListener {
+public class AccountsEditList extends SherlockFragmentActivity implements OpenVpnHelper.StatusListener, AppFlowCallback {
 
     private static final int CONFIRM_DIALOG = 100;
     private static final int ANDROID_CONFIRM_DIALOG = 101;
     private VpnProfile mVpnProfile;
-    private BroadcastReceiver mConfirmDialogReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null && intent.getAction() == OpenVpnHelper.ACTION_BROADCAST_VPN_PERMISSION_OK) {
-                if (mVpnProfile != null) {
-                    startVPN(mVpnProfile);
-                } else {
-                    new ConfigProfileTask(true).execute();
-                }
-            }
-        }
-    };
     private SipProfile account;
+    private AuGeoAppFlowManager mAuGeoFlowManager;
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        launchVpnPermissionDialog();
+        mAuGeoFlowManager = new AuGeoAppFlowManager(this, handler);
+        mAuGeoFlowManager.registerAppFlowCallbackListener(this);
+        Intent intent = VpnService.prepare(this);
+        if (intent != null) {
+            startActivityForResult(intent, ANDROID_CONFIRM_DIALOG);
+        } else {
+            mAuGeoFlowManager.start();
+        }
         setContentView(R.layout.accounts_view);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        OpenVpnHelper.getInstance().registerStatusListener(AccountsEditList.this);
-
-
-        startVpnSipRegisterProcess();
 
     }
 
     private void launchVpnPermissionDialog() {
-        Intent intent = VpnService.prepare(this);
-        if(intent != null) {
-            startActivityForResult(intent, ANDROID_CONFIRM_DIALOG);
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mConfirmDialogReceiver, new IntentFilter(OpenVpnHelper.ACTION_BROADCAST_VPN_PERMISSION_OK));
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mConfirmDialogReceiver);
     }
 
     @Override
@@ -126,14 +116,25 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
         return false;
     }
 
-    @Override
-    public void onStatusChanged(String message) {
 
-        if (message.contains(OpenVpnHelper.CONNECTED_SUCESS_STATUS)) {
-            Intent intent = new Intent();
-            intent.setAction(OpenVpnHelper.ACTION_BROADCAST_VPN_CONNECTED);
-            sendBroadcast(intent);
-        }
+    @Override
+    public void onVpnAuthCredentialsRecieved(VpnProfile sipProfile) {
+
+    }
+
+    @Override
+    public void onDeviceProfileReceived(DeviceProfile deviceProfile) {
+
+    }
+
+    @Override
+    public void onDeviceProfileRetreiveFailed() {
+
+    }
+
+    @Override
+    public void onVpnConnected() {
+
     }
 
     @Override
@@ -150,21 +151,18 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
     }
 
     @Override
+    public void onVpnFailed() {
+
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case ANDROID_CONFIRM_DIALOG:
-                    startVpnSipRegisterProcess();
-                    break;
-
-                case CONFIRM_DIALOG:
-                    if (mVpnProfile != null) {
-                        startVPN(mVpnProfile);
-                    } else {
-                        new ConfigProfileTask(true).execute();
-                    }
+                    mAuGeoFlowManager.start();
                     break;
             }
         } else if (resultCode == RESULT_CANCELED) {
@@ -194,7 +192,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
     private void startVpnSipRegisterProcess() {
         if (OpenVpnConfigManager.getInstance().hasVpnAuthCredentials() && !OpenVpnHelper.getInstance().isBound()) {
             new ConfigProfileTask(true).execute();
-        }  else {
+        } else {
             TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             String deviceID = telephonyManager.getDeviceId();
             AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfile(deviceID, new Callback<AuGeoDeviceResponse>() {
@@ -208,7 +206,6 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
 
                     account = SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
                     new ConfigProfileTask(true).execute();
-
 
 
                 }
