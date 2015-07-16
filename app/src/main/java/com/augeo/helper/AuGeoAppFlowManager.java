@@ -68,8 +68,10 @@ public class AuGeoAppFlowManager {
 
 
                             try {
-                                OpenVpnHelper.getInstance().init(mContext, new OpenVPNStatusListener(deviceProfile));
-                                startVPN(vpnProfile);
+                                if(!OpenVpnHelper.getInstance().isVpnConnected()) {
+                                    OpenVpnHelper.getInstance().init(mContext, new OpenVPNStatusListener(deviceProfile));
+                                    startVPN(vpnProfile);
+                                }
                             } catch (RemoteException e) {
                                 e.printStackTrace();
                             }
@@ -92,19 +94,6 @@ public class AuGeoAppFlowManager {
         TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         final String deviceID = telephonyManager.getDeviceId();
         AuGeoDeviceResponse deviceResponse = AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfile(deviceID);
-
-        AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfile(deviceID, new Callback<AuGeoDeviceResponse>() {
-            @Override
-            public void success(AuGeoDeviceResponse auGeoDeviceResponse, Response response) {
-
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-
-            }
-        });
-
         DeviceProfile deviceProfile = null;
         if (deviceResponse != null && deviceResponse.getResponse() != null && !deviceResponse.getResponse().isEmpty()) {
             deviceProfile = deviceResponse.getResponse().get(0);

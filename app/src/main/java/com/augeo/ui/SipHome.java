@@ -23,7 +23,6 @@ package com.augeo.ui;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,22 +33,17 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.VpnService;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -67,9 +61,6 @@ import com.csipsimple.R;
 import com.csipsimple.api.SipConfigManager;
 import com.csipsimple.api.SipManager;
 import com.csipsimple.api.SipProfile;
-import com.csipsimple.api.SipUri;
-import com.csipsimple.db.DBProvider;
-import com.csipsimple.models.Filter;
 import com.csipsimple.ui.account.AccountsEditList;
 import com.csipsimple.ui.calllog.CallLogListFragment;
 import com.csipsimple.ui.dialpad.DialerFragment;
@@ -90,26 +81,11 @@ import com.csipsimple.utils.Theme;
 import com.csipsimple.utils.UriUtils;
 import com.csipsimple.utils.backup.BackupWrapper;
 import com.csipsimple.wizards.BasePrefsWizard;
-import com.csipsimple.wizards.WizardIface;
-import com.csipsimple.wizards.WizardUtils;
 import com.csipsimple.wizards.WizardUtils.WizardInfo;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.logging.Handler;
 
-import de.blinkt.openvpn.LaunchVPN;
 import de.blinkt.openvpn.VpnProfile;
 import de.blinkt.openvpn.api.ExternalAppDatabase;
 
@@ -187,21 +163,24 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        Intent intent = VpnService.prepare(this);
+        if (intent != null && hasUserTriedActivatingSync()) {
+            startActivityForResult(intent, ANDROID_VPN_SERVICE_PERMISSION);
+        }
         OpenVpnConfigManager.init(this);
         ExternalAppDatabase extapps = new ExternalAppDatabase(this);
         extapps.addApp(getPackageName());
         mAugeoAppFlowManager = new AuGeoAppFlowManager(this, mHandler);
-        //prefWrapper = new PreferencesWrapper(this);
-        Intent intent = VpnService.prepare(this);
-        if (intent != null && hasTriedOnceActivateAcc) {
-            startActivityForResult(intent, ANDROID_VPN_SERVICE_PERMISSION);
-        }
+        mAugeoAppFlowManager.registerAppFlowCallbackListener(this);
+
+
 
 
         if (intent == null) {
             startAppFlow();
         }
+        //prefWrapper = new PreferencesWrapper(this);
+
 
         prefProviderWrapper = new PreferencesProviderWrapper(this);
 
@@ -297,168 +276,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         super.onStart();
     }
 
-    public void fetchData() {
 
-        new AsyncTask<Object, Object, Object>() {
-
-            @Override
-            protected Object doInBackground(Object... arg0) {
-
-                try {
-                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                    final String deviceID = telephonyManager.getDeviceId();
-
-                    String data = GET("http://portal.septrivium.com/api.php?EIN=" + deviceID);
-
-                    if (data != null && !TextUtils.isEmpty(data)) {
-                        JSONObject device = new JSONObject(data);
-
-                        JSONArray deviceList = device.getJSONArray("devices");
-
-                        SipHome.this.getContentResolver().delete(SipProfile.ACCOUNT_URI, null, null);
-
-                        if (deviceList.length() > 0) {
-                            for (int i = 0; i < deviceList.length(); i++) {
-
-                                JSONObject item = deviceList.getJSONObject(i);
-                                String wizardId = "SIP2SIP";
-
-                                //					        onClickAddAccount();
-
-                                WizardInfo wizardInfo = WizardUtils.getWizardClass(wizardId);
-                                WizardIface wizard = null;
-
-                                try {
-                                    wizard = (WizardIface) wizardInfo.classObject.newInstance();
-                                } catch (Exception e) {
-                                    Log.e(THIS_FILE, "Can't access wizard class", e);
-                                }
-
-                                //							BasePrefsWizard basePref = new BasePrefsWizard();
-                                //							Intent basePref = new Intent();
-                                //
-                                //							basePref.setClass(getActivity(), BasePrefsWizard.class);
-
-                                //							PreferencesWrapper prefs = new PreferencesWrapper(basePref.ge.getClass().getApplicationContext());
-
-                                long accountID = -1;
-                                SipProfile account = SipProfile.getProfileFromDbId(SipHome.home.getApplicationContext(), accountID, DBProvider.ACCOUNT_FULL_PROJECTION);
-                                account.display_name = item.getString("username");
-
-
-                                account.acc_id = "<sip:"
-                                        + SipUri.encodeUser(account.display_name) + "@" + item.getString("server") + ">";
-
-                                String regUri = "sip:" + item.getString("server");
-                                account.reg_uri = regUri;
-                                account.proxies = new String[]{regUri};
-
-
-                                account.realm = "*";
-                                account.username = item.getString("username");
-                                account.data = item.getString("password");
-
-                                OpenVpnConfigManager.getInstance().saveVpnUsername(item.getString("vpn_username"));
-                                OpenVpnConfigManager.getInstance().saveVpnPassword(item.getString("vpn_password"));
-
-                                account.scheme = SipProfile.CRED_SCHEME_DIGEST;
-                                account.datatype = SipProfile.CRED_DATA_PLAIN_PASSWD;
-
-                                account.reg_timeout = 5 * 1000;
-                                account.transport = SipProfile.TRANSPORT_TCP;
-
-
-                                //							System.out.println("ACCOUNT ACC ID: " + account.acc_id);
-                                //							System.out.println("ACCOUNT ID: " + account.id);
-
-                                if (account.id == SipProfile.INVALID_ID) {
-                                    // This account does not exists yet
-                                    //							    prefs.startEditing();
-                                    //								wizard.setDefaultParams(prefs);
-                                    //								prefs.endEditing();
-                                    SipHome.this.applyNewAccountDefault(account);
-                                    Uri uri = SipHome.home.getContentResolver().insert(SipProfile.ACCOUNT_URI, account.getDbContentValues());
-
-                                    // After insert, add filters for this wizard
-                                    account.id = ContentUris.parseId(uri);
-                                    List<Filter> filters = wizard.getDefaultFilters(account);
-                                    if (filters != null) {
-                                        for (Filter filter : filters) {
-                                            // Ensure the correct id if not done by the wizard
-                                            filter.account = (int) account.id;
-                                            SipHome.home.getContentResolver().insert(SipManager.FILTER_URI, filter.getDbContentValues());
-                                        }
-                                    }
-
-                                }
-                            }
-                        } else {
-                            runOnUiThread(new Runnable() {
-                                public void run() {
-                                    Toast msg = Toast.makeText(SipHome.this, "Sorry, Device ID " + deviceID + " is not yet registered", Toast.LENGTH_LONG);
-                                    msg.setGravity(Gravity.CENTER, 0, 0);
-                                    msg.show();
-                                }
-                            });
-                        }
-
-                    }
-                } catch (Exception e) {
-                }
-                return arg0;
-
-            }
-        }.execute(null, null, null);
-    }
-
-
-    private void applyNewAccountDefault(SipProfile account) {
-        if (account.use_rfc5626) {
-            if (TextUtils.isEmpty(account.rfc5626_instance_id)) {
-                String autoInstanceId = (UUID.randomUUID()).toString();
-                account.rfc5626_instance_id = "<urn:uuid:" + autoInstanceId + ">";
-            }
-        }
-    }
-
-
-    public static String GET(String url) {
-        InputStream inputStream = null;
-        String result = "";
-        try {
-
-            // create HttpClient
-            HttpClient httpclient = new DefaultHttpClient();
-
-            // make GET request to the given URL
-            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-
-            // receive response as inputStream
-            inputStream = httpResponse.getEntity().getContent();
-
-            // convert inputstream to string
-            if (inputStream != null)
-
-                try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"), 8);
-                    StringBuilder sb = new StringBuilder();
-                    String line = null;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    inputStream.close();
-                    result = sb.toString();
-                } catch (Exception e) {
-                    return null;
-                }
-            else
-                result = "Did not work!";
-
-        } catch (Exception e) {
-            //	    Log.d("InputStream", e.getLocalizedMessage());
-        }
-        return result;
-    }
 
     /**
      * This is a helper class that implements the management of tabs and all
@@ -1148,13 +966,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             }
 
         } else if (resultCode == RESULT_CANCELED) {
-//            mConfirmedDialog = false;
         }
-        if (requestCode == OpenVpnHelper.ICS_OPENVPN_PERMISSION) {
-            OpenVpnHelper.getInstance().registerToServiceCallback();
-        }
-
-        onVpnResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -1230,20 +1042,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         }
     }
 
-    public void onVpnResult(int requestCode, int resultCode, Intent data) {
-//        OpenVpnHelper.getInstance().onActivityResult(requestCode, resultCode, data);
-    }
 
     @Override
     public void onWarningRemoved(String warnKey) {
         applyWarning(warnKey, false);
-    }
-
-    private void startVPN(VpnProfile profile) {
-        Intent intent = new Intent(this, LaunchVPN.class);
-        intent.putExtra(LaunchVPN.EXTRA_KEY, profile.getUUID().toString());
-        intent.setAction(Intent.ACTION_MAIN);
-        startActivity(intent);
     }
 
 
