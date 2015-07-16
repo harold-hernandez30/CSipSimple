@@ -138,6 +138,11 @@ public class AccountsEditList extends SherlockFragmentActivity implements OpenVp
     }
 
     @Override
+    public void onSipAccountSavedToDatabase(SipProfile sipProfile) {
+
+    }
+
+    @Override
     public void onVpnServiceConnected(Intent intent, int requestCode) {
 
         switch (requestCode) {

@@ -44,6 +44,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -70,6 +71,7 @@ import com.csipsimple.ui.messages.ConversationsListFragment;
 import com.csipsimple.ui.warnings.WarningFragment;
 import com.csipsimple.ui.warnings.WarningUtils;
 import com.csipsimple.ui.warnings.WarningUtils.OnWarningChanged;
+import com.csipsimple.utils.AccountListUtils;
 import com.csipsimple.utils.Compatibility;
 import com.csipsimple.utils.CustomDistribution;
 import com.csipsimple.utils.Log;
@@ -129,28 +131,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private AuGeoAppFlowManager mAugeoAppFlowManager;
 
     private android.os.Handler mHandler = new android.os.Handler();
-
-    @Override
-    public void onVpnAuthCredentialsRecieved(VpnProfile sipProfile) {
-        android.util.Log.d("APP_FLOW", "onVpnAuthCredentialsRecieved");
-    }
-
-    @Override
-    public void onDeviceProfileReceived(DeviceProfile deviceProfile) {
-        android.util.Log.d("APP_FLOW", "onDeviceProfileReceived");
-    }
-
-    @Override
-    public void onDeviceProfileRetreiveFailed() {
-        android.util.Log.d("APP_FLOW", "onDeviceProfileRetreiveFailed");
-    }
-
-    @Override
-    public void onVpnConnected() {
-        android.util.Log.d("APP_FLOW", "onVPNConnected");
-
-    }
-
 
     /**
      * Listener interface for Fragments accommodated in {@link ViewPager}
@@ -274,6 +254,38 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+
+    @Override
+    public void onVpnAuthCredentialsRecieved(VpnProfile sipProfile) {
+        android.util.Log.d("APP_FLOW", "onVpnAuthCredentialsRecieved");
+    }
+
+    @Override
+    public void onDeviceProfileReceived(DeviceProfile deviceProfile) {
+        android.util.Log.d("APP_FLOW", "onDeviceProfileReceived");
+    }
+
+    @Override
+    public void onDeviceProfileRetreiveFailed() {
+        android.util.Log.d("APP_FLOW", "onDeviceProfileRetreiveFailed");
+    }
+
+    @Override
+    public void onVpnConnected() {
+        android.util.Log.d("APP_FLOW", "onVPNConnected");
+        Toast.makeText(this, "Connected to VPN", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onSipAccountSavedToDatabase(SipProfile sipProfile) {
+        android.util.Log.d("APP_FLOW", "onSipAccountSavedToDatabase");
+
+        AccountListUtils.AccountStatusDisplay accountStatusDisplay = AccountListUtils.getAccountDisplay(this, sipProfile.id);
+
+        Toast.makeText(this, "Registering...", Toast.LENGTH_LONG).show();
+
     }
 
 

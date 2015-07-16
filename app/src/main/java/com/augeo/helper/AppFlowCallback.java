@@ -18,4 +18,6 @@ public interface AppFlowCallback {
 
     void onVpnConnected();
 
+    void onSipAccountSavedToDatabase(SipProfile sipProfile);
+
 }

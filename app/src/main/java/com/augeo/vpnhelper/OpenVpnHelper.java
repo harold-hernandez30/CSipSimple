@@ -61,7 +61,9 @@ public class OpenVpnHelper implements Handler.Callback {
         void onVpnConnected();
 
         void onVpnServiceConnected(Intent i, int status);
+
         void onVpnFailed();
+
     }
     private OpenVpnHelper() {}
 

@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.augeo.siphelper.sipprofilehelper.SipProfileBuilder;
 import com.augeo.siphelper.sipprofilehelper.SipProfileDatabaseHelper;
@@ -18,6 +19,7 @@ import com.augeo.webapihelper.AuGeoWebAPIManager;
 import com.augeo.webresponse.AuGeoDeviceResponse;
 import com.augeo.webresponse.DeviceProfile;
 import com.csipsimple.api.SipProfile;
+import com.csipsimple.utils.AccountListUtils;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -69,7 +71,7 @@ public class AuGeoAppFlowManager {
 
                             try {
                                 if(!OpenVpnHelper.getInstance().isVpnConnected()) {
-                                    OpenVpnHelper.getInstance().init(mContext, new OpenVPNStatusListener(deviceProfile));
+                                    OpenVpnHelper.getInstance().init(mContext, new OpenVPNStatusListener(deviceProfile, mListener));
                                     startVPN(vpnProfile);
                                 }
                             } catch (RemoteException e) {
@@ -121,15 +123,21 @@ public class AuGeoAppFlowManager {
     private class OpenVPNStatusListener implements OpenVpnHelper.StatusListener {
 
         private DeviceProfile deviceProfile;
+        private AppFlowCallback listener;
 
-        public OpenVPNStatusListener(DeviceProfile deviceProfile) {
+        public OpenVPNStatusListener(DeviceProfile deviceProfile, AppFlowCallback listener) {
             this.deviceProfile = deviceProfile;
+            this.listener = listener;
         }
 
         @Override
         public void onVpnConnected() {
             Log.d("APP_FLOW", "Creating profile and register");
-            SipProfileDatabaseHelper.createProfileAndRegister(mContext,  SipProfileBuilder.generateFromDeviceProfile(deviceProfile));
+            listener.onVpnConnected();
+            SipProfile sipAccount =  SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
+            SipProfileDatabaseHelper.createProfileAndRegister(mContext,sipAccount);
+            listener.onSipAccountSavedToDatabase(sipAccount);
+
 
         }
 
