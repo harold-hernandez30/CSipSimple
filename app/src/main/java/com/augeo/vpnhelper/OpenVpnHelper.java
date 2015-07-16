@@ -219,6 +219,7 @@ public class OpenVpnHelper implements Handler.Callback {
     public void unbindService(Context context) {
         if(mConnection != null) {
             context.unbindService(mConnection);
+            mListener = null;
         }
     }
 

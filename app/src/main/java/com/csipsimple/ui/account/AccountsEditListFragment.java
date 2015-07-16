@@ -145,6 +145,14 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(connection != null) {
+            getActivity().unbindService(connection);
+        }
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ListView lv = getListView();

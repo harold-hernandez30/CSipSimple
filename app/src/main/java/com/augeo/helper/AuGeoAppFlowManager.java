@@ -62,13 +62,9 @@ public class AuGeoAppFlowManager {
                 OpenVpnConfigManager.getInstance().saveVpnPassword(deviceProfile.getVpnPassword());
                 try {
                     final VpnProfile vpnProfile = new ConfigConverter(mContext).doImportFromAsset("augeo_android.ovpn");
-
-
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-
-
                             try {
                                 if(!OpenVpnHelper.getInstance().isVpnConnected()) {
                                     OpenVpnHelper.getInstance().init(mContext, new OpenVPNStatusListener(deviceProfile, mListener));
@@ -95,7 +91,9 @@ public class AuGeoAppFlowManager {
     private DeviceProfile registerDeviceProfileReceived() {
         TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         final String deviceID = telephonyManager.getDeviceId();
-        AuGeoDeviceResponse deviceResponse = AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfile(deviceID);
+        //DEBUG FOR EMULATOR ONLY: 357441053465113
+
+        AuGeoDeviceResponse deviceResponse = AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfile("357441053465113");
         DeviceProfile deviceProfile = null;
         if (deviceResponse != null && deviceResponse.getResponse() != null && !deviceResponse.getResponse().isEmpty()) {
             deviceProfile = deviceResponse.getResponse().get(0);
