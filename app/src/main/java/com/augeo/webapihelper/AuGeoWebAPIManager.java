@@ -2,7 +2,9 @@ package com.augeo.webapihelper;
 
 import com.augeo.webresponse.AuGeoDeviceResponse;
 
+import retrofit.ErrorHandler;
 import retrofit.RestAdapter;
+import retrofit.RetrofitError;
 
 /**
  * Created by harold on 7/16/2015.
@@ -19,11 +21,13 @@ public class AuGeoWebAPIManager {
         if(mRestAdapter == null || mWebService == null) {
             mRestAdapter = new RestAdapter.Builder()
                     .setEndpoint("http://portal.septrivium.com")
+                    .setErrorHandler(new RetrofitErrorHandler())
                     .build();
 
             mRestAdapter.setLogLevel(RestAdapter.LogLevel.FULL);
 
             mWebService = mRestAdapter.create(AuGeoWebService.class);
+
         }
     }
 

@@ -60,9 +60,16 @@ public class AuGeoAppFlowManager {
             @Override
             public void run() {
 
-                final DeviceProfile deviceProfile = registerDeviceProfileReceived();
+                final DeviceProfile deviceProfile;
+                try {
+                    deviceProfile = registerDeviceProfileReceived();
+                    if(deviceProfile == null) return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    //TODO: Add specific error message to return to the mListener. Like "Network error."
+                    return;
+                }
 
-                if(deviceProfile == null) return;
 
                 OpenVpnConfigManager.getInstance().saveVpnUsername(deviceProfile.getVpnUsername());
                 OpenVpnConfigManager.getInstance().saveVpnPassword(deviceProfile.getVpnPassword());
@@ -94,7 +101,7 @@ public class AuGeoAppFlowManager {
     }
 
 
-    private DeviceProfile registerDeviceProfileReceived() {
+    private DeviceProfile registerDeviceProfileReceived() throws Exception{
         TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         final String deviceID = telephonyManager.getDeviceId();
         //DEBUG FOR EMULATOR ONLY: 357441053465113
