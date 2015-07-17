@@ -33,16 +33,27 @@
             android:layout_height="match_parent"
             android:drawSelectorOnTop="false" />
 
-        <Button
-            android:id="@android:id/empty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:drawableLeft="@android:drawable/ic_menu_add"
-            android:drawablePadding="10dip"
-            android:gravity="center"
-            android:text="@string/add_account"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+        <!--<Button-->
+            <!--android:id="@android:id/empty"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:drawableLeft="@android:drawable/ic_menu_add"-->
+            <!--android:drawablePadding="10dip"-->
+            <!--android:gravity="center"-->
+            <!--android:text="@string/add_account"-->
+            <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
+
+        <!--<TextView-->
+            <!--android:id="@android:id/empty"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:drawableLeft="@android:drawable/ic_menu_add"-->
+            <!--android:drawablePadding="10dip"-->
+            <!--android:gravity="center"-->
+            <!--android:text="@string/add_account"-->
+            <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
     </FrameLayout>
 
 </FrameLayout>

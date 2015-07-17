@@ -22,7 +22,7 @@
 package com.csipsimple.utils;
 
 public class Log {
-	private static int logLevel = 1;
+	private static int logLevel = 5;
 	
 	/**
 	 * Change current logging level

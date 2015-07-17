@@ -1,7 +1,10 @@
 package com.augeo.helper;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -20,6 +23,7 @@ import com.augeo.webresponse.AuGeoDeviceResponse;
 import com.augeo.webresponse.DeviceProfile;
 import com.csipsimple.api.SipProfile;
 import com.csipsimple.utils.AccountListUtils;
+import com.csipsimple.widgets.AccountWidgetProvider;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -49,7 +53,7 @@ public class AuGeoAppFlowManager {
         mHandler = handler;
     }
 
-    public void start(){
+    public void start() {
         //no need to ask for dialog
 
         new Thread(new Runnable() {
@@ -66,7 +70,7 @@ public class AuGeoAppFlowManager {
                         @Override
                         public void run() {
                             try {
-                                if(!OpenVpnHelper.getInstance().isVpnConnected()) {
+                                if (!OpenVpnHelper.getInstance().isVpnConnected()) {
                                     OpenVpnHelper.getInstance().init(mContext, new OpenVPNStatusListener(deviceProfile, mListener));
                                     startVPN(vpnProfile);
                                 }
@@ -132,10 +136,19 @@ public class AuGeoAppFlowManager {
         public void onVpnConnected() {
             Log.d("APP_FLOW", "Creating profile and register");
             listener.onVpnConnected();
-            SipProfile sipAccount =  SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
-            SipProfileDatabaseHelper.createProfileAndRegister(mContext,sipAccount);
-            listener.onSipAccountSavedToDatabase(sipAccount);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
 
+                    SipProfile sipAccount = SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
+                    sipAccount.active = true;
+                    SipProfileDatabaseHelper.createProfileAndRegister(mContext, sipAccount);
+//                    updateAllRegistered(sipAccount);
+                    listener.onSipAccountSavedToDatabase(sipAccount);
+
+                    AccountWidgetProvider.updateWidget(mContext);
+                }
+            });
 
         }
 
@@ -150,4 +163,9 @@ public class AuGeoAppFlowManager {
         }
     }
 
+    public void updateAllRegistered(SipProfile sipProfile) {
+        ContentValues cv = new ContentValues();
+        cv.put(SipProfile.FIELD_ACTIVE, true);
+        mContext.getContentResolver().update(ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, sipProfile.id), cv, null, null);
+    }
 }

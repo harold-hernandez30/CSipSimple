@@ -52,6 +52,7 @@ import android.text.TextUtils;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.augeo.vpnhelper.OpenVpnHelper;
 import com.csipsimple.R;
 import com.csipsimple.api.ISipConfiguration;
 import com.csipsimple.api.ISipService;
@@ -1022,7 +1023,7 @@ public class SipService extends Service {
 
 		Log.i(THIS_FILE, "Create SIP Service");
 		prefsWrapper = new PreferencesProviderWrapper(this);
-		Log.setLogLevel(prefsWrapper.getLogLevel());
+		Log.setLogLevel(5);
 		
 		telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 //		connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -1923,7 +1924,7 @@ public class SipService extends Service {
 			mExecutor = null;
 			
 			Log.d(THIS_FILE, "Destroy sip stack");
-			
+
 			sipWakeLock.reset();
 			
 			if(stopSipStack()) {

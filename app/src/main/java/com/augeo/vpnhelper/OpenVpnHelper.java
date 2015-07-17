@@ -182,6 +182,7 @@ public class OpenVpnHelper implements Handler.Callback {
                 // unexpectedly disconnected -- that is, its process crashed.
                 mService = null;
                 isBound = false;
+                isVpnConnected = false;
 
             }
         };
@@ -231,8 +232,12 @@ public class OpenVpnHelper implements Handler.Callback {
     public void disconnect() {
         try {
             if(mService != null) {
+//                unbindService(context);
                 mService.disconnect();
+                mService = null;
             }
+            isVpnConnected = false;
+            isBound = false;
             mListener = null;
         } catch (RemoteException e) {
             e.printStackTrace();

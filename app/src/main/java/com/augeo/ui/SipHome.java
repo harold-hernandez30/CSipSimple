@@ -23,10 +23,13 @@ package com.augeo.ui;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -34,6 +37,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -43,6 +47,7 @@ import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -131,6 +136,25 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private AuGeoAppFlowManager mAugeoAppFlowManager;
 
     private android.os.Handler mHandler = new android.os.Handler();
+    private AccountStatusContentObserver statusObserver;
+    private SipProfile mSipProfile;
+
+    class AccountStatusContentObserver extends ContentObserver {
+
+        public AccountStatusContentObserver(Handler h) {
+            super(h);
+        }
+
+        public void onChange(boolean selfChange) {
+            if(mSipProfile != null) {
+                android.util.Log.d("ACCOUNT_LIST_FRAG", "Accounts status.onChange( " + selfChange + ") : " + mSipProfile.id);
+                AccountListUtils.AccountStatusDisplay accountStatusDisplay = AccountListUtils.getAccountDisplay(SipHome.this,
+                        mSipProfile.id);
+                Toast.makeText(SipHome.this, "Account Status: " + accountStatusDisplay.statusLabel, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
 
     /**
      * Listener interface for Fragments accommodated in {@link ViewPager}
@@ -143,10 +167,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Intent intent = VpnService.prepare(this);
-        if (intent != null && hasUserTriedActivatingSync()) {
-            startActivityForResult(intent, ANDROID_VPN_SERVICE_PERMISSION);
-        }
+
         OpenVpnConfigManager.init(this);
         ExternalAppDatabase extapps = new ExternalAppDatabase(this);
         extapps.addApp(getPackageName());
@@ -154,7 +175,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         mAugeoAppFlowManager.registerAppFlowCallbackListener(this);
 
 
-
+        Intent intent = VpnService.prepare(this);
+        if (shouldStartAppFlow(intent)) {
+            startActivityForResult(intent, ANDROID_VPN_SERVICE_PERMISSION);
+        }
 
         if (intent == null) {
             startAppFlow();
@@ -224,7 +248,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         }
 
         selectTabWithAction(getIntent());
-        Log.setLogLevel(prefProviderWrapper.getLogLevel());
+        Log.setLogLevel(5);
 
 
         // Async check
@@ -239,6 +263,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 //        fetchData();
 
 
+    }
+
+    private boolean shouldStartAppFlow(Intent intent) {
+        return intent != null && hasUserTriedActivatingSync();
     }
 
     private void startAppFlow() {
@@ -282,9 +310,18 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     public void onSipAccountSavedToDatabase(SipProfile sipProfile) {
         android.util.Log.d("APP_FLOW", "onSipAccountSavedToDatabase");
 
-        AccountListUtils.AccountStatusDisplay accountStatusDisplay = AccountListUtils.getAccountDisplay(this, sipProfile.id);
+        mSipProfile = sipProfile;
 
-        Toast.makeText(this, "Registering...", Toast.LENGTH_LONG).show();
+        if (statusObserver == null) {
+            statusObserver = new AccountStatusContentObserver(mHandler);
+            getContentResolver().registerContentObserver(SipProfile.ACCOUNT_STATUS_URI, true, statusObserver);
+        }
+//        ContentValues cv = new ContentValues();
+//        cv.put(SipProfile.FIELD_ACTIVE, true);
+//
+//        android.util.Log.d("APP_FLOW", "onToggleRow(), tag.accountId: " + sipProfile.id);
+//        getContentResolver().update(ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, sipProfile.id), cv, null, null);
+
 
     }
 
@@ -659,6 +696,12 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     protected void onPause() {
         Log.d(THIS_FILE, "On Pause SIPHOME");
         onForeground = false;
+
+        if (statusObserver != null) {
+            getContentResolver().unregisterContentObserver(statusObserver);
+            statusObserver = null;
+        }
+
         if (asyncSanityChecker != null) {
             if (asyncSanityChecker.isAlive()) {
                 asyncSanityChecker.interrupt();
@@ -666,7 +709,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             }
         }
 
-        android.util.Log.d("BATTERY_SAVING_MODE", "is in battery saving mode? " + OpenVpnConfigManager.getInstance().isInBatterySavingMode());
 
         super.onPause();
 
@@ -677,6 +719,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         Log.d(THIS_FILE, "On Resume SIPHOME");
         super.onResume();
         onForeground = true;
+
+
 
         prefProviderWrapper.setPreferenceBooleanValue(PreferencesWrapper.HAS_BEEN_QUIT, false);
 
@@ -989,6 +1033,11 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         sendBroadcast(intent);
         if (quit) {
             finish();
+            OpenVpnHelper.getInstance().disconnect();
+        }
+
+        if(OpenVpnConfigManager.getInstance().isInBatterySavingMode()) {
+            android.util.Log.d("BATTERY_SAVING_MODE", "is in battery saving mode? " + OpenVpnConfigManager.getInstance().isInBatterySavingMode());
             OpenVpnHelper.getInstance().disconnect();
         }
     }

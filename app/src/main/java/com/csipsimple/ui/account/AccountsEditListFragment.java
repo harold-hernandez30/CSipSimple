@@ -86,24 +86,8 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     private AccountStatusContentObserver statusObserver = null;
     private View mHeaderView;
     private AccountsEditListAdapter mAdapter;
-
-    private BroadcastReceiver mVpnConnectedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-//            onResume();
-            android.util.Log.d("VPN_CONNECTED_RECEIVER", "Vpn connected!");
-            updateAllRegistered();
-//            updateCheckedItem();
-
-//            SipHome.home.fetchData();
-            new GetDeviceProfile(getActivity()).execute();
-
-            ((BaseAdapter) getListAdapter()).notifyDataSetChanged();
-
-
-        }
-    };
     private ISipService service;
+
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
@@ -127,7 +111,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         }
 
         public void onChange(boolean selfChange) {
-            Log.d(THIS_FILE, "Accounts status.onChange( " + selfChange + ")");
+            android.util.Log.d("ACCOUNT_LIST_FRAG", "Accounts status.onChange( " + selfChange + ")");
             ((BaseAdapter) getListAdapter()).notifyDataSetChanged();
         }
     }
@@ -148,7 +132,7 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     public void onDestroy() {
         super.onDestroy();
         if(connection != null) {
-            getActivity().unbindService(connection);
+//            getActivity().unbindService(connection);
         }
     }
 
@@ -165,13 +149,16 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         View detailsFrame = getActivity().findViewById(R.id.details);
         dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
 
-        getActivity().bindService(new Intent(getActivity(), SipService.class), connection, Context.BIND_AUTO_CREATE);
+//        getActivity().bindService(new Intent(getActivity(), SipService.class), connection, Context.BIND_AUTO_CREATE);
 
         if (savedInstanceState != null) {
             // Restore last state for checked position.
             curCheckPosition = savedInstanceState.getLong(CURRENT_CHOICE, SipProfile.INVALID_ID);
             //curCheckWizard = savedInstanceState.getString(CURRENT_WIZARD);
         }
+
+
+//        setEmptyText("Test");
         setListShown(false);
         if (mAdapter == null) {
             if (mHeaderView != null) {
@@ -221,37 +208,25 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
 
     private static final String THIS_FILE = null;
 
-
-    private void applyNewAccountDefault(SipProfile account) {
-        if (account.use_rfc5626) {
-            if (TextUtils.isEmpty(account.rfc5626_instance_id)) {
-                String autoInstanceId = (UUID.randomUUID()).toString();
-                account.rfc5626_instance_id = "<urn:uuid:" + autoInstanceId + ">";
-            }
-        }
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Use custom drag and drop view
         View v = inflater.inflate(R.layout.accounts_edit_list, container, false);
-
-
-//        SipHome.home.fetchData();
-
         return v;
     }
 
     private void updateCheckedItem() {
+        android.util.Log.d("ACCOUNT_LIST_FRAG", "updateCheckedItem()");
         if (curCheckPosition != SipProfile.INVALID_ID) {
             for (int i = 0; i < getListAdapter().getCount(); i++) {
                 long profId = getListAdapter().getItemId(i);
                 if (profId == curCheckPosition) {
                     getListView().setItemChecked(i, true);
+                    android.util.Log.d("ACCOUNT_LIST_FRAG", "updateCheckedItem()" + "itemchecked: " + i);
                 }
             }
         } else {
+            android.util.Log.d("ACCOUNT_LIST_FRAG", "updateCheckedItem()" + "invalid sip ID");
             for (int i = 0; i < getListAdapter().getCount(); i++) {
                 getListView().setItemChecked(i, false);
             }
@@ -272,7 +247,6 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         if (statusObserver == null) {
             statusObserver = new AccountStatusContentObserver(mHandler);
             if (isAdded()) {
-                getActivity().registerReceiver(mVpnConnectedReceiver, new IntentFilter(OpenVpnHelper.ACTION_BROADCAST_VPN_CONNECTED));
                 getActivity().getContentResolver().registerContentObserver(SipProfile.ACCOUNT_STATUS_URI, true, statusObserver);
             }
         }
@@ -284,7 +258,6 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
         super.onPause();
         if (statusObserver != null && isAdded()) {
             getActivity().getContentResolver().unregisterContentObserver(statusObserver);
-            getActivity().unregisterReceiver(mVpnConnectedReceiver);
             statusObserver = null;
         }
     }
@@ -367,11 +340,14 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     public void onToggleRow(AccountRowTag tag) {
         ContentValues cv = new ContentValues();
         cv.put(SipProfile.FIELD_ACTIVE, !tag.activated);
+
+        android.util.Log.d("ACCOUNT_LIST_FRAG", "onToggleRow(), tag.accountId: " + tag.accountId);
         getActivity().getContentResolver().update(ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, tag.accountId), cv, null, null);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        android.util.Log.d("ACCOUNT_LIST_FRAG", "onCreateLoader()" + "id: " + id + "bundle: " + args);
         return new CursorLoader(getActivity(), SipProfile.ACCOUNT_URI, new String[]{
                 SipProfile.FIELD_ID + " AS " + BaseColumns._ID,
                 SipProfile.FIELD_ID,
@@ -386,12 +362,14 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         super.onLoadFinished(loader, data);
         // Select correct item if any
+        android.util.Log.d("ACCOUNT_LIST_FRAG", "onLoadFinished()" + "loader: " + loader + "data: " + data);
         updateCheckedItem();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        android.util.Log.d("ACCOUNT_LIST_FRAG", "onActivityResult()");
         if (resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null) {
 
             if (requestCode == CHOOSE_WIZARD) {
@@ -454,23 +432,6 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-//        final SipProfile account = profileFromContextMenuInfo(menuInfo);
-//        if(account == null) {
-//            return;
-//        }
-//        WizardInfo wizardInfos = WizardUtils.getWizardClass(account.wizard);
-//
-//        // Setup the menu header
-//        menu.setHeaderTitle(account.display_name);
-//        if(wizardInfos != null) {
-//            menu.setHeaderIcon(wizardInfos.icon);
-//        }
-//        
-//        menu.add(0, MENU_ITEM_ACTIVATE, 0, account.active ? R.string.deactivate_account
-//                : R.string.activate_account);
-//        menu.add(0, MENU_ITEM_MODIFY, 0, R.string.modify_account);
-//        menu.add(0, MENU_ITEM_DELETE, 0, R.string.delete_account);
-//        menu.add(0, MENU_ITEM_WIZARD, 0, R.string.choose_wizard);
 
     }
 
@@ -508,93 +469,10 @@ public class AccountsEditListFragment extends CSSListFragment implements /*OnQui
 
     }
 
-    private void onClickAddAccount() {
-        startActivityForResult(new Intent(getActivity(), WizardChooser.class),
-                CHOOSE_WIZARD);
-    }
-
     @Override
     public void changeCursor(Cursor c) {
         if (mAdapter != null) {
             mAdapter.changeCursor(c);
-        }
-    }
-
-    public void updateAllRegistered() {
-
-        for (int i = 0; i < getListAdapter().getCount(); i++) {
-
-            ContentValues cv = new ContentValues();
-            Cursor c = (Cursor) getListAdapter().getItem(i - getListView().getHeaderViewsCount());
-            SipProfile sipProfile = new SipProfile(c);
-            if (sipProfile.active) {
-                cv.put(SipProfile.FIELD_ACTIVE, sipProfile.active);
-                getActivity().getContentResolver().update(ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, sipProfile.id), cv, null, null);
-            }
-
-        }
-
-    }
-
-    private class GetDeviceProfile extends AsyncTask<Void, Void, AuGeoDeviceResponse> {
-
-        private WeakReference<Context> weakReferenceContext;
-
-        public GetDeviceProfile(Context context) {
-            weakReferenceContext = new WeakReference<>(context);
-
-        }
-
-        @Override
-        protected AuGeoDeviceResponse doInBackground(Void... params) {
-            Context context = weakReferenceContext.get();
-            if (context != null) {
-
-                TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-                String deviceID = telephonyManager.getDeviceId();
-
-                return AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfile(deviceID);
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(AuGeoDeviceResponse auGeoDeviceResponse) {
-            super.onPostExecute(auGeoDeviceResponse);
-
-            if(auGeoDeviceResponse != null && auGeoDeviceResponse.getResponse() != null && !auGeoDeviceResponse.getResponse().isEmpty()) {
-                DeviceProfile deviceProfile = auGeoDeviceResponse.getResponse().get(0);
-
-                SipProfile sipProfile = SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
-
-                Context context = weakReferenceContext.get();
-                if (context != null) {
-                    new CreateSipProfileInDatabaseTask(context, sipProfile).execute();
-                }
-            }
-        }
-
-        private class CreateSipProfileInDatabaseTask extends AsyncTask<Void, Void, Void> {
-
-            private WeakReference<Context> weakReferenceContext;
-            private SipProfile sipProfile;
-
-            public CreateSipProfileInDatabaseTask(Context context, SipProfile sipProfile) {
-                this.sipProfile = sipProfile;
-                weakReferenceContext = new WeakReference<>(context);
-
-            }
-
-            @Override
-            protected Void doInBackground(Void... params) {
-
-                Context context = weakReferenceContext.get();
-                if (context != null) {
-                    SipProfileDatabaseHelper.createProfileAndRegister(context, sipProfile); //Should be async
-                }
-                return null;
-            }
         }
     }
 
