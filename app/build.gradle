@@ -1,15 +1,21 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release_staging {
+            keyAlias 'septrivium'
+            keyPassword 'RB16wPjKLH3YboFWgSN2'
+            storeFile file('C:/project i/septrivium.jks')
+            storePassword 'C2iNQcnTF4oXXSuO12NF'
+        }
+    }
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
-
     defaultConfig {
         applicationId "com.septrivium.augeo"
         minSdkVersion 15
         targetSdkVersion 22
     }
-
     sourceSets {
         main {
             assets.srcDirs = ['src/main/assets', 'ovpnlibs/assets']
@@ -28,7 +34,6 @@ android {
 
         }
     }
-
     buildTypes {
         release {
             minifyEnabled false
