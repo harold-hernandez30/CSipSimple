@@ -5,7 +5,7 @@ android {
     buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "com.augeo"
+        applicationId "com.septrivium.augeo"
         minSdkVersion 15
         targetSdkVersion 22
     }

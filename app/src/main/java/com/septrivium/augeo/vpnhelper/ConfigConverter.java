@@ -1,4 +1,4 @@
-package com.augeo.vpnhelper;
+package com.septrivium.augeo.vpnhelper;
 
 import android.content.Context;
 import android.os.Environment;

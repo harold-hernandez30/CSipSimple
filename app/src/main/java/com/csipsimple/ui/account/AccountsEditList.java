@@ -33,11 +33,10 @@ import android.os.Handler;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
-import com.augeo.connection.ConnectionReciever;
-import com.augeo.helper.AppFlowCallback;
-import com.augeo.helper.AuGeoAppFlowManager;
-import com.augeo.vpnhelper.OpenVpnHelper;
-import com.augeo.webresponse.DeviceProfile;
+import com.septrivium.augeo.connection.ConnectionReciever;
+import com.septrivium.augeo.helper.AppFlowCallback;
+import com.septrivium.augeo.helper.AuGeoAppFlowManager;
+import com.septrivium.augeo.webresponse.DeviceProfile;
 import com.csipsimple.R;
 import com.csipsimple.api.SipProfile;
 import com.csipsimple.utils.Compatibility;

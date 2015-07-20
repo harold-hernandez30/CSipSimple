@@ -1,13 +1,7 @@
-package com.augeo.webapihelper;
-
-import java.io.IOException;
-import java.net.SocketTimeoutException;
+package com.septrivium.augeo.webapihelper;
 
 import retrofit.ErrorHandler;
 import retrofit.RetrofitError;
-import retrofit.client.Client;
-import retrofit.client.Request;
-import retrofit.client.Response;
 
 /**
  * Created by harold on 7/18/2015.

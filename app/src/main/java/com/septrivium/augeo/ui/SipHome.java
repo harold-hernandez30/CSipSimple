@@ -19,13 +19,11 @@
  * along with CSipSimple.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.augeo.ui;
+package com.septrivium.augeo.ui;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -49,7 +47,6 @@ import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -60,12 +57,12 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ValueAnimator;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.augeo.connection.ConnectionReciever;
-import com.augeo.helper.AppFlowCallback;
-import com.augeo.helper.AuGeoAppFlowManager;
-import com.augeo.vpnhelper.OpenVpnConfigManager;
-import com.augeo.vpnhelper.OpenVpnHelper;
-import com.augeo.webresponse.DeviceProfile;
+import com.septrivium.augeo.connection.ConnectionReciever;
+import com.septrivium.augeo.helper.AppFlowCallback;
+import com.septrivium.augeo.helper.AuGeoAppFlowManager;
+import com.septrivium.augeo.vpnhelper.OpenVpnConfigManager;
+import com.septrivium.augeo.vpnhelper.OpenVpnHelper;
+import com.septrivium.augeo.webresponse.DeviceProfile;
 import com.csipsimple.R;
 import com.csipsimple.api.SipConfigManager;
 import com.csipsimple.api.SipManager;

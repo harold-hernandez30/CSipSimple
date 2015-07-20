@@ -27,7 +27,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.text.TextUtils;
 
-import com.augeo.vpnhelper.OpenVpnHelper;
+import com.septrivium.augeo.vpnhelper.OpenVpnHelper;
 import com.csipsimple.R;
 import com.csipsimple.api.SipCallSession;
 import com.csipsimple.api.SipManager;

@@ -1,12 +1,8 @@
-package com.augeo.siphelper.sipprofilehelper;
+package com.septrivium.augeo.siphelper.sipprofilehelper;
 
-import android.content.Context;
-
-import com.augeo.vpnhelper.OpenVpnConfigManager;
-import com.augeo.webresponse.DeviceProfile;
+import com.septrivium.augeo.webresponse.DeviceProfile;
 import com.csipsimple.api.SipProfile;
 import com.csipsimple.api.SipUri;
-import com.csipsimple.db.DBProvider;
 
 /**
  * Created by harold on 7/16/2015.

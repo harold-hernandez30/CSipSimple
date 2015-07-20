@@ -40,7 +40,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockDialogFragment;
-import com.augeo.ui.AboutActivity;
+import com.septrivium.augeo.ui.AboutActivity;
 import com.csipsimple.R;
 import com.csipsimple.api.SipConfigManager;
 import com.csipsimple.api.SipManager;

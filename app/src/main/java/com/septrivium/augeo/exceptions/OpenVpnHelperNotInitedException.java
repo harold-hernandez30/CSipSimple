@@ -1,4 +1,4 @@
-package com.augeo.exceptions;
+package com.septrivium.augeo.exceptions;
 
 /**
  * Created by harold on 7/10/2015.

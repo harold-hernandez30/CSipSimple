@@ -3,7 +3,7 @@
  * Distributed under the GNU GPL v2 with additional terms. For full terms see the file doc/LICENSE.txt
  */
 
-package com.augeo.ui;
+package com.septrivium.augeo.ui;
 
 import android.app.Fragment;
 import android.app.PendingIntent;

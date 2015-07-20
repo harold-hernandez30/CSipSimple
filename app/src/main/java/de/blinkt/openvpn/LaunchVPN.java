@@ -24,9 +24,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
-import com.augeo.vpnhelper.OpenVpnConfigManager;
+import com.septrivium.augeo.vpnhelper.OpenVpnConfigManager;
 import com.csipsimple.R;
-import com.augeo.ui.SipHome;
+import com.septrivium.augeo.ui.SipHome;
 
 import java.io.IOException;
 

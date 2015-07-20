@@ -1,6 +1,6 @@
-package com.augeo.helper;
+package com.septrivium.augeo.helper;
 
-import com.augeo.webresponse.DeviceProfile;
+import com.septrivium.augeo.webresponse.DeviceProfile;
 import com.csipsimple.api.SipProfile;
 
 import de.blinkt.openvpn.VpnProfile;

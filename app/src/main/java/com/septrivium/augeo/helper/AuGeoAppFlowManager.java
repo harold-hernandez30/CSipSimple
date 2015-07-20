@@ -1,4 +1,4 @@
-package com.augeo.helper;
+package com.septrivium.augeo.helper;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -9,14 +9,14 @@ import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.augeo.siphelper.sipprofilehelper.SipProfileBuilder;
-import com.augeo.siphelper.sipprofilehelper.SipProfileDatabaseHelper;
-import com.augeo.vpnhelper.ConfigConverter;
-import com.augeo.vpnhelper.OpenVpnConfigManager;
-import com.augeo.vpnhelper.OpenVpnHelper;
-import com.augeo.webapihelper.AuGeoWebAPIManager;
-import com.augeo.webresponse.AuGeoDeviceResponse;
-import com.augeo.webresponse.DeviceProfile;
+import com.septrivium.augeo.siphelper.sipprofilehelper.SipProfileBuilder;
+import com.septrivium.augeo.siphelper.sipprofilehelper.SipProfileDatabaseHelper;
+import com.septrivium.augeo.vpnhelper.ConfigConverter;
+import com.septrivium.augeo.vpnhelper.OpenVpnConfigManager;
+import com.septrivium.augeo.vpnhelper.OpenVpnHelper;
+import com.septrivium.augeo.webapihelper.AuGeoWebAPIManager;
+import com.septrivium.augeo.webresponse.AuGeoDeviceResponse;
+import com.septrivium.augeo.webresponse.DeviceProfile;
 import com.csipsimple.api.SipProfile;
 import com.csipsimple.widgets.AccountWidgetProvider;
 

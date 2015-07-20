@@ -23,32 +23,25 @@ package com.csipsimple.ui.account;
 
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.BaseColumns;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -56,26 +49,15 @@ import android.widget.ListView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import com.augeo.siphelper.sipprofilehelper.SipProfileBuilder;
-import com.augeo.siphelper.sipprofilehelper.SipProfileDatabaseHelper;
-import com.augeo.webapihelper.AuGeoWebAPIManager;
-import com.augeo.webresponse.AuGeoDeviceResponse;
-import com.augeo.webresponse.DeviceProfile;
 import com.csipsimple.R;
 import com.csipsimple.api.ISipService;
 import com.csipsimple.api.SipProfile;
-import com.augeo.ui.SipHome;
-import com.csipsimple.service.SipService;
 import com.csipsimple.ui.account.AccountsEditListAdapter.AccountRowTag;
 import com.csipsimple.ui.account.AccountsEditListAdapter.OnCheckedRowListener;
-import com.augeo.vpnhelper.OpenVpnHelper;
 import com.csipsimple.widgets.CSSListFragment;
 import com.csipsimple.wizards.BasePrefsWizard;
 import com.csipsimple.wizards.WizardChooser;
 import com.csipsimple.wizards.WizardUtils;
-
-import java.lang.ref.WeakReference;
-import java.util.UUID;
 
 public class AccountsEditListFragment extends CSSListFragment implements /*OnQuitListener,*/ OnCheckedRowListener {
 

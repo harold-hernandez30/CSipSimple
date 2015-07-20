@@ -3,7 +3,7 @@ package test.activitytest;
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.augeo.ui.SipHome;
+import com.septrivium.augeo.ui.SipHome;
 import com.csipsimple.ui.dialpad.DialerFragment;
 
 /**

@@ -1,4 +1,4 @@
-package com.augeo.webapihelper;
+package com.septrivium.augeo.webapihelper;
 
 
 /**

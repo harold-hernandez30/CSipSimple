@@ -1,10 +1,6 @@
-package com.augeo.webapihelper;
+package com.septrivium.augeo.webapihelper;
 
-import com.augeo.webresponse.AuGeoDeviceResponse;
-
-import retrofit.ErrorHandler;
 import retrofit.RestAdapter;
-import retrofit.RetrofitError;
 
 /**
  * Created by harold on 7/16/2015.

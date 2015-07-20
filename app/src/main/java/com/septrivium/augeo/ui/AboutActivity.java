@@ -1,4 +1,4 @@
-package com.augeo.ui;
+package com.septrivium.augeo.ui;
 
 import android.app.Activity;
 import android.os.Bundle;

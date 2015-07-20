@@ -52,7 +52,6 @@ import android.text.TextUtils;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import com.augeo.vpnhelper.OpenVpnHelper;
 import com.csipsimple.R;
 import com.csipsimple.api.ISipConfiguration;
 import com.csipsimple.api.ISipService;

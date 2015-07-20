@@ -74,7 +74,7 @@ import com.csipsimple.api.SipManager;
 import com.csipsimple.api.SipProfile;
 import com.csipsimple.api.SipUri.ParsedSipContactInfos;
 import com.csipsimple.models.Filter;
-import com.augeo.ui.SipHome.ViewPagerVisibilityListener;
+import com.septrivium.augeo.ui.SipHome.ViewPagerVisibilityListener;
 import com.csipsimple.ui.dialpad.DialerLayout.OnAutoCompleteListVisibilityChangedListener;
 import com.csipsimple.utils.CallHandlerPlugin;
 import com.csipsimple.utils.CallHandlerPlugin.OnLoadListener;

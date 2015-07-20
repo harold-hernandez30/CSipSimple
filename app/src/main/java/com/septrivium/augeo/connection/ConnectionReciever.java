@@ -1,4 +1,4 @@
-package com.augeo.connection;
+package com.septrivium.augeo.connection;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.VpnService;
-import android.util.Log;
 
-import com.augeo.helper.AuGeoAppFlowManager;
-import com.augeo.vpnhelper.OpenVpnHelper;
+import com.septrivium.augeo.helper.AuGeoAppFlowManager;
 
 public class ConnectionReciever extends BroadcastReceiver {
     private AuGeoAppFlowManager mAugeoAppFlowManager;

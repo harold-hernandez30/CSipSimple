@@ -3,7 +3,7 @@
  * Distributed under the GNU GPL v2 with additional terms. For full terms see the file doc/LICENSE.txt
  */
 
-package com.augeo.vpnhelper;
+package com.septrivium.augeo.vpnhelper;
 
 import android.annotation.TargetApi;
 import android.content.Context;

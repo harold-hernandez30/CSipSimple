@@ -1,4 +1,4 @@
-package com.augeo.webresponse;
+package com.septrivium.augeo.webresponse;
 
 import java.util.List;
 

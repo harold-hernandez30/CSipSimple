@@ -1,12 +1,9 @@
-package com.augeo.webapihelper;
+package com.septrivium.augeo.webapihelper;
 
-import com.augeo.webresponse.AuGeoDeviceResponse;
-
-import java.util.List;
+import com.septrivium.augeo.webresponse.AuGeoDeviceResponse;
 
 import retrofit.Callback;
 import retrofit.http.GET;
-import retrofit.http.Path;
 import retrofit.http.Query;
 
 /**

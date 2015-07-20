@@ -29,7 +29,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.csipsimple.R;
-import com.augeo.ui.SipHome;
+import com.septrivium.augeo.ui.SipHome;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

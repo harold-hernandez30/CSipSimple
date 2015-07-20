@@ -1,4 +1,4 @@
-package com.augeo.siphelper.sipprofilehelper;
+package com.septrivium.augeo.siphelper.sipprofilehelper;
 
 import android.content.ContentUris;
 import android.content.Context;
@@ -7,7 +7,6 @@ import android.net.Uri;
 import com.csipsimple.api.SipManager;
 import com.csipsimple.api.SipProfile;
 import com.csipsimple.models.Filter;
-import com.csipsimple.utils.Log;
 import com.csipsimple.wizards.WizardIface;
 import com.csipsimple.wizards.WizardUtils;
 
