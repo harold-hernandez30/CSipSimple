@@ -50,6 +50,7 @@ public class AuGeoAppFlowManager {
                 if(deviceProfile == null) return;
             } catch (Exception e) {
                 e.printStackTrace();
+                isStarted = false;
                 //TODO: Add specific error message to return to the mListener. Like "Network error."
                 return;
             }
@@ -71,14 +72,17 @@ public class AuGeoAppFlowManager {
                             }
                         } catch (RemoteException e) {
                             e.printStackTrace();
+                            isStarted = false;
                         }
                     }
                 });
 
             } catch (IOException e) {
                 e.printStackTrace();
+                isStarted = false;
             } catch (ConfigParser.ConfigParseError configParseError) {
                 configParseError.printStackTrace();
+                isStarted = false;
             }
 
         }
@@ -180,7 +184,7 @@ public class AuGeoAppFlowManager {
 
         @Override
         public void onVpnFailed() {
-
+            
         }
     }
 
