@@ -143,18 +143,18 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
                 case ANDROID_CONFIRM_DIALOG:
                     new AlertDialog.Builder(this)
                             .setTitle(R.string.warning)
-                            .setMessage(getString(R.string.app_name) + " requires VPN. Please ")
+                            .setMessage(getString(R.string.app_name) + " requires VPN service. Please click 'OK' on the 'Allow connection' dialog to use this service.")
                             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     launchVpnPermissionDialog();
                                 }
                             })
-                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-//                                    SipHome.home.fetchData();
-                                }
-                            })
+//                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+////                                    SipHome.home.fetchData();
+//                                }
+//                            })
                             .show();
                     break;
 
