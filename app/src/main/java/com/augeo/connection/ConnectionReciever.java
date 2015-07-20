@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.VpnService;
+import android.util.Log;
 
 import com.augeo.helper.AuGeoAppFlowManager;
 import com.augeo.vpnhelper.OpenVpnHelper;
@@ -40,8 +42,10 @@ public class ConnectionReciever extends BroadcastReceiver {
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
         if(isConnected) {
-            if(mAugeoAppFlowManager != null) {
+
+            if(mAugeoAppFlowManager != null && (VpnService.prepare(context) == null)){
                 mAugeoAppFlowManager.start();
+                android.util.Log.d("APP_FLOW_MANAGER", "start from: " + Log.getStackTraceString(new Throwable()));
             }
         } else { // DISCONNECTED
             // Update value of VPN isConnected.

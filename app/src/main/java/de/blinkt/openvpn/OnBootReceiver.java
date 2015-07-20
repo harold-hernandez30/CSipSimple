@@ -36,5 +36,6 @@ public class OnBootReceiver extends BroadcastReceiver {
 		startVpnIntent.putExtra(LaunchVPN.EXTRA_HIDELOG, true);
 
 		context.startActivity(startVpnIntent);
+		android.util.Log.d("LAUNCH_VPN", "OnBootReceiver.launchVPN");
 	}
 }

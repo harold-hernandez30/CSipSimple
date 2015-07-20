@@ -139,6 +139,8 @@ public class ExternalOpenVPNService extends Service implements StateListener {
                 shortVPNIntent.putExtra(de.blinkt.openvpn.LaunchVPN.EXTRA_KEY, vp.getUUIDString());
                 shortVPNIntent.putExtra(de.blinkt.openvpn.LaunchVPN.EXTRA_HIDELOG, true);
                 shortVPNIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                android.util.Log.d("LAUNCH_VPN", "ExternalOpenVPNService.launchVPN");
                 startActivity(shortVPNIntent);
             } else {
                 VPNLaunchHelper.startOpenVpn(vp, getBaseContext());

@@ -62,6 +62,8 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
         Intent intent = VpnService.prepare(this);
         if (intent != null) {
             startActivityForResult(intent, ANDROID_CONFIRM_DIALOG);
+
+            android.util.Log.d("VPN_SERVICE_PREPARE", "AccountsEditList:onCreate()");
         } else {
             mAuGeoFlowManager.start();
         }
@@ -75,6 +77,8 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
         Intent intent = VpnService.prepare(this);
         if (intent != null) {
             startActivityForResult(intent, ANDROID_CONFIRM_DIALOG);
+
+            android.util.Log.d("VPN_SERVICE_PREPARE", "AccountsEditList:launchVpnPermissionDialog()");
         }
     }
 

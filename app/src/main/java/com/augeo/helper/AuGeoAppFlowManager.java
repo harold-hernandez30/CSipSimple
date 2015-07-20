@@ -140,6 +140,8 @@ public class AuGeoAppFlowManager {
         intent.putExtra(LaunchVPN.EXTRA_KEY, profile.getUUID().toString());
         intent.setAction(Intent.ACTION_MAIN);
         mContext.startActivity(intent);
+
+        android.util.Log.d("LAUNCH_VPN", "AuGeoAppFlowManager.startVPN");
     }
 
     public void disconnect() {
@@ -184,7 +186,7 @@ public class AuGeoAppFlowManager {
 
         @Override
         public void onVpnFailed() {
-            
+
         }
     }
 

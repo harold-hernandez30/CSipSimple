@@ -184,6 +184,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         Intent intent = VpnService.prepare(this);
         if (shouldStartAppFlow(intent)) {
             startActivityForResult(intent, ANDROID_VPN_SERVICE_PERMISSION);
+            android.util.Log.d("VPN_SERVICE_PREPARE", "SipHome:onCreate()");
         }
 
         if (intent == null) {

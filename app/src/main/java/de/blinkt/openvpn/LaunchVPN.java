@@ -270,6 +270,8 @@ public class LaunchVPN extends Activity {
 			// Start the query
 			try {
 				startActivityForResult(intent, START_VPN_PROFILE);
+
+				android.util.Log.d("VPN_SERVICE_PREPARE", "LaunchVPN:onStart()");
 			} catch (ActivityNotFoundException ane) {
 				// Shame on you Sony! At least one user reported that 
 				// an official Sony Xperia Arc S image triggers this exception
