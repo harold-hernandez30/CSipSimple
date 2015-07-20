@@ -503,6 +503,6 @@
     <string name="action_settings">Settings</string>
     <string name="help_menu_openvpn">Vpn Client</string>
     <string name="title_activity_vpnprefs">VPN Settings</string>
-    <string name="empty_account_list_message">Registering account.</string>
+    <string name="empty_account_list_message">Please wait while we register your account.</string>
 
 </resources>
