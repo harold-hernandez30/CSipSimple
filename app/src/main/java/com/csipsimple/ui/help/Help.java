@@ -230,11 +230,11 @@ public class Help extends SherlockDialogFragment implements OnItemClickListener 
 			}catch(Exception e) {
 				Log.e(THIS_FILE, "Impossible to send logs...", e);
 			}
-			Log.setLogLevel(1);
+			Log.setLogLevel(5);
 			break;
 		case START_LOGS:
 			prefsWrapper.setPreferenceStringValue(SipConfigManager.LOG_LEVEL, "4");
-			Log.setLogLevel(4);
+			Log.setLogLevel(5);
 			Intent intent = new Intent(SipManager.ACTION_SIP_REQUEST_RESTART);
 			getActivity().sendBroadcast(intent);
 			dismiss();

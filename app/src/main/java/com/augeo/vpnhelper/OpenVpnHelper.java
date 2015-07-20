@@ -86,14 +86,15 @@ public class OpenVpnHelper implements Handler.Callback {
 
     public void init(Context context, StatusListener listener) throws RemoteException {
         if(!isInited) {
+            Log.d("APP_FLOW", "init openvpnhelper");
             mHandler = new Handler(this);
             mPackageName = context.getPackageName();
-            Log.d("OpenVPNLog", "init");
             mCallback = generateIOpenVPNStatusCallBack();
             mConnection = buildServiceConnection();
-            mListener = listener;
             bindService(context);
+            isInited = true;
         }
+        mListener = listener;
 
     }
 

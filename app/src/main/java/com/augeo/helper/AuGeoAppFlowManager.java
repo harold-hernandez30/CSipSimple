@@ -33,10 +33,12 @@ public class AuGeoAppFlowManager {
 
     private AppFlowCallback mListener;
     private Context mContext;
-    private Handler mHandler;
+    private static Handler mHandler;
     private DeviceProfile deviceProfile;
     private VpnProfile vpnProfile;
     private boolean isStarted = false; //started run already
+    private OpenVPNStatusListener mOpenVpnStatusListener;
+    private SipProfile sipAccount;
 
     private class AppFlowRunnable implements Runnable {
 
@@ -62,12 +64,20 @@ public class AuGeoAppFlowManager {
                 if(vpnProfile == null) {
                     vpnProfile = new ConfigConverter(mContext).doImportFromAsset("augeo_android.ovpn");
                 }
+
+                Log.d("APP_FLOW", "Running from thread: " + Thread.currentThread().getId());
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             if (!OpenVpnHelper.getInstance().isVpnConnected()) {
-                                OpenVpnHelper.getInstance().init(mContext, new OpenVPNStatusListener(deviceProfile, mListener));
+//                                if(mOpenVpnStatusListener == null) {
+                                    Log.d("APP_FLOW", "Creating openVPNStatus listener from thread: " + Thread.currentThread().getId());
+                                    mOpenVpnStatusListener = new OpenVPNStatusListener(deviceProfile, mListener);
+//                                }
+                                Log.d("APP_FLOW", "init openvpn helper from thread: " + Thread.currentThread().getId());
+
+                                OpenVpnHelper.getInstance().init(mContext, mOpenVpnStatusListener);
                                 startVPN(vpnProfile);
                             }
                         } catch (RemoteException e) {
@@ -161,13 +171,14 @@ public class AuGeoAppFlowManager {
 
         @Override
         public void onVpnConnected() {
-            Log.d("APP_FLOW", "Creating profile and register");
+            Log.d("APP_FLOW", "VPN Connected. (should wait 3 seconds before creating profile.)");
             listener.onVpnConnected();
-            mHandler.post(new Runnable() {
+            mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
 
-                    SipProfile sipAccount = SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
+                    Log.d("APP_FLOW", "Creating profile and register");
+                    sipAccount = SipProfileBuilder.generateFromDeviceProfile(deviceProfile);
                     sipAccount.active = true;
                     SipProfileDatabaseHelper.createProfileAndRegister(mContext, sipAccount);
 //                    updateAllRegistered(sipAccount);
@@ -175,7 +186,7 @@ public class AuGeoAppFlowManager {
 
                     AccountWidgetProvider.updateWidget(mContext);
                 }
-            });
+            }, 500);
 
         }
 
@@ -190,10 +201,10 @@ public class AuGeoAppFlowManager {
         }
     }
 
-    public void updateAllRegistered(SipProfile sipProfile) {
+    public void updateAllRegistered() {
         ContentValues cv = new ContentValues();
         cv.put(SipProfile.FIELD_ACTIVE, true);
-        mContext.getContentResolver().update(ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, sipProfile.id), cv, null, null);
+        mContext.getContentResolver().update(ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, sipAccount.id), cv, null, null);
     }
 
     public Context getContext() {

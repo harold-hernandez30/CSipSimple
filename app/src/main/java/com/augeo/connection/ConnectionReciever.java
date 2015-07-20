@@ -45,7 +45,7 @@ public class ConnectionReciever extends BroadcastReceiver {
 
             if(mAugeoAppFlowManager != null && (VpnService.prepare(context) == null)){
                 mAugeoAppFlowManager.start();
-                android.util.Log.d("APP_FLOW_MANAGER", "start from: " + Log.getStackTraceString(new Throwable()));
+//                android.util.Log.d("APP_FLOW_MANAGER", "start from: " + Log.getStackTraceString(new Throwable()));
             }
         } else { // DISCONNECTED
             // Update value of VPN isConnected.

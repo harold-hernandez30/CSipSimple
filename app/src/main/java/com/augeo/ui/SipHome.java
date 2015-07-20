@@ -155,7 +155,21 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                 android.util.Log.d("ACCOUNT_LIST_FRAG", "Accounts status.onChange( " + selfChange + ") : " + mSipProfile.id);
                 AccountListUtils.AccountStatusDisplay accountStatusDisplay = AccountListUtils.getAccountDisplay(SipHome.this,
                         mSipProfile.id);
-                Toast.makeText(SipHome.this, "Account Status: " + accountStatusDisplay.statusLabel, Toast.LENGTH_LONG).show();
+                if(accountStatusDisplay.statusLabel.contains("Registering") || accountStatusDisplay.statusLabel.contains("Registered") ) {
+                    Toast.makeText(SipHome.this, "Account Status: " + accountStatusDisplay.statusLabel, Toast.LENGTH_SHORT).show();
+                }
+                if(accountStatusDisplay.statusLabel.contains("Error")) { //Hack
+                    //Retry for 5 seconds
+                    if(mAugeoAppFlowManager != null) {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(SipHome.this, "Retrying...", Toast.LENGTH_SHORT).show();
+                                mAugeoAppFlowManager.updateAllRegistered();
+                            }
+                        }, 1 * 1000);
+                    }
+                }
             }
         }
     }
