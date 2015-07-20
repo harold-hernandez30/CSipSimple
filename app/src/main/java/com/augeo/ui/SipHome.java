@@ -22,12 +22,14 @@
 package com.augeo.ui;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -58,6 +60,7 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ValueAnimator;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.augeo.connection.ConnectionReciever;
 import com.augeo.helper.AppFlowCallback;
 import com.augeo.helper.AuGeoAppFlowManager;
 import com.augeo.vpnhelper.OpenVpnConfigManager;
@@ -139,6 +142,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private AccountStatusContentObserver statusObserver;
     private SipProfile mSipProfile;
 
+    private BroadcastReceiver connectionReciever;
+
     class AccountStatusContentObserver extends ContentObserver {
 
         public AccountStatusContentObserver(Handler h) {
@@ -173,6 +178,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         extapps.addApp(getPackageName());
         mAugeoAppFlowManager = new AuGeoAppFlowManager(this, mHandler);
         mAugeoAppFlowManager.registerAppFlowCallbackListener(this);
+        connectionReciever = new ConnectionReciever(mAugeoAppFlowManager);
 
 
         Intent intent = VpnService.prepare(this);
@@ -256,13 +262,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             public void run() {
                 asyncSanityCheck();
             }
-
-            ;
         };
         asyncSanityChecker.start();
-//        fetchData();
-
-
     }
 
     private boolean shouldStartAppFlow(Intent intent) {
@@ -696,6 +697,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     protected void onPause() {
         Log.d(THIS_FILE, "On Pause SIPHOME");
         onForeground = false;
+        unregisterReceiver(connectionReciever);
 
         if (statusObserver != null) {
             getContentResolver().unregisterContentObserver(statusObserver);
@@ -719,6 +721,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         Log.d(THIS_FILE, "On Resume SIPHOME");
         super.onResume();
         onForeground = true;
+        registerReceiver(connectionReciever, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
 
 

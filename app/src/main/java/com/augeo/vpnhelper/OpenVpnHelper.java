@@ -91,9 +91,14 @@ public class OpenVpnHelper implements Handler.Callback {
             Log.d("OpenVPNLog", "init");
             mCallback = generateIOpenVPNStatusCallBack();
             mConnection = buildServiceConnection();
-            bindService(context, listener);
+            mListener = listener;
+            bindService(context);
         }
 
+    }
+
+    public void init(Context context) throws RemoteException {
+        init(context, null);
     }
 
     private IOpenVPNStatusCallback generateIOpenVPNStatusCallBack() {
@@ -115,7 +120,9 @@ public class OpenVpnHelper implements Handler.Callback {
                 if(message.contains(CONNECTED_SUCESS_STATUS)) {
                     isVpnConnected = true;
                     android.util.Log.d("VPN_SUCCESS", "message contains success");
-                    mListener.onVpnConnected();
+                    if(mListener != null) {
+                        mListener.onVpnConnected();
+                    }
                 } else {
 
                     android.util.Log.d("VPN_SUCCESS", "other messages: " + message);
@@ -188,8 +195,7 @@ public class OpenVpnHelper implements Handler.Callback {
         };
     }
 
-    private void bindService(Context context, StatusListener listener) {
-        mListener = listener;
+    private void bindService(Context context) {
 
         Intent icsopenvpnService = new Intent(IOpenVPNAPIService.class.getName());
         icsopenvpnService.setPackage(context.getPackageName());
@@ -228,6 +234,9 @@ public class OpenVpnHelper implements Handler.Callback {
         unbindService(context);
     }
 
+    public void connect(Context context) throws RemoteException {
+        init(context);
+    }
 
     public void disconnect() {
         try {

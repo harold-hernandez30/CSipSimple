@@ -22,14 +22,18 @@
 package com.csipsimple.ui.account;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.os.Handler;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.augeo.connection.ConnectionReciever;
 import com.augeo.helper.AppFlowCallback;
 import com.augeo.helper.AuGeoAppFlowManager;
 import com.augeo.vpnhelper.OpenVpnHelper;
@@ -45,6 +49,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
     private static final int ANDROID_CONFIRM_DIALOG = 101;
     private AuGeoAppFlowManager mAuGeoFlowManager;
     private Handler handler = new Handler();
+    private BroadcastReceiver connectionReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,8 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
 
         mAuGeoFlowManager = new AuGeoAppFlowManager(this, handler);
         mAuGeoFlowManager.registerAppFlowCallbackListener(this);
+        connectionReceiver = new ConnectionReciever(mAuGeoFlowManager);
+
         Intent intent = VpnService.prepare(this);
         if (intent != null) {
             startActivityForResult(intent, ANDROID_CONFIRM_DIALOG);
@@ -74,12 +81,13 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
     @Override
     protected void onResume() {
         super.onResume();
-
+        registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterReceiver(connectionReceiver);
     }
 
     @Override
