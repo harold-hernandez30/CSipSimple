@@ -24,8 +24,12 @@ package com.csipsimple.widgets;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ToneGenerator;
+import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -38,8 +42,14 @@ import android.widget.ImageButton;
 import com.csipsimple.R;
 import com.csipsimple.utils.Log;
 import com.csipsimple.utils.Theme;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.septrivium.augeo.util.BitmapUtils;
+import com.septrivium.augeo.webresponse.SpeedDialButton;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -125,6 +135,65 @@ public class Dialpad extends FrameLayout implements OnClickListener {
 			}
 		}
 		
+	}
+
+	public void applySpeedDialIcons(List<SpeedDialButton> speedDialButtons) {
+		for(SpeedDialButton speedDialButton : speedDialButtons) {
+
+			for(int buttonId : DIGITS_BTNS.keySet()) {
+				if(speedDialButton.getDialButtonResId() == buttonId) {
+					ImageButton imageButton = (ImageButton) findViewById(buttonId);
+					Bitmap bitmap = ((BitmapDrawable)imageButton.getDrawable()).getBitmap();
+
+					new BindImageTask(imageButton, bitmap, speedDialButton.getIcon()).execute();
+					break; //break out of inner loop. Look for
+				}
+
+			}
+		}
+	}
+
+	private class BindImageTask extends AsyncTask<Void, Void, Bitmap> {
+
+		private WeakReference<Bitmap> srcBitmapWeakReference;
+		private WeakReference<ImageButton> imageButtonWeakReference;
+		private String dstIconUrl;
+
+		BindImageTask(ImageButton imageButton, Bitmap srcBitmap, String dstIconUrl) {
+
+			srcBitmapWeakReference = new WeakReference<>(srcBitmap);
+			imageButtonWeakReference = new WeakReference<>(imageButton);
+			this.dstIconUrl = dstIconUrl;
+		}
+
+		@Override
+		protected Bitmap doInBackground(Void... params) {
+			Bitmap srcBitmap = srcBitmapWeakReference.get();
+			if(srcBitmap == null) return null;
+
+			Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(dstIconUrl, new ImageSize(srcBitmap.getWidth()/4, srcBitmap.getHeight()/4));
+			if(dstBitmap == null) {
+
+				Log.d("DIAL_PAD", "cannot download: " + dstIconUrl);
+				return null;
+			}
+
+			return BitmapUtils.combineImage(srcBitmap, dstBitmap, PorterDuff.Mode.DST_OVER);
+
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap resultBitmap) {
+			super.onPostExecute(resultBitmap);
+
+			ImageButton imageButton = imageButtonWeakReference.get();
+
+			if(imageButton != null && resultBitmap != null) {
+				imageButton.setImageBitmap(resultBitmap);
+				Log.d("DIAL_PAD", "setting new combined bitmap");
+			}
+
+		}
 	}
 	
 	

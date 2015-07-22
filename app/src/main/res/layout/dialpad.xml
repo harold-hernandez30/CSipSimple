@@ -32,19 +32,19 @@
             android:id="@+id/button1"
             style="@style/DialtactsDialpadButtonStyle"
             android:contentDescription="@string/description_image_button_one"
-            android:src="@drawable/dial_num_1" />
+            android:src="@drawable/dial_num_1_wht" />
 
         <ImageButton
             android:id="@+id/button2"
             style="@style/DialtactsDialpadButtonStyle"
             android:contentDescription="@string/description_image_button_two"
-            android:src="@drawable/dial_num_2" />
+            android:src="@drawable/dial_num_2_wht" />
 
         <ImageButton
             android:id="@+id/button3"
             style="@style/DialtactsDialpadButtonStyle"
             android:contentDescription="@string/description_image_button_three"
-            android:src="@drawable/dial_num_3" />
+            android:src="@drawable/dial_num_3_wht" />
     </TableRow>
 
     <TableRow
@@ -56,7 +56,7 @@
             android:id="@+id/button4"
             style="@style/DialtactsDialpadButtonStyle"
             android:contentDescription="@string/description_image_button_four"
-            android:src="@drawable/dial_num_4" />
+            android:src="@drawable/dial_num_4_wht" />
 
         <ImageButton
             android:id="@+id/button5"

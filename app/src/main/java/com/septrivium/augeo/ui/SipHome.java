@@ -57,6 +57,10 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ValueAnimator;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.septrivium.augeo.connection.ConnectionReciever;
 import com.septrivium.augeo.helper.AppFlowCallback;
 import com.septrivium.augeo.helper.AuGeoAppFlowManager;
@@ -141,6 +145,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     private BroadcastReceiver connectionReciever;
 
+
+
     class AccountStatusContentObserver extends ContentObserver {
 
         public AccountStatusContentObserver(Handler h) {
@@ -183,7 +189,9 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        if(!ImageLoader.getInstance().isInited()) {
+            ImageLoader.getInstance().init(getUILConfig().build());
+        }
         OpenVpnConfigManager.init(this);
         ExternalAppDatabase extapps = new ExternalAppDatabase(this);
         extapps.addApp(getPackageName());
@@ -1142,6 +1150,17 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         }
 
         return (accountCount > 0);
+    }
+
+    public ImageLoaderConfiguration.Builder getUILConfig() {
+        ImageLoaderConfiguration.Builder config = new ImageLoaderConfiguration.Builder(this);
+        config.threadPriority(Thread.NORM_PRIORITY - 2);
+        config.denyCacheImageMultipleSizesInMemory();
+        config.diskCacheFileNameGenerator(new Md5FileNameGenerator());
+        config.diskCacheSize(50 * 1024 * 1024); // 50 MiB
+        config.tasksProcessingOrder(QueueProcessingType.LIFO);
+        config.writeDebugLogs(); // Remove for release app;
+        return config;
     }
 
 }

@@ -474,11 +474,29 @@ public class DialerFragment extends SherlockFragment implements OnClickListener,
             speedDialButtons.get(i).setDialButtonResId(buttonResIds[i + 1]);
         }
 
+        //FIXME: Current icon urls from server is empty. Provide dummy urls that have actual images for now.
+        assignDummySpeedDialIconUrls(speedDialButtons);
+
+        dialPad.applySpeedDialIcons(speedDialButtons);
         //TODO: maybe add dialer numbers to contacts?
 
         //TODO: Support for custom speed dial item (assign feature)
 
 
+    }
+
+    private void assignDummySpeedDialIconUrls(List<SpeedDialButton> speedDialButtons) {
+        for(SpeedDialButton speedDialButton : speedDialButtons) {
+            if(speedDialButton.getLabel().equalsIgnoreCase("Front Desk")) {
+                speedDialButton.setIcon("https://maxcdn.icons8.com/wp-content/uploads/2015/01/frontdesk.png");
+            } else if(speedDialButton.getLabel().equalsIgnoreCase("Housekeeping")) {
+                speedDialButton.setIcon("https://maxcdn.icons8.com/wp-content/uploads/2015/01/housekeeping.png");
+            } else if(speedDialButton.getLabel().equalsIgnoreCase("Room Service")) {
+                speedDialButton.setIcon("http://images.clipartpanda.com/serve-clipart-hotel-icon-room-service-clip-art-bw-md.png");
+            } else if(speedDialButton.getLabel().equalsIgnoreCase("Operator")) {
+                speedDialButton.setIcon("https://cdn4.iconfinder.com/data/icons/professionals/512/dispatcher-512.png");
+            }
+        }
     }
 
     private class OnAutoCompleteListItemClicked implements OnItemClickListener {

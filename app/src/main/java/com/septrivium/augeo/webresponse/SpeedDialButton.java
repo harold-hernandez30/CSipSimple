@@ -1,5 +1,7 @@
 package com.septrivium.augeo.webresponse;
 
+import android.widget.ImageButton;
+
 /**
  * Created by harold on 7/22/2015.
  */
@@ -51,4 +53,5 @@ public class SpeedDialButton {
     public void setDial(String dial) {
         this.dial = dial;
     }
+
 }
