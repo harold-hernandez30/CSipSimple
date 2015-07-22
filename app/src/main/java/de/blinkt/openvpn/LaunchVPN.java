@@ -195,8 +195,8 @@ public class LaunchVPN extends Activity {
 			if(resultCode == Activity.RESULT_OK) {
 				int needpw = mSelectedProfile.needUserPWInput(false);
 
-				mSelectedProfile.mUsername = OpenVpnConfigManager.getInstance().getVpnUsername();
-				mSelectedProfile.mPassword = OpenVpnConfigManager.getInstance().getVpnPassword();
+//				mSelectedProfile.mUsername = OpenVpnConfigManager.getInstance().getVpnUsername();
+//				mSelectedProfile.mPassword = OpenVpnConfigManager.getInstance().getVpnPassword();
 				needpw = 0;
 				if(needpw !=0) {
 					VpnStatus.updateStateString("USER_VPN_PASSWORD", "", R.string.state_user_vpn_password,

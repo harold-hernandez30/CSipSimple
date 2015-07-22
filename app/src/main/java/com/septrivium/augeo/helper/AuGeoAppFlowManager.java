@@ -58,11 +58,12 @@ public class AuGeoAppFlowManager {
             }
 
 
+            //May not be needed since doImportFromAsset already assigns the vpn username and password
             OpenVpnConfigManager.getInstance().saveVpnUsername(deviceProfile.getVpnUsername());
             OpenVpnConfigManager.getInstance().saveVpnPassword(deviceProfile.getVpnPassword());
             try {
                 if(vpnProfile == null) {
-                    vpnProfile = new ConfigConverter(mContext).doImportFromAsset("augeo_android.ovpn");
+                    vpnProfile = new ConfigConverter(mContext).doImportFromAsset("augeo_android.ovpn", deviceProfile);
                 }
 
                 Log.d("APP_FLOW", "Running from thread: " + Thread.currentThread().getId());

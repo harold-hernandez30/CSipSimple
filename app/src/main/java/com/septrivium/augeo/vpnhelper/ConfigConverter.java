@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.util.Base64;
 
 import com.csipsimple.R;
+import com.septrivium.augeo.webresponse.DeviceProfile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,7 +53,7 @@ public class ConfigConverter {
         vpl.saveProfileList(context);
     }
 
-    public VpnProfile doImportFromAsset(String assetName) throws IOException, ConfigParser.ConfigParseError {
+    public VpnProfile doImportFromAsset(String assetName, DeviceProfile deviceProfile) throws IOException, ConfigParser.ConfigParseError {
         ConfigParser cp = new ConfigParser();
 
         InputStreamReader isr = new InputStreamReader(mContext.getResources().getAssets().open(assetName));
@@ -61,8 +62,10 @@ public class ConfigConverter {
         mResult = cp.convertProfile();
         embedFiles(cp);
         mResult.mName = "auGeo_android";
-//        mResult.mUsername = "richard";
-//        mResult.mPassword = "richard";
+        mResult.mUsername = deviceProfile.getVpnUsername();
+        mResult.mPassword = deviceProfile.getVpnPassword();
+        mResult.mServerName = deviceProfile.getVpnServerDomain();
+        mResult.mServerPort = deviceProfile.getVpnServerPort();
         saveProfile(mResult, mContext);
 
         return mResult;
