@@ -9,6 +9,25 @@ public class SpeedDialButton {
     private String icon;
     private String dial;
 
+    private int dialButtonResId;
+    private String number;
+
+    public int getDialButtonResId() {
+        return dialButtonResId;
+    }
+
+    public void setDialButtonResId(int dialButtonResId) {
+        this.dialButtonResId = dialButtonResId;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
     public String getLabel() {
         return label;
     }

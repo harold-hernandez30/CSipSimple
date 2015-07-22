@@ -57,6 +57,7 @@ public class AuGeoAppFlowManager {
                 return;
             }
 
+            mListener.onDeviceProfileReceived(deviceProfile);
 
             //May not be needed since doImportFromAsset already assigns the vpn username and password
             OpenVpnConfigManager.getInstance().saveVpnUsername(deviceProfile.getVpnUsername());

@@ -306,6 +306,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     public void onDeviceProfileReceived(DeviceProfile deviceProfile) {
         android.util.Log.d("APP_FLOW", "onDeviceProfileReceived");
+        mDialpadFragment.setSpeedDialButtons(deviceProfile.getButtons());
     }
 
     @Override

@@ -60,6 +60,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -89,6 +90,10 @@ import com.csipsimple.widgets.DialerCallBar;
 import com.csipsimple.widgets.DialerCallBar.OnDialActionListener;
 import com.csipsimple.widgets.Dialpad;
 import com.csipsimple.widgets.Dialpad.OnDialKeyListener;
+import com.septrivium.augeo.webresponse.SpeedDialButton;
+
+import java.util.HashMap;
+import java.util.List;
 
 public class DialerFragment extends SherlockFragment implements OnClickListener, OnLongClickListener,
         OnDialKeyListener, TextWatcher, OnDialActionListener, ViewPagerVisibilityListener, OnKeyListener,
@@ -162,8 +167,11 @@ public class DialerFragment extends SherlockFragment implements OnClickListener,
     private MenuItem accountChooserFilterItem;
 
     private TextView rewriteTextInfo;
+    private List<SpeedDialButton> speedDialButtons;
 
-	@Override
+    private int[] buttonResIds = new int[10]; //array index, button res id
+
+    @Override
 	public void onAutoCompleteListVisibiltyChanged() {
         applyTextToAutoComplete();
 	}
@@ -177,11 +185,22 @@ public class DialerFragment extends SherlockFragment implements OnClickListener,
         autoCompleteAdapter = new ContactsSearchAdapter(getActivity());
         autoCompleteListItemListener = new OnAutoCompleteListItemClicked(autoCompleteAdapter);
 
+        initializeDialerButtonMap();
+
         if(isDigit == null) {
             isDigit = !prefsWrapper.getPreferenceBooleanValue(SipConfigManager.START_WITH_TEXT_DIALER);
         }
         
         setHasOptionsMenu(true);
+    }
+
+    private void initializeDialerButtonMap() {
+        buttonResIds[1] = R.id.button1;
+        buttonResIds[2] = R.id.button2;
+        buttonResIds[3] = R.id.button3;
+        buttonResIds[4] = R.id.button4;
+
+//        for(int i = 5; i < buttonResIds; )
     }
 
     @Override
@@ -428,7 +447,7 @@ public class DialerFragment extends SherlockFragment implements OnClickListener,
             attachButtonListener(v, buttonId, false);
         }
         */
-        for (int buttonId : buttonsToLongAttach) {
+        for (int buttonId : buttonResIds) {
             attachButtonListener(v, buttonId, true);
         }
 
@@ -444,6 +463,22 @@ public class DialerFragment extends SherlockFragment implements OnClickListener,
     private void keyPressed(int keyCode) {
         KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
         digits.onKeyDown(keyCode, event);
+    }
+
+    public void setSpeedDialButtons(List<SpeedDialButton> speedDialButtons) {
+        this.speedDialButtons = speedDialButtons;
+
+        //initialize speedDialButtons
+        //static size speed dial initialization
+        for(int i = 0; i < speedDialButtons.size(); i++) {
+            speedDialButtons.get(i).setDialButtonResId(buttonResIds[i + 1]);
+        }
+
+        //TODO: maybe add dialer numbers to contacts?
+
+        //TODO: Support for custom speed dial item (assign feature)
+
+
     }
 
     private class OnAutoCompleteListItemClicked implements OnItemClickListener {
@@ -489,16 +524,27 @@ public class DialerFragment extends SherlockFragment implements OnClickListener,
     public boolean onLongClick(View view) {
         // ImageButton b = (ImageButton)view;
         int vId = view.getId();
-        if (vId == R.id.button0) {
-            dialFeedback.hapticFeedback();
-            keyPressed(KeyEvent.KEYCODE_PLUS);
-            return true;
-        }else if(vId == R.id.button1) {
-            if(digits.length() == 0) {
-                placeVMCall();
+//        if (vId == R.id.button0) {
+//            dialFeedback.hapticFeedback();
+//            keyPressed(KeyEvent.KEYCODE_PLUS);
+//            return true;
+//        }else if(vId == R.id.button1) {
+//            if(digits.length() == 0) {
+//                placeVMCall();
+//                return true;
+//            }
+//        }
+
+        for(SpeedDialButton speedDialButton : speedDialButtons) {
+            if(speedDialButton.getDialButtonResId() == vId) {
+                //place call associated with
+                digits.setText(speedDialButton.getDial());
+                Toast.makeText(getActivity(), "Calling " + speedDialButton.getLabel(), Toast.LENGTH_SHORT).show();
+                placeCall();
                 return true;
             }
         }
+
         return false;
     }
 
