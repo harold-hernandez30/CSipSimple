@@ -2,52 +2,12 @@ package com.septrivium.augeo.webresponse;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Created by harold on 7/15/2015.
  */
 public class DeviceProfile {
-/**
- *
- * {"devices":[
- {"device_id":"13",
- "ein":"357441053465113",
- "mac":"","protocol":"sip",
- "server":"172.27.3.15",
- "username":"223","password":"027bbd169197dc36cada5f6e6fa7f640",
- "vpn_username":"richard",
- "vpn_password":"richard"}]}
-
-
- {
-    "devices":[
-        {
-        "device_id":"13",
-        "ein":"357441053465113",
-        "mac":"","protocol":"sip",
-        "server":"172.27.3.15",
-        "username":"223",
-        "password":"027bbd169197dc36cada5f6e6fa7f640"
-        }
-    ],
-    "vpn_username":"richard",
-    "vpn_password":"richard"
- }
-
- {
- "devices":[
-        {
-         "device_id":"13",
-         "ein":"357441053465113",
-         "mac":"","protocol":"sip",
-         "server":"172.27.3.15",
-         "username":"223",
-         "password":"027bbd169197dc36cada5f6e6fa7f640",
-         "vpn_username":"richard",
-         "vpn_password":"richard"
-        }
-    ]
- }
- */
 
     @SerializedName("device_id")
     private String deviceId;
@@ -68,6 +28,54 @@ public class DeviceProfile {
 
     @SerializedName("vpn_password")
     private String vpnPassword;
+
+    private List<SpeedDialButton> buttons;
+
+    @SerializedName("site_id")
+    private String siteId;
+
+
+    @SerializedName("vpn_server")
+    private String vpnServerDomain;
+
+    @SerializedName("vpn_port")
+    private String vpnServerPort;
+
+    public String getSipUpsername() {
+        return sipUpsername;
+    }
+
+    public List<SpeedDialButton> getButtons() {
+        return buttons;
+    }
+
+    public void setButtons(List<SpeedDialButton> buttons) {
+        this.buttons = buttons;
+    }
+
+    public String getSiteId() {
+        return siteId;
+    }
+
+    public void setSiteId(String siteId) {
+        this.siteId = siteId;
+    }
+
+    public String getVpnServerDomain() {
+        return vpnServerDomain;
+    }
+
+    public void setVpnServerDomain(String vpnServerDomain) {
+        this.vpnServerDomain = vpnServerDomain;
+    }
+
+    public String getVpnServerPort() {
+        return vpnServerPort;
+    }
+
+    public void setVpnServerPort(String vpnServerPort) {
+        this.vpnServerPort = vpnServerPort;
+    }
 
     public String getDeviceId() {
         return deviceId;
@@ -132,6 +140,7 @@ public class DeviceProfile {
     public void setVpnPassword(String vpnPassword) {
         this.vpnPassword = vpnPassword;
     }
+
 
     @Override
     public String toString() {

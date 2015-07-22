@@ -37,4 +37,6 @@ public class AuGeoWebAPIManager {
     public AuGeoWebService getWebService() {
         return mWebService;
     }
+
+    //For debugging:       String responseInString = new String(((TypedByteArray) response.getBody()).getBytes());
 }
