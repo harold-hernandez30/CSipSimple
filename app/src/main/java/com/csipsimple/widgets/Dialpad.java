@@ -171,7 +171,7 @@ public class Dialpad extends FrameLayout implements OnClickListener {
 			Bitmap srcBitmap = srcBitmapWeakReference.get();
 			if(srcBitmap == null) return null;
 
-			Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(dstIconUrl, new ImageSize(srcBitmap.getWidth()/4, srcBitmap.getHeight()/4));
+			Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(dstIconUrl, new ImageSize(60, 60));
 			if(dstBitmap == null) {
 
 				Log.d("DIAL_PAD", "cannot download: " + dstIconUrl);
