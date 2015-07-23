@@ -14,12 +14,14 @@ public class RetryWithDelay
         implements Func1<Observable<? extends Throwable>, Observable<?>> {
 
     private final int _maxRetries;
-    private final int _retryDelayMillis;
     private int _retryCount;
 
-    public RetryWithDelay(final int maxRetries, final int retryDelayMillis) {
+    /**
+     *
+     * @param maxRetries
+     */
+    public RetryWithDelay(final int maxRetries) {
         _maxRetries = maxRetries;
-        _retryDelayMillis = retryDelayMillis;
         _retryCount = 0;
     }
 
