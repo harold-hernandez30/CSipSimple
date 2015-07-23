@@ -44,6 +44,7 @@ import com.csipsimple.utils.Log;
 import com.csipsimple.utils.Theme;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.septrivium.augeo.rxhelper.RetryWithDelay;
 import com.septrivium.augeo.util.BitmapUtils;
 import com.septrivium.augeo.webresponse.SpeedDialButton;
 
@@ -175,12 +176,13 @@ public class Dialpad extends FrameLayout implements OnClickListener {
                         return null;
                     }
                 })
+                .retryWhen(new RetryWithDelay(3, 1000)) //retry 3 times, every 1 second
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<SpeedDialButton>() {
                     @Override
                     public void call(SpeedDialButton speedDialButton) {
-                        if(speedDialButton == null) {
+                        if (speedDialButton == null) {
                             return;
                         }
                         final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
