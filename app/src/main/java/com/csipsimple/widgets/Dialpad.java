@@ -190,7 +190,6 @@ public class Dialpad extends FrameLayout implements OnClickListener {
 
 			if(imageButton != null && resultBitmap != null) {
 				imageButton.setImageBitmap(resultBitmap);
-				Log.d("DIAL_PAD", "setting new combined bitmap");
 			}
 
 		}

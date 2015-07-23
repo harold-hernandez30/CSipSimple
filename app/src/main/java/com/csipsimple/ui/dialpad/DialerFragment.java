@@ -488,13 +488,13 @@ public class DialerFragment extends SherlockFragment implements OnClickListener,
     private void assignDummySpeedDialIconUrls(List<SpeedDialButton> speedDialButtons) {
         for(SpeedDialButton speedDialButton : speedDialButtons) {
             if(speedDialButton.getLabel().equalsIgnoreCase("Front Desk")) {
-                speedDialButton.setIcon("https://maxcdn.icons8.com/wp-content/uploads/2015/01/frontdesk.png");
+                speedDialButton.setIcon("http://b.dryicons.com/images/icon_sets/pixelistica_blue_icons/png/128x128/reception_bell.png");
             } else if(speedDialButton.getLabel().equalsIgnoreCase("Housekeeping")) {
-                speedDialButton.setIcon("https://maxcdn.icons8.com/wp-content/uploads/2015/01/housekeeping.png");
+                speedDialButton.setIcon("http://vancouver.housing.ubc.ca/wp-content/uploads/2014/02/icon_facilities_cleaning.png");
             } else if(speedDialButton.getLabel().equalsIgnoreCase("Room Service")) {
                 speedDialButton.setIcon("http://images.clipartpanda.com/serve-clipart-hotel-icon-room-service-clip-art-bw-md.png");
             } else if(speedDialButton.getLabel().equalsIgnoreCase("Operator")) {
-                speedDialButton.setIcon("https://cdn4.iconfinder.com/data/icons/professionals/512/dispatcher-512.png");
+                speedDialButton.setIcon("http://i.istockimg.com/file_thumbview_approve/43964724/3/stock-illustration-43964724-flat-call-center-icon.jpg");
             }
         }
     }
