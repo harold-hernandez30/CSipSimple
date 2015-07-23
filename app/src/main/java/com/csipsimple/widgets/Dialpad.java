@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 
 import rx.Observable;
+import rx.Observer;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -152,35 +153,51 @@ public class Dialpad extends FrameLayout implements OnClickListener {
 
     public void applySpeedDialIcons(List<SpeedDialButton> speedDialButtons) {
 
-        //TODO: convert to rxJava
         Observable<SpeedDialButton> speedDialButtonObservable = Observable.from(speedDialButtons);
 
         speedDialButtonObservable
-
                 .map(new Func1<SpeedDialButton, SpeedDialButton>() {
                     @Override
                     public SpeedDialButton call(SpeedDialButton speedDialButton) {
                         final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
                         final Bitmap srcBitmap = ((BitmapDrawable) imageButton.getDrawable()).getBitmap();
-                        final Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(speedDialButton.getIcon(), new ImageSize(60, 60));
-                        final Bitmap newBitmap =  BitmapUtils.combineImage(srcBitmap, dstBitmap, PorterDuff.Mode.DST_OVER);
+                        Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(speedDialButton.getIcon(), new ImageSize(60, 60));
+
+                        if (dstBitmap == null) {
+                            throw new RuntimeException("");
+                        }
+
+                        final Bitmap newBitmap = BitmapUtils.combineImage(srcBitmap, dstBitmap, PorterDuff.Mode.DST_OVER);
 
                         ImageLoader.getInstance().getMemoryCache().put(speedDialButton.getIcon() + "_compound", newBitmap);
                         return speedDialButton;
 
                     }
+
+
                 })
                 .retryWhen(new RetryWithDelay(5)) //retry 5 times, x * x seconds
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<SpeedDialButton>() {
+                .subscribe(new Observer<SpeedDialButton>() {
                     @Override
-                    public void call(SpeedDialButton speedDialButton) {
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(SpeedDialButton speedDialButton) {
                         if (speedDialButton == null) {
                             return;
                         }
                         final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
                         imageButton.setImageBitmap(ImageLoader.getInstance().getMemoryCache().get(speedDialButton.getIcon() + "_compound"));
+
                     }
                 });
 
