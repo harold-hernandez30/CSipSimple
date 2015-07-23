@@ -54,7 +54,10 @@ import java.util.Map;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 
 public class Dialpad extends FrameLayout implements OnClickListener {
@@ -112,7 +115,7 @@ public class Dialpad extends FrameLayout implements OnClickListener {
         /**
          * Called when the user make an action
          *
-         * @param keyCode keyCode pressed
+         * @param keyCode  keyCode pressed
          * @param dialTone corresponding dialtone
          */
         void onTrigger(int keyCode, int dialTone);
@@ -149,39 +152,48 @@ public class Dialpad extends FrameLayout implements OnClickListener {
     public void applySpeedDialIcons(List<SpeedDialButton> speedDialButtons) {
 
         //TODO: convert to rxJava
-//		Observable<SpeedDialButton> speedDialButtonObservable = Observable.from(speedDialButtons);
-//
-//		speedDialButtonObservable
-//
-//				.map(new Func1<SpeedDialButton, Bitmap>() {
-//					@Override
-//					public Bitmap call(SpeedDialButton speedDialButton) {
-//						for(int buttonId : DIGITS_BTNS.keySet()) {
-//							if(speedDialButton.getDialButtonResId() == buttonId) {
-//								final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
-//								final Bitmap srcBitmap = ((BitmapDrawable)imageButton.getDrawable()).getBitmap();
-//								final Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(speedDialButton.getIcon(), new ImageSize(60, 60))
-//								BitmapUtils.combineImage(bitmap, dstBitmap, PorterDuff.Mode.DST_OVER)
-//
-//								break; //break out of inner loop. Look for
-//							}
-//
-//						}
-//
-//
-//						return ;
-//					}
-//				});
+        Observable<SpeedDialButton> speedDialButtonObservable = Observable.from(speedDialButtons);
 
+        speedDialButtonObservable
 
-        for (SpeedDialButton speedDialButton : speedDialButtons) {
-            if (speedDialButton.getDialButtonResId() == speedDialButton.getDialButtonResId()) {
-                final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
-                final Bitmap bitmap = ((BitmapDrawable) imageButton.getDrawable()).getBitmap();
+                .map(new Func1<SpeedDialButton, SpeedDialButton>() {
+                    @Override
+                    public SpeedDialButton call(SpeedDialButton speedDialButton) {
+                        final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
+                        final Bitmap srcBitmap = ((BitmapDrawable) imageButton.getDrawable()).getBitmap();
+                        final Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(speedDialButton.getIcon(), new ImageSize(60, 60));
+                        final Bitmap newBitmap =  BitmapUtils.combineImage(srcBitmap, dstBitmap, PorterDuff.Mode.DST_OVER);
 
-                new BindImageTask(imageButton, bitmap, speedDialButton.getIcon()).execute();
-            }
-        }
+                        ImageLoader.getInstance().getMemoryCache().put(speedDialButton.getIcon() + "_compound", newBitmap);
+                        return speedDialButton;
+
+                    }
+                })
+                .onErrorReturn(new Func1<Throwable, SpeedDialButton>() {
+                    @Override
+                    public SpeedDialButton call(Throwable throwable) {
+                        return null;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<SpeedDialButton>() {
+                    @Override
+                    public void call(SpeedDialButton speedDialButton) {
+                        if(speedDialButton == null) {
+                            return;
+                        }
+                        final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
+                        imageButton.setImageBitmap(ImageLoader.getInstance().getMemoryCache().get(speedDialButton.getIcon() + "_compound"));
+                    }
+                });
+
+//        for (SpeedDialButton speedDialButton : speedDialButtons) {
+//            final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
+//            final Bitmap bitmap = ((BitmapDrawable) imageButton.getDrawable()).getBitmap();
+//
+//            new BindImageTask(imageButton, bitmap, speedDialButton.getIcon()).execute();
+//        }
     }
 
     private class BindImageTask extends AsyncTask<Void, Void, Bitmap> {
@@ -228,8 +240,7 @@ public class Dialpad extends FrameLayout implements OnClickListener {
     /**
      * Registers a callback to be invoked when the user triggers an event.
      *
-     * @param listener
-     *            the OnTriggerListener to attach to this view
+     * @param listener the OnTriggerListener to attach to this view
      */
     public void setOnDialKeyListener(OnDialKeyListener listener) {
         onDialKeyListener = listener;
@@ -248,7 +259,7 @@ public class Dialpad extends FrameLayout implements OnClickListener {
 
     }
     /*
-	boolean mForceWidth = false;
+    boolean mForceWidth = false;
 	public void setForceWidth(boolean forceWidth) {
 	    mForceWidth = forceWidth;
 	}
