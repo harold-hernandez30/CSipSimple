@@ -170,12 +170,6 @@ public class Dialpad extends FrameLayout implements OnClickListener {
 
                     }
                 })
-                .onErrorReturn(new Func1<Throwable, SpeedDialButton>() {
-                    @Override
-                    public SpeedDialButton call(Throwable throwable) {
-                        return null;
-                    }
-                })
                 .retryWhen(new RetryWithDelay(3, 1000)) //retry 3 times, every 1 second
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
