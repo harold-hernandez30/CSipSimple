@@ -1,22 +1,22 @@
 /**
  * Copyright (C) 2010-2012 Regis Montoya (aka r3gis - www.r3gis.fr)
  * This file is part of CSipSimple.
- *
- *  CSipSimple is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  If you own a pjsip commercial license you can also redistribute it
- *  and/or modify it under the terms of the GNU Lesser General Public License
- *  as an android library.
- *
- *  CSipSimple is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with CSipSimple.  If not, see <http://www.gnu.org/licenses/>.
+ * <p/>
+ * CSipSimple is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * If you own a pjsip commercial license you can also redistribute it
+ * and/or modify it under the terms of the GNU Lesser General Public License
+ * as an android library.
+ * <p/>
+ * CSipSimple is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU General Public License
+ * along with CSipSimple.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.csipsimple.widgets;
@@ -52,173 +52,202 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Func1;
+
 
 public class Dialpad extends FrameLayout implements OnClickListener {
 
-	private OnDialKeyListener onDialKeyListener;
-	
-	// Here we need a map to quickly find if the clicked button id is in the map keys
-	@SuppressLint("UseSparseArrays")
+    private OnDialKeyListener onDialKeyListener;
+
+    // Here we need a map to quickly find if the clicked button id is in the map keys
+    @SuppressLint("UseSparseArrays")
     private static final Map<Integer, int[]> DIGITS_BTNS = new HashMap<Integer, int[]>();
-	
-	static {
-		DIGITS_BTNS.put(R.id.button0, new int[] {ToneGenerator.TONE_DTMF_0, KeyEvent.KEYCODE_0});
-		DIGITS_BTNS.put(R.id.button1, new int[] {ToneGenerator.TONE_DTMF_1, KeyEvent.KEYCODE_1});
-		DIGITS_BTNS.put(R.id.button2, new int[] {ToneGenerator.TONE_DTMF_2, KeyEvent.KEYCODE_2});
-		DIGITS_BTNS.put(R.id.button3, new int[] {ToneGenerator.TONE_DTMF_3, KeyEvent.KEYCODE_3});
-		DIGITS_BTNS.put(R.id.button4, new int[] {ToneGenerator.TONE_DTMF_4, KeyEvent.KEYCODE_4});
-		DIGITS_BTNS.put(R.id.button5, new int[] {ToneGenerator.TONE_DTMF_5, KeyEvent.KEYCODE_5});
-		DIGITS_BTNS.put(R.id.button6, new int[] {ToneGenerator.TONE_DTMF_6, KeyEvent.KEYCODE_6});
-		DIGITS_BTNS.put(R.id.button7, new int[] {ToneGenerator.TONE_DTMF_7, KeyEvent.KEYCODE_7});
-		DIGITS_BTNS.put(R.id.button8, new int[] {ToneGenerator.TONE_DTMF_8, KeyEvent.KEYCODE_8});
-		DIGITS_BTNS.put(R.id.button9, new int[] {ToneGenerator.TONE_DTMF_9, KeyEvent.KEYCODE_9});
-		DIGITS_BTNS.put(R.id.buttonpound, new int[] {ToneGenerator.TONE_DTMF_P, KeyEvent.KEYCODE_POUND});
-		DIGITS_BTNS.put(R.id.buttonstar, new int[] {ToneGenerator.TONE_DTMF_S, KeyEvent.KEYCODE_STAR});
-	};
-	
-	private static final SparseArray<String> DIGITS_NAMES = new SparseArray<String>();
+
+    static {
+        DIGITS_BTNS.put(R.id.button0, new int[]{ToneGenerator.TONE_DTMF_0, KeyEvent.KEYCODE_0});
+        DIGITS_BTNS.put(R.id.button1, new int[]{ToneGenerator.TONE_DTMF_1, KeyEvent.KEYCODE_1});
+        DIGITS_BTNS.put(R.id.button2, new int[]{ToneGenerator.TONE_DTMF_2, KeyEvent.KEYCODE_2});
+        DIGITS_BTNS.put(R.id.button3, new int[]{ToneGenerator.TONE_DTMF_3, KeyEvent.KEYCODE_3});
+        DIGITS_BTNS.put(R.id.button4, new int[]{ToneGenerator.TONE_DTMF_4, KeyEvent.KEYCODE_4});
+        DIGITS_BTNS.put(R.id.button5, new int[]{ToneGenerator.TONE_DTMF_5, KeyEvent.KEYCODE_5});
+        DIGITS_BTNS.put(R.id.button6, new int[]{ToneGenerator.TONE_DTMF_6, KeyEvent.KEYCODE_6});
+        DIGITS_BTNS.put(R.id.button7, new int[]{ToneGenerator.TONE_DTMF_7, KeyEvent.KEYCODE_7});
+        DIGITS_BTNS.put(R.id.button8, new int[]{ToneGenerator.TONE_DTMF_8, KeyEvent.KEYCODE_8});
+        DIGITS_BTNS.put(R.id.button9, new int[]{ToneGenerator.TONE_DTMF_9, KeyEvent.KEYCODE_9});
+        DIGITS_BTNS.put(R.id.buttonpound, new int[]{ToneGenerator.TONE_DTMF_P, KeyEvent.KEYCODE_POUND});
+        DIGITS_BTNS.put(R.id.buttonstar, new int[]{ToneGenerator.TONE_DTMF_S, KeyEvent.KEYCODE_STAR});
+    }
+
+    ;
+
+    private static final SparseArray<String> DIGITS_NAMES = new SparseArray<String>();
 
     private static final String THIS_FILE = null;
-	static {
-		DIGITS_NAMES.put(R.id.button0, "0");
-		DIGITS_NAMES.put(R.id.button1, "1");
-		DIGITS_NAMES.put(R.id.button2, "2");
-		DIGITS_NAMES.put(R.id.button3, "3");
-		DIGITS_NAMES.put(R.id.button4, "4");
-		DIGITS_NAMES.put(R.id.button5, "5");
-		DIGITS_NAMES.put(R.id.button6, "6");
-		DIGITS_NAMES.put(R.id.button7, "7");
-		DIGITS_NAMES.put(R.id.button8, "8");
-		DIGITS_NAMES.put(R.id.button9, "9");
-		DIGITS_NAMES.put(R.id.buttonpound, "pound");
-		DIGITS_NAMES.put(R.id.buttonstar, "star");
-	};
-	
-	/**
-	 * Interface definition for a callback to be invoked when a tab is triggered
-	 * by moving it beyond a target zone.
-	 */
-	public interface OnDialKeyListener {
-		
-		/**
-		 * Called when the user make an action
-		 * 
-		 * @param keyCode keyCode pressed
-		 * @param dialTone corresponding dialtone
-		 */
-		void onTrigger(int keyCode, int dialTone);
-	}
-	
-	public Dialpad(Context context) {
+
+    static {
+        DIGITS_NAMES.put(R.id.button0, "0");
+        DIGITS_NAMES.put(R.id.button1, "1");
+        DIGITS_NAMES.put(R.id.button2, "2");
+        DIGITS_NAMES.put(R.id.button3, "3");
+        DIGITS_NAMES.put(R.id.button4, "4");
+        DIGITS_NAMES.put(R.id.button5, "5");
+        DIGITS_NAMES.put(R.id.button6, "6");
+        DIGITS_NAMES.put(R.id.button7, "7");
+        DIGITS_NAMES.put(R.id.button8, "8");
+        DIGITS_NAMES.put(R.id.button9, "9");
+        DIGITS_NAMES.put(R.id.buttonpound, "pound");
+        DIGITS_NAMES.put(R.id.buttonstar, "star");
+    }
+
+    ;
+
+    /**
+     * Interface definition for a callback to be invoked when a tab is triggered
+     * by moving it beyond a target zone.
+     */
+    public interface OnDialKeyListener {
+
+        /**
+         * Called when the user make an action
+         *
+         * @param keyCode keyCode pressed
+         * @param dialTone corresponding dialtone
+         */
+        void onTrigger(int keyCode, int dialTone);
+    }
+
+    public Dialpad(Context context) {
         super(context);
         initLayout(context);
     }
-	
-	public Dialpad(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		initLayout(context);
-	}
-	
-	private void initLayout(Context context) {
+
+    public Dialpad(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        initLayout(context);
+    }
+
+    private void initLayout(Context context) {
         LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.dialpad, this, true);
-	}
-	
-	@Override
-	protected void onFinishInflate() {
-		super.onFinishInflate();
-		
-		for(int buttonId : DIGITS_BTNS.keySet()) {
-			ImageButton button = (ImageButton) findViewById(buttonId);
-			if(button != null) {
-			    button.setOnClickListener(this);
-			}
-		}
-		
-	}
+    }
 
-	public void applySpeedDialIcons(List<SpeedDialButton> speedDialButtons) {
-		for(SpeedDialButton speedDialButton : speedDialButtons) {
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
 
-			for(int buttonId : DIGITS_BTNS.keySet()) {
-				if(speedDialButton.getDialButtonResId() == buttonId) {
-					ImageButton imageButton = (ImageButton) findViewById(buttonId);
-					Bitmap bitmap = ((BitmapDrawable)imageButton.getDrawable()).getBitmap();
+        for (int buttonId : DIGITS_BTNS.keySet()) {
+            ImageButton button = (ImageButton) findViewById(buttonId);
+            if (button != null) {
+                button.setOnClickListener(this);
+            }
+        }
 
-					new BindImageTask(imageButton, bitmap, speedDialButton.getIcon()).execute();
-					break; //break out of inner loop. Look for
-				}
+    }
 
-			}
-		}
-	}
+    public void applySpeedDialIcons(List<SpeedDialButton> speedDialButtons) {
 
-	private class BindImageTask extends AsyncTask<Void, Void, Bitmap> {
+        //TODO: convert to rxJava
+//		Observable<SpeedDialButton> speedDialButtonObservable = Observable.from(speedDialButtons);
+//
+//		speedDialButtonObservable
+//
+//				.map(new Func1<SpeedDialButton, Bitmap>() {
+//					@Override
+//					public Bitmap call(SpeedDialButton speedDialButton) {
+//						for(int buttonId : DIGITS_BTNS.keySet()) {
+//							if(speedDialButton.getDialButtonResId() == buttonId) {
+//								final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
+//								final Bitmap srcBitmap = ((BitmapDrawable)imageButton.getDrawable()).getBitmap();
+//								final Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(speedDialButton.getIcon(), new ImageSize(60, 60))
+//								BitmapUtils.combineImage(bitmap, dstBitmap, PorterDuff.Mode.DST_OVER)
+//
+//								break; //break out of inner loop. Look for
+//							}
+//
+//						}
+//
+//
+//						return ;
+//					}
+//				});
 
-		private WeakReference<Bitmap> srcBitmapWeakReference;
-		private WeakReference<ImageButton> imageButtonWeakReference;
-		private String dstIconUrl;
 
-		BindImageTask(ImageButton imageButton, Bitmap srcBitmap, String dstIconUrl) {
+        for (SpeedDialButton speedDialButton : speedDialButtons) {
+            if (speedDialButton.getDialButtonResId() == speedDialButton.getDialButtonResId()) {
+                final ImageButton imageButton = (ImageButton) findViewById(speedDialButton.getDialButtonResId());
+                final Bitmap bitmap = ((BitmapDrawable) imageButton.getDrawable()).getBitmap();
 
-			srcBitmapWeakReference = new WeakReference<>(srcBitmap);
-			imageButtonWeakReference = new WeakReference<>(imageButton);
-			this.dstIconUrl = dstIconUrl;
-		}
+                new BindImageTask(imageButton, bitmap, speedDialButton.getIcon()).execute();
+            }
+        }
+    }
 
-		@Override
-		protected Bitmap doInBackground(Void... params) {
-			Bitmap srcBitmap = srcBitmapWeakReference.get();
-			if(srcBitmap == null) return null;
+    private class BindImageTask extends AsyncTask<Void, Void, Bitmap> {
 
-			Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(dstIconUrl, new ImageSize(60, 60));
-			if(dstBitmap == null) {
+        private WeakReference<Bitmap> srcBitmapWeakReference;
+        private WeakReference<ImageButton> imageButtonWeakReference;
+        private String dstIconUrl;
 
-				Log.d("DIAL_PAD", "cannot download: " + dstIconUrl);
-				return null;
-			}
+        BindImageTask(ImageButton imageButton, Bitmap srcBitmap, String dstIconUrl) {
 
-			return BitmapUtils.combineImage(srcBitmap, dstBitmap, PorterDuff.Mode.DST_OVER);
+            srcBitmapWeakReference = new WeakReference<>(srcBitmap);
+            imageButtonWeakReference = new WeakReference<>(imageButton);
+            this.dstIconUrl = dstIconUrl;
+        }
 
-		}
+        @Override
+        protected Bitmap doInBackground(Void... params) {
+            Bitmap srcBitmap = srcBitmapWeakReference.get();
+            if (srcBitmap == null) return null;
 
-		@Override
-		protected void onPostExecute(Bitmap resultBitmap) {
-			super.onPostExecute(resultBitmap);
+            Bitmap dstBitmap = ImageLoader.getInstance().loadImageSync(dstIconUrl, new ImageSize(60, 60));
+            if (dstBitmap == null) {
+                return null;
+            }
 
-			ImageButton imageButton = imageButtonWeakReference.get();
+            return BitmapUtils.combineImage(srcBitmap, dstBitmap, PorterDuff.Mode.DST_OVER);
 
-			if(imageButton != null && resultBitmap != null) {
-				imageButton.setImageBitmap(resultBitmap);
-			}
+        }
 
-		}
-	}
-	
-	
-	/**
-	 * Registers a callback to be invoked when the user triggers an event.
-	 * 
-	 * @param listener
-	 *            the OnTriggerListener to attach to this view
-	 */
-	public void setOnDialKeyListener(OnDialKeyListener listener) {
-		onDialKeyListener = listener;
-	}
+        @Override
+        protected void onPostExecute(Bitmap resultBitmap) {
+            super.onPostExecute(resultBitmap);
 
-	private void dispatchDialKeyEvent(int buttonId) {
-		if (onDialKeyListener != null && DIGITS_BTNS.containsKey(buttonId)) {
-			int[] datas = DIGITS_BTNS.get(buttonId);
-			onDialKeyListener.onTrigger(datas[1], datas[0]);
-		}
-	}
+            ImageButton imageButton = imageButtonWeakReference.get();
 
-	@Override
-	public void onClick(View v) {
-		dispatchDialKeyEvent(v.getId());
-		
-	}
-	/*
+            if (imageButton != null && resultBitmap != null) {
+                imageButton.setImageBitmap(resultBitmap);
+            }
+
+        }
+    }
+
+
+    /**
+     * Registers a callback to be invoked when the user triggers an event.
+     *
+     * @param listener
+     *            the OnTriggerListener to attach to this view
+     */
+    public void setOnDialKeyListener(OnDialKeyListener listener) {
+        onDialKeyListener = listener;
+    }
+
+    private void dispatchDialKeyEvent(int buttonId) {
+        if (onDialKeyListener != null && DIGITS_BTNS.containsKey(buttonId)) {
+            int[] datas = DIGITS_BTNS.get(buttonId);
+            onDialKeyListener.onTrigger(datas[1], datas[0]);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        dispatchDialKeyEvent(v.getId());
+
+    }
+    /*
 	boolean mForceWidth = false;
 	public void setForceWidth(boolean forceWidth) {
 	    mForceWidth = forceWidth;
@@ -231,27 +260,27 @@ public class Dialpad extends FrameLayout implements OnClickListener {
 	    }
 	};
     */
-	
 
-	public void applyTheme(Theme t) {
-	    
-		Log.d(THIS_FILE, "Theming in progress");
-		for(int buttonId : DIGITS_BTNS.keySet()) {
-			
-			ImageButton b = (ImageButton) findViewById(buttonId);
-			// We need to use state list as reused
-			t.applyBackgroundStateListDrawable(b, "btn_dial");
-			
-			// Src of button
-			Drawable src = t.getDrawableResource("dial_num_"+DIGITS_NAMES.get(buttonId));
-			if(src != null) {
-				b.setImageDrawable(src);
-			}
-			
-			// Padding of button
-			t.applyLayoutMargin(b, "dialpad_btn_margin");
-		}
-		
-	}
+
+    public void applyTheme(Theme t) {
+
+        Log.d(THIS_FILE, "Theming in progress");
+        for (int buttonId : DIGITS_BTNS.keySet()) {
+
+            ImageButton b = (ImageButton) findViewById(buttonId);
+            // We need to use state list as reused
+            t.applyBackgroundStateListDrawable(b, "btn_dial");
+
+            // Src of button
+            Drawable src = t.getDrawableResource("dial_num_" + DIGITS_NAMES.get(buttonId));
+            if (src != null) {
+                b.setImageDrawable(src);
+            }
+
+            // Padding of button
+            t.applyLayoutMargin(b, "dialpad_btn_margin");
+        }
+
+    }
 
 }
