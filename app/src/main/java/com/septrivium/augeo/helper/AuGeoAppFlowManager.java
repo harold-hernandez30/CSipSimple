@@ -9,6 +9,7 @@ import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.septrivium.augeo.persistence.AuGeoPreferenceManager;
 import com.septrivium.augeo.siphelper.sipprofilehelper.SipProfileBuilder;
 import com.septrivium.augeo.siphelper.sipprofilehelper.SipProfileDatabaseHelper;
 import com.septrivium.augeo.vpnhelper.ConfigConverter;
@@ -131,6 +132,7 @@ public class AuGeoAppFlowManager {
             deviceProfile = deviceResponse.getResponse().get(0);
             if(mListener != null) {
                 mListener.onDeviceProfileReceived(deviceProfile);
+                AuGeoPreferenceManager.getInstance().saveDeviceProfie(deviceProfile);
             }
         } else {
             if(mListener != null) {

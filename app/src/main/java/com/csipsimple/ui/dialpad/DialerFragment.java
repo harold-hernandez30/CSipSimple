@@ -31,6 +31,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -75,6 +77,7 @@ import com.csipsimple.api.SipManager;
 import com.csipsimple.api.SipProfile;
 import com.csipsimple.api.SipUri.ParsedSipContactInfos;
 import com.csipsimple.models.Filter;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.septrivium.augeo.ui.SipHome.ViewPagerVisibilityListener;
 import com.csipsimple.ui.dialpad.DialerLayout.OnAutoCompleteListVisibilityChangedListener;
 import com.csipsimple.utils.CallHandlerPlugin;
@@ -92,6 +95,8 @@ import com.csipsimple.widgets.Dialpad;
 import com.csipsimple.widgets.Dialpad.OnDialKeyListener;
 import com.septrivium.augeo.webresponse.SpeedDialButton;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -477,7 +482,26 @@ public class DialerFragment extends SherlockFragment implements OnClickListener,
         //FIXME: Current icon urls from server is empty. Provide dummy urls that have actual images for now.
         assignDummySpeedDialIconUrls(speedDialButtons);
 
-        dialPad.applySpeedDialIcons(speedDialButtons);
+
+        List<SpeedDialButton> requestedSpeedDialButtons = new ArrayList<>();
+        for(SpeedDialButton speedDialButton : speedDialButtons) {
+            Bitmap combinedIcon = ImageLoader.getInstance().getMemoryCache().get(speedDialButton.getCombinedIconKey());
+            if(combinedIcon != null) { // we already have the bitmap stored.
+                dialPad.setSpeedDialIcon(speedDialButton.getDialButtonResId(), combinedIcon);
+            } else { //We don't have it in memory yet. Go fetch it!
+                //But first, go and try to check disk cache
+                File cachedImage = ImageLoader.getInstance().getDiskCache().get(speedDialButton.getCombinedIconKey());
+                if(cachedImage != null) {
+                    Bitmap bitmap = BitmapFactory.decodeFile(cachedImage.getAbsolutePath());
+                    dialPad.setSpeedDialIcon(speedDialButton.getDialButtonResId(), bitmap);
+                } else { //No luck from disk, either.
+                    requestedSpeedDialButtons.add(speedDialButton);
+                }
+            }
+        }
+        if(!requestedSpeedDialButtons.isEmpty()) {
+            dialPad.applySpeedDialIcons(speedDialButtons);
+        }
         //TODO: maybe add dialer numbers to contacts?
 
         //TODO: Support for custom speed dial item (assign feature)

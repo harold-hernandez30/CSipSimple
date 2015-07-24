@@ -64,6 +64,7 @@ import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.septrivium.augeo.connection.ConnectionReciever;
 import com.septrivium.augeo.helper.AppFlowCallback;
 import com.septrivium.augeo.helper.AuGeoAppFlowManager;
+import com.septrivium.augeo.persistence.AuGeoPreferenceManager;
 import com.septrivium.augeo.vpnhelper.OpenVpnConfigManager;
 import com.septrivium.augeo.vpnhelper.OpenVpnHelper;
 import com.septrivium.augeo.webresponse.DeviceProfile;
@@ -193,6 +194,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
             ImageLoader.getInstance().init(getUILConfig().build());
         }
         OpenVpnConfigManager.init(this);
+        AuGeoPreferenceManager.init(this);
         ExternalAppDatabase extapps = new ExternalAppDatabase(this);
         extapps.addApp(getPackageName());
         mAugeoAppFlowManager = new AuGeoAppFlowManager(this, mHandler);
@@ -320,6 +322,11 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     public void onDeviceProfileRetreiveFailed() {
         android.util.Log.d("APP_FLOW", "onDeviceProfileRetreiveFailed");
+        DeviceProfile deviceProfile = AuGeoPreferenceManager.getInstance().getDeviceProfile();
+        if (deviceProfile != null) {
+            mDialpadFragment.setSpeedDialButtons(deviceProfile.getButtons());
+
+        }
     }
 
     @Override

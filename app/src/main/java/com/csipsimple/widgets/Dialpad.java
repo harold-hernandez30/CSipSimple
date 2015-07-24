@@ -44,10 +44,12 @@ import com.csipsimple.utils.Log;
 import com.csipsimple.utils.Theme;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 import com.septrivium.augeo.rxhelper.RetryWithDelay;
 import com.septrivium.augeo.util.BitmapUtils;
 import com.septrivium.augeo.webresponse.SpeedDialButton;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +103,10 @@ public class Dialpad extends FrameLayout implements OnClickListener {
         DIGITS_NAMES.put(R.id.button9, "9");
         DIGITS_NAMES.put(R.id.buttonpound, "pound");
         DIGITS_NAMES.put(R.id.buttonstar, "star");
+    }
+
+    public void setSpeedDialIcon(int dialButtonResId, Bitmap combinedIcon) {
+        ((ImageButton)findViewById(dialButtonResId)).setImageBitmap(combinedIcon);
     }
 
     ;
@@ -179,11 +185,22 @@ public class Dialpad extends FrameLayout implements OnClickListener {
                 .map(new Func1<Data, Data>() {
                     @Override
                     public Data call(Data data) {
-                        data.setCombinedBitmap(BitmapUtils.combineImage(data.getKeypadBitmap(),
+                        Bitmap combinedBitmap = BitmapUtils.combineImage(data.getKeypadBitmap(),
                                 data.speedDialIconBitmap,
-                                PorterDuff.Mode.DST_OVER));
+                                PorterDuff.Mode.DST_OVER);
+                        data.setCombinedBitmap(combinedBitmap);
                         data.getKeypadBitmap().recycle();
                         data.getSpeedDialIconBitmap().recycle();
+                        MemoryCacheUtils.removeFromCache(data.getSpeedDialButton().getIcon(),
+                                ImageLoader.getInstance().getMemoryCache());
+
+                        ImageLoader.getInstance().getMemoryCache().put(data.getSpeedDialButton().getCombinedIconKey(), combinedBitmap);
+                        try {
+                            ImageLoader.getInstance().getDiskCache().save(data.getSpeedDialButton().getCombinedIconKey(), combinedBitmap);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
                         return data;
                     }
                 })

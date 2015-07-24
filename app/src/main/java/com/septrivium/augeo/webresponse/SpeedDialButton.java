@@ -11,6 +11,8 @@ public class SpeedDialButton {
     private String icon;
     private String dial;
 
+    private boolean hasCombinedIcons;
+
     private int dialButtonResId;
     private String number;
 
@@ -54,4 +56,15 @@ public class SpeedDialButton {
         this.dial = dial;
     }
 
+    public boolean hasCombinedIcons() {
+        return hasCombinedIcons;
+    }
+
+    public void setHasCombinedIcons(boolean hasCombinedIcons) {
+        this.hasCombinedIcons = hasCombinedIcons;
+    }
+
+    public String getCombinedIconKey() {
+        return new StringBuilder().append(icon).append("_combined").toString();
+    }
 }
