@@ -42,8 +42,21 @@ public class AuGeoServiceFlowManager {
     private AppFlowCallback mListener;
     private OpenVPNStatusListener mOpenVpnStatusListener;
     private ResultData mResultData;
+    private static AuGeoServiceFlowManager sInstance;
+    private boolean isStarted = false;
+
+    public static AuGeoServiceFlowManager getInstance() {
+        if(sInstance == null) {
+            sInstance = new AuGeoServiceFlowManager();
+        }
+        return sInstance;
+    }
+
+    private AuGeoServiceFlowManager(){}
 
     public void startServices(final Context context, final String deviceId) {
+        if(isStarted) return;
+        isStarted = true;
         requestDeviceProfileObservable(deviceId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

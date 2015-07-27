@@ -49,7 +49,6 @@ import de.blinkt.openvpn.VpnProfile;
 public class AccountsEditList extends SherlockFragmentActivity implements  AppFlowCallback {
 
     private static final int ANDROID_CONFIRM_DIALOG = 101;
-    private AuGeoServiceFlowManager mAuGeoFlowManager;
     private Handler handler = new Handler();
     private BroadcastReceiver connectionReceiver;
     private String deviceID;
@@ -60,9 +59,8 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
 
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         deviceID = telephonyManager.getDeviceId();
-        mAuGeoFlowManager = new AuGeoServiceFlowManager();
-        mAuGeoFlowManager.registerAppFlowCallbackListener(this);
-        connectionReceiver = new ConnectionReciever(mAuGeoFlowManager);
+        AuGeoServiceFlowManager.getInstance().registerAppFlowCallbackListener(this);
+        connectionReceiver = new ConnectionReciever();
 
         Intent intent = VpnService.prepare(this);
         if (intent != null) {
@@ -70,7 +68,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
 
             android.util.Log.d("VPN_SERVICE_PREPARE", "AccountsEditList:onCreate()");
         } else {
-            mAuGeoFlowManager.startServices(this, deviceID);
+            AuGeoServiceFlowManager.getInstance().startServices(this, deviceID);
         }
         setContentView(R.layout.accounts_view);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -141,7 +139,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case ANDROID_CONFIRM_DIALOG:
-                    mAuGeoFlowManager.startServices(this, deviceID);
+                    AuGeoServiceFlowManager.getInstance().startServices(this, deviceID);
                     break;
             }
         } else if (resultCode == RESULT_CANCELED) {

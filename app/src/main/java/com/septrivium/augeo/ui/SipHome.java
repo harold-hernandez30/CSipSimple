@@ -140,7 +140,6 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private Thread asyncSanityChecker;
     private Tab warningTab;
     private ObjectAnimator warningTabfadeAnim;
-    private AuGeoServiceFlowManager mAugeoAppFlowManager;
 
     private android.os.Handler mHandler = new android.os.Handler();
     private AccountStatusContentObserver statusObserver;
@@ -166,12 +165,12 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                 }
                 if(accountStatusDisplay.statusLabel.contains("Error")) { //Hack
                     //Retry for 5 seconds
-                    if(mAugeoAppFlowManager != null) {
+                    if(AuGeoServiceFlowManager.getInstance() != null) {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 Toast.makeText(SipHome.this, "Retrying...", Toast.LENGTH_SHORT).show();
-                                mAugeoAppFlowManager.updateAllRegistered(SipHome.this);
+                                AuGeoServiceFlowManager.getInstance().updateAllRegistered(SipHome.this);
                             }
                         }, 1 * 1000);
                     }
@@ -199,9 +198,9 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         AuGeoPreferenceManager.init(this);
         ExternalAppDatabase extapps = new ExternalAppDatabase(this);
         extapps.addApp(getPackageName());
-        mAugeoAppFlowManager = new AuGeoServiceFlowManager();
-        mAugeoAppFlowManager.registerAppFlowCallbackListener(this);
-        connectionReciever = new ConnectionReciever(mAugeoAppFlowManager);
+        AuGeoServiceFlowManager.getInstance().registerAppFlowCallbackListener(this);
+        connectionReciever = new ConnectionReciever();
+        connectionReciever = new ConnectionReciever();
 
 
         Intent intent = VpnService.prepare(this);
@@ -298,7 +297,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         final String deviceID = telephonyManager.getDeviceId();
-        mAugeoAppFlowManager.startServices(this, deviceID);
+        AuGeoServiceFlowManager.getInstance().startServices(this, deviceID);
     }
 
     @Override

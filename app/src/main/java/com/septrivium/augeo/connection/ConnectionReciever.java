@@ -12,8 +12,6 @@ import com.septrivium.augeo.helper.AuGeoAppFlowManager;
 import com.septrivium.augeo.helper.AuGeoServiceFlowManager;
 
 public class ConnectionReciever extends BroadcastReceiver {
-    private AuGeoServiceFlowManager mAugeoAppFlowManager;
-
 
     //Do we need an instance of AuGeoAppFlowManager?
 
@@ -27,10 +25,9 @@ public class ConnectionReciever extends BroadcastReceiver {
      * - Not sure yet how the vpn handles this
      * -- How to restart the vpn service?
      * -- Should be able to update the isVpnConnected variable
-     * @param augeoAppFlowManager
+     *
      */
-    public ConnectionReciever(AuGeoServiceFlowManager augeoAppFlowManager) {
-        this.mAugeoAppFlowManager = augeoAppFlowManager;
+    public ConnectionReciever() {
     }
 
     @Override
@@ -43,18 +40,16 @@ public class ConnectionReciever extends BroadcastReceiver {
 
         if(isConnected) {
 
-            if(mAugeoAppFlowManager != null && (VpnService.prepare(context) == null)){
+            if((VpnService.prepare(context) == null)){
 
                 TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                 final String deviceID = telephonyManager.getDeviceId();
-                mAugeoAppFlowManager.startServices(context, deviceID);
+                AuGeoServiceFlowManager.getInstance().startServices(context, deviceID);
 //                android.util.Log.d("APP_FLOW_MANAGER", "start from: " + Log.getStackTraceString(new Throwable()));
             }
         } else { // DISCONNECTED
             // Update value of VPN isConnected.
-            if(mAugeoAppFlowManager != null) {
-                mAugeoAppFlowManager.disconnectVpn();
-            }
+                AuGeoServiceFlowManager.getInstance().disconnectVpn();
         }
     }
 }
