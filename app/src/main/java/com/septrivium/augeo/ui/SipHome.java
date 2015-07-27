@@ -326,6 +326,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     @Override
     public void onDeviceProfileRetreiveFailed() {
         android.util.Log.d("APP_FLOW", "onDeviceProfileRetreiveFailed");
+        assignDialPadFromDeviceProfilePrefs();
+    }
+
+    private void assignDialPadFromDeviceProfilePrefs() {
         DeviceProfile deviceProfile = AuGeoPreferenceManager.getInstance().getDeviceProfile();
         if (deviceProfile != null) {
             mDialpadFragment.setSpeedDialButtons(deviceProfile.getButtons());
@@ -755,6 +759,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         onForeground = true;
         registerReceiver(connectionReciever, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
+        assignDialPadFromDeviceProfilePrefs();
 
 
         prefProviderWrapper.setPreferenceBooleanValue(PreferencesWrapper.HAS_BEEN_QUIT, false);

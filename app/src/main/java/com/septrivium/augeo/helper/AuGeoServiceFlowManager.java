@@ -64,16 +64,22 @@ public class AuGeoServiceFlowManager {
 
                     @Override
                     public void onCompleted() {
-
+                        Log.d("RX_FLOW", "startServices(): onComplete()");
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         isStarted = false;
+                        Log.d("RX_FLOW", "startServices() error: " + e.getMessage());
                     }
 
                     @Override
                     public void onNext(final DeviceProfile deviceProfile) {
+                        Log.d("RX_FLOW", "startServices(): onNext()");
+                        AuGeoPreferenceManager.getInstance().saveDeviceProfie(deviceProfile);
+                        if (mListener != null) {
+                            mListener.onDeviceProfileReceived(deviceProfile);
+                        }
                         processResultData(context, deviceProfile);
                     }
                 });
@@ -87,17 +93,19 @@ public class AuGeoServiceFlowManager {
                 .subscribe(new Observer<ResultData>() {
                     @Override
                     public void onCompleted() {
-
+                        Log.d("RX_FLOW", " processResultData():onComplete()");
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         isStarted = false;
+                        Log.d("RX_FLOW", "processResultData():onError() " + e.getMessage());
                     }
 
                     @Override
                     public void onNext(ResultData resultData) {
                         startVPN(context, resultData.getVpnProfile());
+                        Log.d("RX_FLOW", "processResultData():onNext()");
 
                         mOpenVpnStatusListener = new OpenVPNStatusListener(context, resultData.getSipProfile(), mListener);
 
@@ -105,6 +113,7 @@ public class AuGeoServiceFlowManager {
                             OpenVpnHelper.getInstance().init(context, mOpenVpnStatusListener);
                         } catch (RemoteException e) {
                             e.printStackTrace();
+                            isStarted = false;
                         }
                     }
                 });
@@ -118,6 +127,7 @@ public class AuGeoServiceFlowManager {
                     @Override
                     public ResultData call(VpnProfile vpnProfile, SipProfile sipProfile) {
                         mResultData = new ResultData(vpnProfile, sipProfile);
+                        Log.d("RX_FLOW", "getResultData()");
                         return mResultData;
                     }
                 }
@@ -127,6 +137,8 @@ public class AuGeoServiceFlowManager {
     private Observable<DeviceProfile> requestDeviceProfileObservable(String deviceID) {
 
         return AuGeoWebAPIManager.getInstance().getWebService().requestDeviceProfileObservable(deviceID)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<AuGeoDeviceResponse, DeviceProfile>() {
                     @Override
                     public DeviceProfile call(AuGeoDeviceResponse deviceResponse) {
@@ -144,6 +156,7 @@ public class AuGeoServiceFlowManager {
                             }
                         }
 
+                        Log.d("RX_FLOW", "requestDeviceProfileObservable()");
                         return deviceProfile;
                     }
                 }).retryWhen(new RetryWithDelay(3));
@@ -154,12 +167,15 @@ public class AuGeoServiceFlowManager {
             @Override
             public void call(Subscriber<? super VpnProfile> subscriber) {
                 try {
+                    Log.d("RX_FLOW", "createVpnProfile():call()");
                     subscriber.onNext(new ConfigConverter(context).doImportFromAsset("augeo_android.ovpn", deviceProfile));
                     subscriber.onCompleted();
                 } catch (IOException e) {
+                    Log.d("RX_FLOW", "createVpnProfile():IOException");
                     e.printStackTrace();
                     subscriber.onError(e);
                 } catch (ConfigParser.ConfigParseError configParseError) {
+                    Log.d("RX_FLOW", "createVpnProfile():configParseError");
                     configParseError.printStackTrace();
                     subscriber.onError(configParseError);
                 }
@@ -171,6 +187,7 @@ public class AuGeoServiceFlowManager {
         return Observable.create(new Observable.OnSubscribe<SipProfile>() {
             @Override
             public void call(Subscriber<? super SipProfile> subscriber) {
+                Log.d("RX_FLOW", "convertToSipProfile():onNext()");
                 subscriber.onNext(SipProfileBuilder.generateFromDeviceProfile(deviceProfile));
                 subscriber.onCompleted();
             }
@@ -201,6 +218,7 @@ public class AuGeoServiceFlowManager {
         @Override
         public void onVpnConnected() {
             Log.d("APP_FLOW", "VPN Connected. (should wait 3 seconds before creating profile.)");
+            Log.d("RX_FLOW", "onVpnConnected()");
 
             SipProfileDatabaseHelper.createProfileAndRegister(context, sipProfile);
             listener.onSipAccountSavedToDatabase(sipProfile);
@@ -214,7 +232,8 @@ public class AuGeoServiceFlowManager {
 
         @Override
         public void onVpnFailed() {
-
+            Log.d("RX_FLOW", "onVpnFailed()");
+            isStarted = false;
         }
     }
 
