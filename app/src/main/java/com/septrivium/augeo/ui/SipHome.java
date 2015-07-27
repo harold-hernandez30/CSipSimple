@@ -44,6 +44,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +65,7 @@ import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.septrivium.augeo.connection.ConnectionReciever;
 import com.septrivium.augeo.helper.AppFlowCallback;
 import com.septrivium.augeo.helper.AuGeoAppFlowManager;
+import com.septrivium.augeo.helper.AuGeoServiceFlowManager;
 import com.septrivium.augeo.persistence.AuGeoPreferenceManager;
 import com.septrivium.augeo.vpnhelper.OpenVpnConfigManager;
 import com.septrivium.augeo.vpnhelper.OpenVpnHelper;
@@ -138,7 +140,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     private Thread asyncSanityChecker;
     private Tab warningTab;
     private ObjectAnimator warningTabfadeAnim;
-    private AuGeoAppFlowManager mAugeoAppFlowManager;
+    private AuGeoServiceFlowManager mAugeoAppFlowManager;
 
     private android.os.Handler mHandler = new android.os.Handler();
     private AccountStatusContentObserver statusObserver;
@@ -169,7 +171,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
                             @Override
                             public void run() {
                                 Toast.makeText(SipHome.this, "Retrying...", Toast.LENGTH_SHORT).show();
-                                mAugeoAppFlowManager.updateAllRegistered();
+                                mAugeoAppFlowManager.updateAllRegistered(SipHome.this);
                             }
                         }, 1 * 1000);
                     }
@@ -197,7 +199,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         AuGeoPreferenceManager.init(this);
         ExternalAppDatabase extapps = new ExternalAppDatabase(this);
         extapps.addApp(getPackageName());
-        mAugeoAppFlowManager = new AuGeoAppFlowManager(this, mHandler);
+        mAugeoAppFlowManager = new AuGeoServiceFlowManager();
         mAugeoAppFlowManager.registerAppFlowCallbackListener(this);
         connectionReciever = new ConnectionReciever(mAugeoAppFlowManager);
 
@@ -293,7 +295,10 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     }
 
     private void startAppFlow() {
-        mAugeoAppFlowManager.start();
+
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        final String deviceID = telephonyManager.getDeviceId();
+        mAugeoAppFlowManager.startServices(this, deviceID);
     }
 
     @Override

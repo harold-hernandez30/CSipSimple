@@ -26,8 +26,8 @@ public class SipProfileBuilder {
         account.username = deviceProfile.getSipUsername();
         account.data = deviceProfile.getSipPassword();
 
-        account.scheme = SipProfile.CRED_SCHEME_DIGEST;
         account.datatype = SipProfile.CRED_DATA_PLAIN_PASSWD;
+        account.scheme = SipProfile.CRED_SCHEME_DIGEST;
 
         account.reg_timeout = 5 * 1000;
         account.transport = SipProfile.TRANSPORT_TCP;

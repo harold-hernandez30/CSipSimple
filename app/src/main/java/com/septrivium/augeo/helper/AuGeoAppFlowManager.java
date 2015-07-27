@@ -47,10 +47,10 @@ public class AuGeoAppFlowManager {
         public void run() {
 
             try {
-                if(deviceProfile == null) {
+                if (deviceProfile == null) {
                     deviceProfile = registerDeviceProfileReceived();
                 }
-                if(deviceProfile == null) return;
+                if (deviceProfile == null) return;
             } catch (Exception e) {
                 e.printStackTrace();
                 isStarted = false;
@@ -60,11 +60,8 @@ public class AuGeoAppFlowManager {
 
             mListener.onDeviceProfileReceived(deviceProfile);
 
-            //May not be needed since doImportFromAsset already assigns the vpn username and password
-            OpenVpnConfigManager.getInstance().saveVpnUsername(deviceProfile.getVpnUsername());
-            OpenVpnConfigManager.getInstance().saveVpnPassword(deviceProfile.getVpnPassword());
             try {
-                if(vpnProfile == null) {
+                if (vpnProfile == null) {
                     vpnProfile = new ConfigConverter(mContext).doImportFromAsset("augeo_android.ovpn", deviceProfile);
                 }
 
@@ -74,11 +71,7 @@ public class AuGeoAppFlowManager {
                     public void run() {
                         try {
                             if (!OpenVpnHelper.getInstance().isVpnConnected()) {
-//                                if(mOpenVpnStatusListener == null) {
-                                    Log.d("APP_FLOW", "Creating openVPNStatus listener from thread: " + Thread.currentThread().getId());
-                                    mOpenVpnStatusListener = new OpenVPNStatusListener(deviceProfile, mListener);
-//                                }
-                                Log.d("APP_FLOW", "init openvpn helper from thread: " + Thread.currentThread().getId());
+                                mOpenVpnStatusListener = new OpenVPNStatusListener(deviceProfile, mListener);
 
                                 OpenVpnHelper.getInstance().init(mContext, mOpenVpnStatusListener);
                                 startVPN(vpnProfile);
@@ -112,17 +105,16 @@ public class AuGeoAppFlowManager {
     /**
      * start() should only run once. Otherwise, it will spawn multiple threads trying to connect to connect to the vpn
      * multiple times causing the vpn connection to fail.
-     *
      */
     public void start() {
-        if(!isStarted) {
+        if (!isStarted) {
             isStarted = true;
             new Thread(new AppFlowRunnable()).start();
         }
     }
 
 
-    private DeviceProfile registerDeviceProfileReceived() throws Exception{
+    private DeviceProfile registerDeviceProfileReceived() throws Exception {
         TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         final String deviceID = telephonyManager.getDeviceId();
 
@@ -130,12 +122,12 @@ public class AuGeoAppFlowManager {
         DeviceProfile deviceProfile = null;
         if (deviceResponse != null && deviceResponse.getResponse() != null && !deviceResponse.getResponse().isEmpty()) {
             deviceProfile = deviceResponse.getResponse().get(0);
-            if(mListener != null) {
+            if (mListener != null) {
                 mListener.onDeviceProfileReceived(deviceProfile);
                 AuGeoPreferenceManager.getInstance().saveDeviceProfie(deviceProfile);
             }
         } else {
-            if(mListener != null) {
+            if (mListener != null) {
                 mListener.onDeviceProfileRetreiveFailed();
             }
         }

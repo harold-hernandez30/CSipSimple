@@ -6,11 +6,13 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.VpnService;
+import android.telephony.TelephonyManager;
 
 import com.septrivium.augeo.helper.AuGeoAppFlowManager;
+import com.septrivium.augeo.helper.AuGeoServiceFlowManager;
 
 public class ConnectionReciever extends BroadcastReceiver {
-    private AuGeoAppFlowManager mAugeoAppFlowManager;
+    private AuGeoServiceFlowManager mAugeoAppFlowManager;
 
 
     //Do we need an instance of AuGeoAppFlowManager?
@@ -27,7 +29,7 @@ public class ConnectionReciever extends BroadcastReceiver {
      * -- Should be able to update the isVpnConnected variable
      * @param augeoAppFlowManager
      */
-    public ConnectionReciever(AuGeoAppFlowManager augeoAppFlowManager) {
+    public ConnectionReciever(AuGeoServiceFlowManager augeoAppFlowManager) {
         this.mAugeoAppFlowManager = augeoAppFlowManager;
     }
 
@@ -42,13 +44,16 @@ public class ConnectionReciever extends BroadcastReceiver {
         if(isConnected) {
 
             if(mAugeoAppFlowManager != null && (VpnService.prepare(context) == null)){
-                mAugeoAppFlowManager.start();
+
+                TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                final String deviceID = telephonyManager.getDeviceId();
+                mAugeoAppFlowManager.startServices(context, deviceID);
 //                android.util.Log.d("APP_FLOW_MANAGER", "start from: " + Log.getStackTraceString(new Throwable()));
             }
         } else { // DISCONNECTED
             // Update value of VPN isConnected.
             if(mAugeoAppFlowManager != null) {
-                mAugeoAppFlowManager.disconnect();
+                mAugeoAppFlowManager.disconnectVpn();
             }
         }
     }

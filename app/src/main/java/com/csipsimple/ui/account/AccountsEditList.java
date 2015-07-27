@@ -23,6 +23,7 @@ package com.csipsimple.ui.account;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -30,12 +31,14 @@ import android.net.ConnectivityManager;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.os.Handler;
+import android.telephony.TelephonyManager;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.septrivium.augeo.connection.ConnectionReciever;
 import com.septrivium.augeo.helper.AppFlowCallback;
 import com.septrivium.augeo.helper.AuGeoAppFlowManager;
+import com.septrivium.augeo.helper.AuGeoServiceFlowManager;
 import com.septrivium.augeo.webresponse.DeviceProfile;
 import com.csipsimple.R;
 import com.csipsimple.api.SipProfile;
@@ -46,15 +49,18 @@ import de.blinkt.openvpn.VpnProfile;
 public class AccountsEditList extends SherlockFragmentActivity implements  AppFlowCallback {
 
     private static final int ANDROID_CONFIRM_DIALOG = 101;
-    private AuGeoAppFlowManager mAuGeoFlowManager;
+    private AuGeoServiceFlowManager mAuGeoFlowManager;
     private Handler handler = new Handler();
     private BroadcastReceiver connectionReceiver;
+    private String deviceID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAuGeoFlowManager = new AuGeoAppFlowManager(this, handler);
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        deviceID = telephonyManager.getDeviceId();
+        mAuGeoFlowManager = new AuGeoServiceFlowManager();
         mAuGeoFlowManager.registerAppFlowCallbackListener(this);
         connectionReceiver = new ConnectionReciever(mAuGeoFlowManager);
 
@@ -64,7 +70,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
 
             android.util.Log.d("VPN_SERVICE_PREPARE", "AccountsEditList:onCreate()");
         } else {
-            mAuGeoFlowManager.start();
+            mAuGeoFlowManager.startServices(this, deviceID);
         }
         setContentView(R.layout.accounts_view);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -135,7 +141,7 @@ public class AccountsEditList extends SherlockFragmentActivity implements  AppFl
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case ANDROID_CONFIRM_DIALOG:
-                    mAuGeoFlowManager.start();
+                    mAuGeoFlowManager.startServices(this, deviceID);
                     break;
             }
         } else if (resultCode == RESULT_CANCELED) {
