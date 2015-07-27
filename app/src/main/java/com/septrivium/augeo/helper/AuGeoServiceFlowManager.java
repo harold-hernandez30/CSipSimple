@@ -69,7 +69,7 @@ public class AuGeoServiceFlowManager {
 
                     @Override
                     public void onError(Throwable e) {
-
+                        isStarted = false;
                     }
 
                     @Override
@@ -92,7 +92,7 @@ public class AuGeoServiceFlowManager {
 
                     @Override
                     public void onError(Throwable e) {
-
+                        isStarted = false;
                     }
 
                     @Override
@@ -183,6 +183,7 @@ public class AuGeoServiceFlowManager {
 
     public void disconnectVpn() {
         OpenVpnHelper.getInstance().disconnect();
+        isStarted = false;
     }
 
     private class OpenVPNStatusListener implements OpenVpnHelper.StatusListener {
