@@ -107,7 +107,9 @@ public class AuGeoServiceFlowManager {
                         startVPN(context, resultData.getVpnProfile());
                         Log.d("RX_FLOW", "processResultData():onNext()");
 
-                        mOpenVpnStatusListener = new OpenVPNStatusListener(context, resultData.getSipProfile(), mListener);
+                        if(mOpenVpnStatusListener == null) {
+                            mOpenVpnStatusListener = new OpenVPNStatusListener(context, resultData.getSipProfile(), mListener);
+                        }
 
                         try {
                             OpenVpnHelper.getInstance().init(context, mOpenVpnStatusListener);
@@ -236,12 +238,6 @@ public class AuGeoServiceFlowManager {
             isStarted = false;
         }
     }
-
-//    public void updateAllRegistered() {
-//        ContentValues cv = new ContentValues();
-//        cv.put(SipProfile.FIELD_ACTIVE, true);
-//        mContext.getContentResolver().update(ContentUris.withAppendedId(SipProfile.ACCOUNT_ID_URI_BASE, sipAccount.id), cv, null, null);
-//    }
 
     private class ResultData {
         private VpnProfile vpnProfile;
