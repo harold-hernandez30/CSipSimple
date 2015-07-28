@@ -37,7 +37,6 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.septrivium.augeo.connection.ConnectionReciever;
 import com.septrivium.augeo.helper.AppFlowCallback;
-import com.septrivium.augeo.helper.AuGeoAppFlowManager;
 import com.septrivium.augeo.helper.AuGeoServiceFlowManager;
 import com.septrivium.augeo.webresponse.DeviceProfile;
 import com.csipsimple.R;

@@ -8,7 +8,6 @@ import android.net.NetworkInfo;
 import android.net.VpnService;
 import android.telephony.TelephonyManager;
 
-import com.septrivium.augeo.helper.AuGeoAppFlowManager;
 import com.septrivium.augeo.helper.AuGeoServiceFlowManager;
 
 public class ConnectionReciever extends BroadcastReceiver {

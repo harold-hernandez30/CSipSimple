@@ -64,7 +64,6 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.septrivium.augeo.connection.ConnectionReciever;
 import com.septrivium.augeo.helper.AppFlowCallback;
-import com.septrivium.augeo.helper.AuGeoAppFlowManager;
 import com.septrivium.augeo.helper.AuGeoServiceFlowManager;
 import com.septrivium.augeo.persistence.AuGeoPreferenceManager;
 import com.septrivium.augeo.vpnhelper.OpenVpnConfigManager;
