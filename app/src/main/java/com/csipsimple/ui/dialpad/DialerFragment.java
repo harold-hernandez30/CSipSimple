@@ -480,7 +480,7 @@ public class DialerFragment extends SherlockFragment implements OnClickListener,
         }
 
         //FIXME: Current icon urls from server is empty. Provide dummy urls that have actual images for now.
-        assignDummySpeedDialIconUrls(speedDialButtons);
+//        assignDummySpeedDialIconUrls(speedDialButtons);
 
 
         List<SpeedDialButton> requestedSpeedDialButtons = new ArrayList<>();
