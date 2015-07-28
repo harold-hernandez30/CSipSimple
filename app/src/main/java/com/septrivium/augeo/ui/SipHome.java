@@ -330,9 +330,8 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
 
     private void assignDialPadFromDeviceProfilePrefs() {
         DeviceProfile deviceProfile = AuGeoPreferenceManager.getInstance().getDeviceProfile();
-        if (deviceProfile != null) {
+        if (deviceProfile != null && mDialpadFragment != null) {
             mDialpadFragment.setSpeedDialButtons(deviceProfile.getButtons());
-
         }
     }
 
