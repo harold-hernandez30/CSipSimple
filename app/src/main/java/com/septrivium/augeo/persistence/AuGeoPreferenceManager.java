@@ -44,6 +44,6 @@ public class AuGeoPreferenceManager {
     }
 
     public void saveDeviceProfie(DeviceProfile deviceProfile) {
-        prefs.edit().putString(KEY_DEVICE_PROFILE, new Gson().toJson(deviceProfile));
+        prefs.edit().putString(KEY_DEVICE_PROFILE, new Gson().toJson(deviceProfile)).apply();
     }
 }

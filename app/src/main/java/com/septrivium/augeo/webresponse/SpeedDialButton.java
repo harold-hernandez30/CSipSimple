@@ -67,4 +67,16 @@ public class SpeedDialButton {
     public String getCombinedIconKey() {
         return new StringBuilder().append(icon).append("_combined").toString();
     }
+
+    @Override
+    public String toString() {
+        return "SpeedDialButton{" +
+                "label='" + label + '\'' +
+                ", icon='" + icon + '\'' +
+                ", dial='" + dial + '\'' +
+                ", hasCombinedIcons=" + hasCombinedIcons +
+                ", dialButtonResId=" + dialButtonResId +
+                ", number='" + number + '\'' +
+                '}';
+    }
 }

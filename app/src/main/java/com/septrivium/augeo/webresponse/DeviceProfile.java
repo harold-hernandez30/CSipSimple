@@ -141,7 +141,6 @@ public class DeviceProfile {
         this.vpnPassword = vpnPassword;
     }
 
-
     @Override
     public String toString() {
         return "DeviceProfile{" +
@@ -153,6 +152,10 @@ public class DeviceProfile {
                 ", sipPassword='" + sipPassword + '\'' +
                 ", vpnUsername='" + vpnUsername + '\'' +
                 ", vpnPassword='" + vpnPassword + '\'' +
+                ", buttons=" + buttons +
+                ", siteId='" + siteId + '\'' +
+                ", vpnServerDomain='" + vpnServerDomain + '\'' +
+                ", vpnServerPort='" + vpnServerPort + '\'' +
                 '}';
     }
 }

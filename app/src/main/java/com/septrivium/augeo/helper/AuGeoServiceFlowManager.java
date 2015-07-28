@@ -55,7 +55,11 @@ public class AuGeoServiceFlowManager {
     private AuGeoServiceFlowManager(){}
 
     public void startServices(final Context context, final String deviceId) {
-        if(isStarted) return;
+        if(isStarted) {
+            Log.d("RX_FLOW", "service already started");
+            return;
+        }
+        Log.d("RX_FLOW", "Starting service");
         isStarted = true;
         requestDeviceProfileObservable(deviceId)
                 .subscribeOn(Schedulers.io())
@@ -76,6 +80,7 @@ public class AuGeoServiceFlowManager {
                     @Override
                     public void onNext(final DeviceProfile deviceProfile) {
                         Log.d("RX_FLOW", "startServices(): onNext()");
+                        Log.d("DEVICE_PROFILE", "device profile: " + deviceProfile.toString());
                         AuGeoPreferenceManager.getInstance().saveDeviceProfie(deviceProfile);
                         if (mListener != null) {
                             mListener.onDeviceProfileReceived(deviceProfile);

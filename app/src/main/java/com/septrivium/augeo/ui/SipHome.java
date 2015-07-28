@@ -1071,13 +1071,13 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         intent.putExtra(SipManager.EXTRA_OUTGOING_ACTIVITY, new ComponentName(this, SipHome.class));
         sendBroadcast(intent);
         if (quit) {
+            AuGeoServiceFlowManager.getInstance().disconnectVpn();
             finish();
-            OpenVpnHelper.getInstance().disconnect();
         }
 
         if(OpenVpnConfigManager.getInstance().isInBatterySavingMode()) {
             android.util.Log.d("BATTERY_SAVING_MODE", "is in battery saving mode? " + OpenVpnConfigManager.getInstance().isInBatterySavingMode());
-            OpenVpnHelper.getInstance().disconnect();
+            AuGeoServiceFlowManager.getInstance().disconnectVpn();
         }
     }
 
