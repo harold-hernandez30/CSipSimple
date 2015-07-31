@@ -13,7 +13,7 @@ android {
     buildToolsVersion "22.0.1"
     defaultConfig {
         applicationId "com.septrivium.augeo"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 22
     }
     sourceSets {

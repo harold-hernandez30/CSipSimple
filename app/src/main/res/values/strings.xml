@@ -58,6 +58,8 @@
     <string name="messages_tab_name_text">Messages</string>
     <string name="favorites_tab_name_text">Favorites</string>
     <string name="menu_disconnect">Disconnect</string>
+    <string name="menu_start_lock">Lock</string>
+    <string name="menu_stop_lock">Unlock</string>
     <string name="service_ticker_registered_text">SIP Registered</string>
     <string name="outgoing_call_chooser_call_text">Call</string>
     <string name="reorder">Reorder</string>

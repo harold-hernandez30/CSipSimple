@@ -7,8 +7,8 @@
     android:versionName="1.02.04" >
 
     <uses-sdk
-        android:minSdkVersion="15"
-        android:targetSdkVersion="21" />
+        android:minSdkVersion="21"
+        android:targetSdkVersion="22" />
 
     <supports-screens
         android:anyDensity="true"
@@ -216,8 +216,7 @@
         <service
             android:name=".service.SipService"
             android:exported="true"
-            android:permission="android.permission.CONFIGURE_SIP"
-            android:process=":sipStack" >
+            android:permission="android.permission.CONFIGURE_SIP" >
             <intent-filter>
                 <action android:name="com.csipsimple.service.SipService" />
                 <action android:name="com.csipsimple.service.SipConfiguration" />
@@ -226,8 +225,7 @@
         <service android:name=".service.Downloader" />
 
         <receiver
-            android:name=".service.DeviceStateReceiver"
-            android:process=":sipStack" >
+            android:name=".service.DeviceStateReceiver" >
 
             <!-- Here filter for protected-broadcasts -->
             <intent-filter>
@@ -244,8 +242,7 @@
         <!--
         <receiver
             android:name="com.csipsimple.service.DeviceStateReceiver"
-            android:permission="android.permission.CONFIGURE_SIP"
-            android:process=":sipStack" >
+            android:permission="android.permission.CONFIGURE_SIP" >
             <intent-filter>
                 <action android:name="com.csipsimple.accounts.activate" />
             </intent-filter>
@@ -344,8 +341,7 @@
         <!-- Call management -->
         <receiver
             android:name=".service.OutgoingCall"
-            android:permission="android.permission.CALL_PHONE"
-            android:process=":sipStack" >
+            android:permission="android.permission.CALL_PHONE">
 
             <!-- Here filter for protected-broadcasts -->
             <intent-filter android:priority="0" >
@@ -361,7 +357,6 @@
             android:label="@string/call"
             android:launchMode="singleTask"
             android:permission="android.permission.USE_SIP"
-            android:process=":sipStack"
             android:taskAffinity=""
             android:theme="@style/DarkTheme.Dialog" >
             <intent-filter>
@@ -445,7 +440,6 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:permission="android.permission.CONFIGURE_SIP"
-            android:process=":sipStack"
             android:taskAffinity=""
             android:theme="@style/DarkTheme.NoTitle" >
             <intent-filter android:priority="10" >
@@ -522,11 +516,9 @@
             android:windowSoftInputMode="stateHidden" />
 
         <!-- Embedded plugins -->
-        <!-- Call handlers android:process=":telCallHandler" -->
         <receiver
             android:name=".plugins.telephony.CallHandler"
-            android:permission="android.permission.PROCESS_OUTGOING_CALLS"
-            android:process=":sipStack" >
+            android:permission="android.permission.PROCESS_OUTGOING_CALLS" >
             <intent-filter>
                 <action android:name="com.csipsimple.phone.action.HANDLE_CALL" />
             </intent-filter>
@@ -540,8 +532,7 @@
         <provider
             android:name=".db.DBProvider"
             android:authorities="com.csipsimple.db"
-            android:permission="android.permission.CONFIGURE_SIP"
-            android:process=":sipStack" />
+            android:permission="android.permission.CONFIGURE_SIP" />
 
         <!-- New UI -->
         <activity
